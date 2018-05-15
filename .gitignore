@@ -1,0 +1,12 @@
+Debug/
+SpaceCube/Debug/
+Server/Debug/
+
+Release/
+SpaceCube/Release/
+Server/Release
+
+*.map
+*.ent
+
+.vs/

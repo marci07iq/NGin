@@ -1,0 +1,1914 @@
+Templates of dynamic arrays with automatic check of bounds
+
+                     (version 1.2c)
+
+                 The programmer manual
+
+Contents
+========
+
+1. Introduction
+
+1.1. Requirements
+1.2. Technical parameters
+1.3. Software license
+1.4. Disclaimer
+1.5. Third party components
+1.6. Technical support
+1.7. Contact information
+1.8. Acknowledgements
+
+2. Contents of the program folder
+
+3. Instructions
+
+3.1. Using of dynamic arrays
+3.2. Using of dynamic pointers
+3.3. Using if restricted arrays
+3.4. Using if restricted pointers
+3.5. Support for STL library
+3.6. Check of bounds at debugging of program
+3.7. Methods for manual optimization of programs
+
+4. Guidelines
+
+4.1. Possible areas of application
+4.2. Performance
+4.3. Consumption of memory
+4.4. Interaction with operation system
+
+5. Technical information
+
+5.1. Information on implementation
+5.2. Peculiarities of implementation of regular operations
+5.3. Processing of exception
+5.4. Preprocessing options
+
+6. Supplementary capabilities
+
+6.1. Service constants
+6.2. Service functions
+6.3. Service templates
+6.4. Service structures
+6.5. Service header files
+
+Appendix 1. Summary of methods
+
+Appendix 2. Known issues
+
+Appendix 3. What's new
+
+
+1. Introduction
+===============
+
+Existing programming languages enforce a programmer to indicate
+size of array and to ensure that neither index will fall beyond
+the array bounds. To implement alternative technique, the
+template of dynamic arrays for C++ provides for regular C
+operations on arrays and pointers combined with with automatic
+allocation of memory and protection against memory overwrite
+errors without appreciable decline of performance.
+
+
+1.1. Requirements
+-----------------
+
+The template is designed to conform to the following standards:
+standards: C++: ISO/IEC 14882:1998(E) and C: ISO/IEC 9899:1990.
+
+Current version have been tested under:
+- Microsoft Visual C++ 6.0, 7.0, SDK 2003 R2, 2005, 2008, 2010.
+- Borland C++ 3.1 (16 bit).
+- Borland C++ 4.5 (32 bit).
+- Borland C++ Builder 1.0.
+- GNU g++ 2.9.6 (32 bit, Red Hat Linux 7.1).
+- GNU g++ 3.3.3 (ARM, Pocket GCC, Windows Mobile 5).
+- GNU g++ 4.1.2 (64 bit, SuSE Linux 10).
+- GNU g++ 4.2.3 (32 bit, Workbench).
+
+The preceding versions have been tested under:
+- Microsoft Visual C++ 5.0,
+- Microsoft.NET Framework SDK 1.0, 1.1.
+- cxx (Digital Unix 4.0, DEC Alpha).
+
+
+1.2. Technical parameters
+-------------------------
+
+- Size of descriptor of array (*):                 2 words
+- Size of dynamic pointer:                         2 words
+- Size of restricted pointer:                      4 words
+
+- Initial amount of memory allocated for array,
+  in bytes:                                              0
+
+- Initial actual size of array on each measurement,
+  in elements:                                           0
+
+- Initialization of memory:                    byte-wise 0
+- Initialization of elements of array
+  by the default constructor:       from low to high index
+- Destruction of elements of array
+  by the default destructor:        from high to low index
+
+- Alignment of the first element of each
+  low-order one-dimensional slice of array:
+                For Visual C++ 7.0 compiler:      16 bytes
+                For other compilers:                1 word
+
+- Minimal number of initialized elements,
+  automatically reserved after the last
+  filled element (**) in each low-order
+  one-dimensional slice of array:                        1
+
+- Minimal size of the memory allocated for filled
+  low-order one-dimensional slice of array:
+  in bytes (***):               16 bits:                44
+                                32 bits:               104
+                                64 bits:               224
+
+- Maximal size of each low-order
+  one-dimensional slice of array
+  in bytes (***):               16 bits:            34,988
+                                32 bits:     1,607,077,576
+
+- Maximal number of operations of memory
+  allocation for each low-order one-dimensional
+  slice of array depending on
+  its size in bytes (****):     16 bits: 2*log3 ((n+4)/ 96)
+                                32 bits: 2*log3 ((n+8)/224)
+                                64 bits: 2*log3((n+16)/480)
+
+- Size of automatically reserved memory
+  in relation to the size of the filled
+  part of array (*****)                  In average: 37.5%
+                                            Maximum:  100%
+
+- Minimal actual size of each senior dimension
+  of multidimensional array after its
+  first-time filling,           16 bits:                10
+  in elements:                  32 bits:                12
+  in elements:                  64 bits:                13
+
+- Maximal actual size of each senior dimension
+  of multidimensional array,
+  in elements:                  16 bits:             8,746
+                                32 bits:       200,884,696
+
+(*)     At filling of multidimensional array the intermediate
+        descriptors for each one-dimensional low-order slice,
+        further for each two-dimensional low-order slice etc.
+        up to to the senior slices are automatically created
+        in the dynamic memory. The memory allocated for these
+        intermediate descriptors, is automatically released
+        at destruction of array.
+
+(**)    A filled element is an element, for which either an
+        operation with the control of indexes (for example,
+        reading/writing) or explicit distribution of memory
+        is carried out.
+
+(***)   Includes all automatically reserved elements.
+
+(****)  Includes one automatically reserved element.
+
+(*****) The size of the filled part of array is calculated
+        a summary size of all one-dimensional low-order slices
+        including one automatically reserved an element for
+        each slice. It is supposed, that the size of each
+        slice is above minimal. The overhead for intermediate
+        descriptors of multidimensional array is not taken
+        into account here, because they do not depend on the
+        size of low-order slices.
+
+
+1.3. Software license
+---------------------
+
+The following copyright statement describes authorship of
+the software.
+
+(C) Copyright 1998-2010 by Dr. Raul N. Shakirov, IMach of RAS (UB).
+
+This source code is distributed as "Public domain", that is
+permission has been granted to copy, distribute and modify
+software in any context without fee, including a commercial
+application, provided that the aforesaid copyright statement
+is present in user-accessible supporting documentation,
+as well as exhaustive description of changes.
+
+This does not affect your ownership of the derived work
+itself, and the intent is to assure proper credit for the
+authors of this software, not to interfere with your
+productive use of this software. "Derived works" includes
+all programs that utilize this software. Credit must be
+given in user-accessible documentation.
+
+
+1.4. Disclaimer
+---------------
+
+Author ensures that he has secured all necessary consents
+and approvals to use third party intellectual property
+rights for this software.
+
+Author confirms that this software does not contain parts,
+which are intended for the purposes, others than central
+purpose announced in the software documentation.
+
+THIS SOFTWARE IS PROVIDED "AS IS". NO WARRANTY OF ANY KIND
+IS EXPRESSED OR IMPLIED. YOU USE AT YOUR OWN RISK. THE
+AUTHOR WILL NOT BE LIABLE FOR DATA LOSS, DAMAGES, LOSS OF
+PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR MISUSING
+THIS SOFTWARE.
+
+
+1.5. Third party components
+---------------------------
+
+The code is original by author.
+
+
+1.6. Technical support
+----------------------
+
+Updates are available at http://www.imach.uran.ru/exarray
+
+Please, send your comments and bug reports to the author.
+
+
+1.7. Contact information
+------------------------
+
+Author: Dr. Raul N. Shakirov,
+Institute of Engineering Science, Russian Ac. of Sci. (UB),
+34 Komsomolskaya str., Ekaterinburg, 620219, Russia.
+
+Phone:  +7 (343) 375-35-80
+Email:  raul@imach.uran.ru
+
+
+1.8. Acknowledgements
+---------------------
+
+My gratitude to Dr. Villen Chistov for a good wish to have
+a boundless array and to Dr. Vladimir Titov for testing of
+the basic components of the template.
+
+
+2. Contents of the program folder
+=================================
+
+The template is implemented as the following files:
+   Exarray.cpp  - memory allocation functions
+   Exarray.h    - template of dynamic arrays
+   Exarray.txt  - the programmer manual (eng)
+   Exarrayr.txt - the programmer manual (rus)
+   Exdebug.h    - debugging macro definitions
+   Exstring.h   - redefinition of functions from string.h
+   Exthread.h   - macro for thread local storage
+   ENG\         - sources with comments (eng)
+   RUS\         - sources with comments (rus)
+
+File Exarray.txt describes the documented functions of the class
+which will be kept in the subsequent versions of the class if
+other is not stipulated in the appropriate section.
+
+For convenience of studying explanatory comment are built into
+the headers and source files. These comments can be considered
+as the additional documentation. If programmers will experience
+difficulties at acquaintance with texts the author will be glad
+to help.
+
+WARNING:
+All definitions is headers and source files, which are not
+providing for regular C operations and not listed in file
+Exarray.txt, are considered to be not documented. They can be
+excluded or modified in the subsequent versions with no notices.
+
+The subfolder PAPERS contains old methodical materials and examples
+of programs for template of dynamic arrays (in Russian):
+   10           - input data for multiplication of matrixes 10*10
+   10.bat       - test of multiplication of matrixes 10*10
+   10.res       - sample for comparison with result of multiplication
+   10.wrk       - result of multiplication
+   Exarray.cpp  - simplified variant of file Exarray.cpp
+   Exarray.h    - simplified variant of file Exarray.h
+   Matrix.txt   - instruction on preparation of input data
+   Matrix1.cpp  - multiplication of matrixes with use of
+                  static arrays.
+   Matrix2.cpp  - multiplication of matrixes with use of
+                  dynamic arrays
+   Matrix3.cpp  - multiplication of matrixes with use of
+                  dynamic arrays and manual optimization
+   P99pz.txt    - paper
+For more recent papers since 2000 please, visit web site of project.
+
+
+3. Instructions
+===============
+
+To use template of dynamic arrays in your program do the following:
+
+1.  Copy to the project folder the following files:
+        Exarray.cpp
+        Exarray.h
+        Exdebug.h    (option - debugging macro definitions)
+        Exstring.h   (option - redefinition string.h functions)
+        Exthread.h   (option - macro for thread local storage)
+
+2.  Include to the project the following file:
+        Exarray.cpp
+
+3.  Insert into the source text the following directive:
+        #include "Exarray.h"
+        #include "Exdebug.h"   (option)
+        #include "Exstring.h"  (option)
+        #include "Exthread.h"  (option)
+
+
+3.1. Using of dynamic arrays
+----------------------------
+
+1.  Dynamic array can be created by instruction:
+        exarray<type> name;
+    or with indication of initial size:
+        exarray<type>  name (size);
+
+    Maximal size of a array must not be set. It is assumed, that
+    array has unlimited number of elements, having initial zero
+    values, or values given by the default constructor of base
+    class. Actually, dynamic array originally has either zero or
+    given initial size, but on reference to any element the size
+    of array is automatically increased. At integer overflow of
+    an index or exhaustion of memory program will be terminated
+    with distinctive diagnostics.
+
+    * Elements of dynamic array must either belong to one of
+      built-in C types or have public default constructor.
+
+    To pass dynamic array to function, declare parameter:
+        exarray<type>& name;
+    or (to block assignment):
+        const exarray<type>& name;
+
+    To pass dynamic array to function with blocked assignment
+    and check of bounds turned off declare parameter:
+        const type* name;
+
+    Multidimensional dynamic array is comprised of dynamic
+    arrays of smaller dimension by means of operator typedef,
+    For example, dynamic matrix can look as:
+        typedef exarray (type) vector;
+        exarray<vector> matrix;
+
+2.  The template implements all regular operations and functions
+    of language C++, including index arithmetic, functions from
+    string.h and also methods of library STL for manual management
+    of size of array and call of the majority of standard
+    algorithms. Therefore dynamic arrays are applied basically
+    by the same rules as regular arrays of language C++.
+
+    In particular, the notation for reference to an element
+    of dynamic array is just same as for conventional array:
+        name [index]
+
+    * The peculiarities of application are described in section
+      "Peculiarities of implementation of regular operations ".
+
+    * For better compatibility with existing compilers some rarely
+      used functions of a template by default are turned off
+      by default - ref. section "Options".
+
+    * Implementation of string functions copying data to dynamic
+      array is located in file Exstring.h.
+
+
+3.2. Using of dynamic pointers
+------------------------------
+
+1.  Dynamic pointer is created by instruction:
+        expoint<type> name;
+
+    Dynamic pointer can refer to dynamic arrays and pointers.
+    At any reference to array via dynamic pointer size of
+    array is automatically increased.
+
+    * At change of size of array all dynamic pointers to
+      this array remain valid.
+
+    * Dynamic pointers can address one-dimensional dynamic arrays
+      and senior dynamic dimension of multi-dimensional arrays.
+
+2.  The template implements all regular operations and basic functions
+    of language C++, including index arithmetic, functions from
+    string.h and also methods of library STL for manual management
+    of size of array and call of the majority of standard
+    algorithms. Therefore dynamic pointers are applied basically
+    by the same rules as regular pointers of language C++.
+
+    In particular, the notation for reference to an element
+    of array is just same as for conventional array:
+        name [index]
+
+    * The peculiarities of application are described in section
+      "Peculiarities of implementation of regular operations ".
+
+    * For better compatibility with existing compilers some rarely
+      used functions of a template by default are turned off
+      by default - ref. section "Options".
+
+    * Implementation of string functions copying data to dynamic
+      array is located in file Exstring.h.
+
+
+3.3. Using of regulated arrays
+------------------------------
+
+1.  Regulated array can be created by instruction:
+        exvector<type> name;
+    or with indication of initial size:
+        exvector<type> name (size);
+
+    Elements of a array are initialized by zero values, or values
+    given by the default constructor of base class. It is necessary
+    to set the size of a array manually. On attempt of reference to
+    outside of array bounds program will be terminated with
+    distinctive diagnostics.
+
+    * Elements of regulated array must either belong to one of
+      built-in C types or have public default constructor.
+
+    To pass regulated array to function, declare parameter:
+        exvector<type>& name;
+    or (to block assignment):
+        const exvector<type>& name;
+
+    To pass regulated array to function with blocked assignment
+    and check of bounds turned off declare parameter:
+        const type* name;
+
+2.  The template implements all regular operations and basic
+    functions of language C++, including index arithmetic and
+    methods of library STL for manual management of size of
+    array and call of the majority of standard algorithms.
+    Therefore regulated arrays are applied basically by
+    the same rules as regular arrays of language C++.
+
+    In particular, the notation for reference to an element
+    of regulated array is just same as for conventional array:
+        name [index]
+
+    * The peculiarities of application are described in section
+      "Peculiarities of implementation of regular operations ".
+
+    * For better compatibility with existing compilers some rarely
+      used functions of a template by default are turned off
+      by default - ref. section "Options".
+
+
+3.4. Using of restricted pointers
+---------------------------------
+
+1.  Restricted pointer is created by instruction:
+        exptr<type> name;
+
+    Restricted pointer can refer to either dynamic and regulated arrays
+    and pointers. During assignment, restricted pointer stores base
+    address and size of array. As opposite to dynamic pointer,
+    restricted pointer does not keep track of further changes of
+    size of array. At any reference to array under restricted pointer
+    check of bounds will be carried out: if the memory for required
+    element is not allocated, the program will finish work with
+    distinctive diagnostics.
+
+    * The restricted pointer to dynamic array is valid until size
+      of the array is not changed.
+
+    To create restricted pointer referring to ordinary C array,
+    use constructor:
+        exptr <type> name (array, size);
+
+2.  The template implements all regular operations and basic
+    functions of language C++, including index arithmetic and
+    methods for call of the majority of STL algorithms.
+    Therefore restricted pointers are applied basically by
+    the same rules as regular arrays of language C++.
+
+    In particular, the notation for reference to an element
+    of array is just same as for conventional pointer:
+        name [index]
+
+    * The peculiarities of application are described in section
+      "Peculiarities of implementation of regular operations ".
+
+    * For better compatibility with existing compilers some rarely
+      used functions of a template by default are turned off
+      by default - ref. section "Options".
+
+
+3.5. Support for STL library
+----------------------------
+
+All templates implements subset of definitions of library STL;
+dynamic and restricted pointers act as direct-access iterators.
+
+General definitions:
+    value_type          Type of an element of array.
+    size_type           size_t
+    difference_type     ptrdiff_t
+    iterator            Iterator of elements of array.
+    const_iterator      ...
+    pointer             Pointer to element of array.
+    const_pointer       ...
+    reference           Reference to element of array.
+    const_reference     ...
+
+Definitions of templates of pointers:
+    iterator_category   random_access_iterator_tag
+
+General methods:
+    m.begin  () Iterator of the first element.
+    m.end    () Iterator of element following the last.
+    m.at    (i) Element (with check of bounds).
+
+Methods of dynamic arrays and pointers:
+   m.size    () Number of elements.
+   m.capacity() Number of elements, for which memory is allocated.
+   m.max_size() Greatest possible number of elements.
+   m.empty   () Predicate size() == 0.
+   m.resize (n) Set exact number of elements.
+
+Methods of dynamic arrays:
+   m.clear   () Clearing array and free dynamic memory.
+   m.swap   (m) Swap arrays without copying of elements.
+
+Methods begin() and end() provide for call of algorithms of
+library STL, basing exclusively on application of iterators,
+for example for_each.
+
+Algorithms receiving the reference to the container, most
+likely, will not work, since the templates realize not all
+regular methods of standard containers. Let's note, that the
+reference can be transferred to the container indirectly
+thereby calling functions-constructors such as back_inserter().
+
+NOTES:
+1.  Iterators begin() and end() are valid so long as the size
+    of the array will not change.
+2.  If dynamic array is empty, begin() == end(), so reference
+    to element begin() is prohibited.
+3.  For dynamic or restricted pointer iterator begin() specifies
+    pointer to current element, i.e. element, on which the pointer
+    points, and end() specifies an element following the last in an
+    array. If the pointer is outside the array, begin() == end()
+    and reference to element begin() is prohibited.
+4.  It is prohibited to refer to element end().
+5.  Iterators begin() and end() implements check of bounds at
+    reference to an element of the array, if program is compiled
+    in debugging mode. To cancel check of an bounds, it is necessary
+    to compile program is release mode or to define macro NCHECKPTR
+    or NDEBUG.
+
+
+3.6. Check of bounds at debugging of program
+--------------------------------------------
+
+Special version of restricted pointers - debug pointers is applied
+to organization of check of bounds at debugging the program.
+
+Debugging pointers differ from the restricted pointers by that at
+compilation with macro NCHECKPTR they are realized through usual
+C pointers which are not implement check of bounds.
+
+There are two kinds of debugging pointers - iterators of STL and
+special macro definitions.
+
+
+3.6.1. Iterators of STL
+-----------------------
+
+Iterators can be used with compilers supporting STL library.
+
+The debugging pointer is created by the instruction:
+    exptr<type>::iterator name;
+
+For creation of debugging pointer to either dynamic or
+regulated array, dynamic or restricted pointer use
+methods begin() and end().
+
+
+3.6.2. Debugging macro and pointers
+-----------------------------------
+
+Debugging macro can be used on any compilers, regardless of
+presence or absence of support for STL.
+
+EXDEBUG(a)      - Execute expression a in the debug mode,
+                  when no NDEBUG macro is defined.
+
+EXARR(T,m,n)    - Define of debug array m of size n of type T.
+                  Debug array acts as ordinary C array and also
+                  "knows" size of assigned array to perform
+                  check when accessing elements of array.
+                  If program attempts to access element
+                  outside of array bounds, it terminates.
+
+EXPTR(T) p      - Debug pointer p to array of type T.
+                  Debug pointer acts as ordinary C array and
+                  "knows" size of assigned array to perform
+                  check when accessing elements of array.
+                  If program attempts to access element
+                  outside of array bounds, it terminates,
+
+EXPTRTO(T,m,n)  - Construct debug pointer to existing
+                  array m of n elements of type T.
+                  Array may be represented thereby name,
+                  C pointer or debug pointer. For debug
+                  pointer check of bounds is carried out.
+
+EXPTRTYPE(m)    - Convert dynamic array, dynamic pointer,
+                  regulated array or restricted pointer
+                  m to format, which allows assignment
+                  to debug pointer.
+
+EXPTRBASE(p)    - Convert debug array or pointer p to
+                  ordinary C array or pointer without
+                  check of bounds.
+
+EXPTRCHECK(p,n) - Convert debug array or pointer p to
+                  ordinary C array or pointer and check if
+                  elements 0..n-1 are accessible.
+
+EXPTRINDEX(p,i) - Convert debug array or pointer p to
+                  ordinary C array or pointer and check if
+                  elements 0..i are accessible.
+
+EXPTRNEW(T,n)   - Allocate array for n elements of type T,
+                  initialize (ref. ALLOW_EXARRAY_NEW_DELETE),
+                  call constructors and return debug pointer.
+
+EXPTRDELETE(p)  - Call destructors and deallocate array,
+                  allocated by EXPTRNEW.
+
+EXPTRALLOC(T,n) - Allocate array for n elements of type T,
+                  initialize and return debug pointer.
+                  Do not call constructors.
+
+EXPTRFREE(p)    - Deallocate array, allocated by EXPTRALLOC.
+                  Do not call destructors.
+
+EXPTRALIGNED_ALLOC(T,n,a) - Allocate with alignment a=1,2,4,8,16
+
+EXPTRALIGNED_FREE(p)      - Deallocate aligned array.
+
+Debug arrays and pointers implements check of bounds if no
+NCHECKPTR macro is defined, otherwise debug arrays and pointers
+are implemented as ordinary C pointers.
+
+Example:            Debug (no NCHECKPTR)            NCHECKPTR
+=================== ===========================     ===========
+EXARR(int,m,10);    int m___ [11];                  int m [11];
+                    exptr<int> p=exptr<int>(m___,10)
+EXPTR(int) p;       exptr<int> p;                   int* p;
+p = EXPTRTO(m,10);  p = exptr<int>(m,10);           p = m;
+EXPTRTYPE(m);       m;                              m.base();
+EXPTRBASE(p);       p.base();                       p;
+
+
+3.7. Methods for manual optimization of programs
+------------------------------------------------
+
+Implicit method of optimization on the speed consisting in an
+opportunity of assignment of dynamic or regulated array or pointer
+to ordinary C constant pointer. Writing to array under constant
+pointer is blocked and both the check of bounds and automatic
+increase of size of the dynamic array is turned off.
+
+Other way of optimization consists in using of the debugging
+pointers (see section 3.4) and special methods described here.
+
+
+3.7.1. Access to array without check of index
+---------------------------------------------
+
+   m.item   (i) Element.
+   m.base    () Pointer of a base array.
+
+THE NOTES:
+
+1.  Transformation to constant pointer to the first element
+    of base array can be carried out implicitly, for example,
+    by transfer of dynamic array to function with parameter
+    const type*.
+
+2.  The pointers are valid so long as size of the array is not
+    changed.
+
+
+3.7.2. Resizing of array
+------------------------
+
+    confine (i) Establish size of array on basis of specified
+                senior index and reserve memory for the further
+                growth of array.
+
+    adjust  (i) Change size of array to allocate memory for
+                element with the specified index or remove
+                elements with twice large index.
+
+    expand  (i) Increase size of a array to allocate memory
+                for element with the specified index.
+
+    shrink  (i) Reduce size of array to remove elements with
+                index twice large then specified.
+
+NOTES:
+
+1.  Method confine (i) does same as method resize (i + 1).
+    Both methods are characterized by a rather high overhead charge,
+    because each call method activates memory allocation routines.
+
+2.  Methods expand() and shrink() are the simplified variants
+    of universal method adjust(). Methods expand() and adjust()
+    guarantee presence in the array of element with the specified
+    index. The method shrink() keeps an element with the specified
+    index, if memory for it is already allocated, otherwise this
+    element remains to be not allocated. All methods activate actual
+    allocation of memory only if it is required. Resulting number
+    of elements is defined by size of allocated memory and can be
+    more then requested.
+
+
+3.7.3. Debugging methods of resizing of array
+---------------------------------------------
+
+    checkadjust (i) Analogue of adjust()
+    checkexpand (i) Analogue of expand()
+    checkshrink (i) Analogue of shrink()
+    checkindex  (i) Check if i < len
+
+At presence of macro NCHECKPTR first three methods are almost
+identical to analogues, and the method checkindex() does
+nothing.
+
+At absence if macro NCHECKPTR all methods establish the maximal
+index in the array by calling confine(), If method checkindex()
+discovers that new number of elements is more then current, it
+invokes function assigned to ::exalloc_status.range_handler.
+
+
+4. Guidelines
+=============
+
+The technique of application of a template is described in
+subfolder PAPERS, containing conceptual text P99pz.txt, examples
+of the programs and also simplified variants of files Exarray.h
+and Exarray.cpp for initial acquaintance.
+
+
+4.1. Possible areas of application
+----------------------------------
+
+1.  Effective alternative to traditional arrays and pointers of
+    language C++, ensuring completely automatic allocation of
+    operative memory. The advantage of automatic allocation of
+    memory in comparison with manual consists in simplification of
+    programming and reduction of number of mistakes, and also in
+    predictability of an overhead charge: no more than 50% on time
+    of performance of the program and no more than 100% on volume
+    of operative memory required at operational system. At manual
+    allocation of memory the overhead charge depends on skills of
+    the programmer, and also presence of time for selection of an
+    optimal method of allocation of memory.
+
+2.  String functions with automatic allocation of memory are
+    implemented for dynamic arrays and pointers of type char.
+    These functions looks like standard string functions from
+    string.h. Therefore, dynamic arrays and pointers of
+    type char can be used instead of string classes of C++.
+
+3.  The existing program code can be converted for using of dynamic
+    arrays and pointers thereby replacement of the declarations,
+    needlessly to change the executable instructions. This allows,
+    in particular to translate existing 16-bits programs to 32-bit
+    mode with moderate (no more than 4x) growth of consumption of
+    memory.
+
+4.  Restricted pointers can be applied to organization of the
+    control of pointers at debugging of program code, which
+    is targeted to use ordinary arrays and pointers.
+
+5.  Regulated arrays can be used, as a tool for allocation of memory,
+    which is more reliable and effective, than regular operators
+    new and delete.
+    Regulated arrays provides for:
+    - Control of overflow of a digit grid;
+    - Zero initializing of allocated memory;
+    - Change of size of array copying of data;
+    - Minimization of fragmentation of dynamic memory;
+    - Optimization for features of L1 cache of processor Pentium,
+      which allows to speed up operations on multidimensional
+      arrays (some algorithms will work twice as fast);
+    - At creation of array of zero length the dynamic memory is
+      not allocated;
+    - The auxiliary template allowing to allocate memory for
+      temporary objects thereby several operations of assigning
+      (ref. Section "Service templates").
+
+6)  All templates can be used on the legacy compilers, which
+    does not implements properly exceptions and library STL.
+
+7)  As an additional opportunity, all templates implements subset
+    of container methods of library STL and dynamic and restricted
+    pointers can act as direct access iterators.
+    As against regular containers and iterators of library STL, the
+    opportunity of automatic allocation of operative memory and
+    check of array bounds is implemented.
+
+
+4.2. Performance
+----------------
+
+Usage of dynamic arrays instead of ordinary C arrays will no affect
+performance the majority of programs if the following features
+of dynamic arrays are taken into account:
+
+The dynamic pointers facilitate transformation of existing program
+code from ordinary C arrays to dynamic array. It is not recommended
+use dynamic pointers in process of development of new program code
+because dynamic pointers have relatively low performance on some
+compilers.
+
+Restricted pointers are targeted specially for organization of
+debugging check of bounds.
+
+When optimizing programs it is necessary to take into account
+the following features of templates:
+
+1.  As against conventional arrays, the reference to element of a dynamic
+    array by index is carried faster, than reference by either
+    dynamic or restricted pointer.
+    * The difference in productivity depends on the compiler:
+      for Borland C++ it is 2-3 times, whereas Visual C++
+      can show no difference due to effect of optimization,
+
+2.  Transfer of a dynamic array to function by reference is more
+    effective then transfer by either dynamic or restricted pointer.
+
+3.  The arithmetic operations on dynamic and restricted pointers
+    are carried out without check of bounds. The operations
+    ++ and - are faster in prefix, since postfix variants of
+    these operations create temporary object. For the same
+    reason operations += and -= are faster, than + and -.
+
+4.  As against conventional arrays, dynamic array are initialized by 0
+    at creation. Therefore, creation of a local dynamic array
+    occupies approximately as much of time, as filling of the array.
+
+5.  In critical cycles of program it is necessary to avoid to refer
+    to element of multidimensional array by several indexes at once.
+    If this multi-index reference takes place, use reference without
+    check of bounds: m.item (i).
+
+    THE REMARK:
+      The overhead charge for control of an bounds is not
+      significant, since on superscalar processors the check of
+      bounds is carried out for 1 step in parallel with calculation
+      of the effective address. But this is the theory, whereas in
+      practice C++ compilers experience difficulties when
+      they try to optimize code with check of bounds.
+
+      Switching-off of the check of bounds helps compiler to
+      implements effective optimization, especially in case of
+      multidimensional arrays.
+
+      For single-dimensional arrays compilers usually build a
+      rather effective code, therefore it is not necessary to
+      turn off check of bounds - difference in productivity will
+      be no more than 10% on Pentium and no more than 30% on
+      Pentium II/III.
+
+      For information: the code constructed by the compiler
+      Visual C++ 6.0 for assigning m [i] = i (i is in the
+      register esi). Instructions for check of bound are marked
+      by asterisk *. It is a lot of these instructions, but:
+      - mov ecx is carried out in parallel with mov eax
+      - cmp and ja are carried out in parallel with calculation
+                   of the effective address eax+esi*4,
+      - push, lea and call are executed only at rare case of
+        overflow.
+
+      * mov      ecx, DWORD PTR [esp+64]
+        mov      eax, DWORD PTR [esp+60]
+      * cmp      ecx, esi
+      * ja       SHORT $L10381
+      * push     esi
+      * lea      ecx, DWORD PTR [esp+64]
+      * call     ?grow@?$exblock@H@@IBEPAHI@Z ; exblock<int>::grow
+      * $L10381:
+        mov      DWORD PTR [eax+esi*4], esi
+
+6.  To increase performance, apply compilers which are carrying out
+    optimization of a code under the target processor (it is
+    especially urgent, if the program will be carried out on
+    microprocessors Celeron and Pentium II/III). Compile program
+    in Release mode. If it is required to increase productivity
+    in Debug mode, permit substitution of inline functions.
+
+7.  The performance of program depends not only on the effective
+    machine code, but also and from thin features of accommodation
+    ot data in memory influencing workload of microprocessor cache
+    (ref. of manual, given by the developers of microprocessors
+    and also paper p99pz.txt).
+
+    After formal replacement of conventional arrays by dynamic arrays
+    accommodation of the data varies, that in itself influences
+    performance of program: if the initial accommodation was
+    wrong, the productivity increase, otherwise decrease.
+
+   The influence of the data accommodation is especially appreciable
+   in case of computing programs, processing multidimensional
+   arrays, where 2-5x change of performance is possible.
+
+
+4.3. Consumption of memory
+--------------------------
+
+The most recommended method to save memory consists in removal of
+unused dynamic arrays, for what they should be placed in stack. If
+some array must be kept permanently, keep the following guidelines:
+
+1.  After filling the array by data set size of a array explicitly
+    according to its actual filling (at automatic allocation of
+    memory size of dynamic array will be some more then required
+    in order to reserve memory for further expansion).
+
+2.  If program is designed for long-term work, for example, as a
+    service of operational system, periodically set size of its
+    dynamic arrays according to required.
+
+3.  Compilation with "auto inline" can significantly increase
+    size of executable code. So use conventional, not automatic
+    inlining.
+
+    NOTE: Option "auto inline" is set by default in compilers
+    Microsoft Visual C++ .NET and above. To turn auto inline
+    off for these compilers, you can use either option "only
+    inline" or the following directives:
+
+        #ifdef  _MSC_VER
+        #pragma auto_inline (off)
+        #endif/*_MSC_VER*/
+
+
+4.4. Interaction with operation system
+--------------------------------------
+
+Dynamic arrays allows automatically compensate mistakes of buffer
+overflow at the expense of increase of amount of consumed memory.
+Depending of cause for buffer overflow, amount of allocated memory
+can result in exhaustion of system resources and sharp delay of work
+of operational system. Therefore in crucial cases it is necessary to
+restrict maximal volume of operative memory selected for program.
+
+
+5. Technical information
+========================
+
+This section contains technical information about current
+implementation of template without granting guarantees that all
+information will be true for the subsequent versions of a class.
+
+
+5.1. Information on implementation
+----------------------------------
+
+Every low-order one-dimensional slice of a dynamic array is stored
+in continuous area of memory consisting of three parts:
+
+1.  Elements of array. Memory allocated for each element is
+    initialized by 0, then the default constructor the base class
+    is called. Elements are accessible for reading and writing.
+
+2.  Zero initialized part, sufficient for placing of several
+    elements of base type. If zero initialized part contains
+    correct values of base type, it can be read at reference
+    without check of bounds.
+
+3.  Reserved memory, which size is determined automatically.
+
+Presence of zero initialized part is essential for reference to
+a array without check of bounds, since it makes regular consequence
+of the widespread error - reference under index equal number of
+elements.
+
+The minimal number of elements of a base type T in zero initialized
+part is set in file Exarray.h by macro EXARRAY_EXTRA_ITEMS.
+This macro can accept values from 0 and higher. Default value - 1.
+
+For purposes of economy of memory a "empty" dynamic array, i.e.
+array without elements, can share zero-initialized static memory
+with other "empty" arrays of the same type. The pointer to static
+memory is returned by static method stub().
+
+
+5.2. Peculiarities of implementation of regular operations
+----------------------------------------------------------
+
+Some distinctive features of templates are caused by restrictions
+of language C++:
+
+The features of a pattern are caused by restrictions of language C++:
+
+1.  Operation sizeof provides for size of descriptor of array
+    instead of size of array in bytes, which is the case for
+    conventional C arrays. Number of elements in array is provided
+    by method size(). Size of a dynamic file in bytes is equal
+    to product if size() and size of element in bytes.
+
+2.  Operation & provides for the pointer to descriptor of array
+    instead of pointer to base array. This difference is essential
+    at assigning of array to void *, and therefore at transfer of
+    array to function such as sort or memcpy. In this case for
+    conventional C array m means just same, as &m, since these pointers,
+    though belong to different types, but contain same addresses.
+    But for dynamic array addresses m and &m are different.
+    Pointer to base array in this case is provided by method base().
+
+3.  At creation of a dynamic array the of elements is not defined,
+    and it is possible to address to any element of the array by
+    index or through dynamic pointer.
+
+    Allocation of memory is carried out automatically.
+    For either registration or prevention of automatic allocation
+    of memory it is possible to define appropriate functions and
+    assign it to global variable exalloc_status.grow_handler.
+
+    Maximal size of a dynamic array in bytes is provided by
+    constant EXCALCBLOCKSIZE_MAX, which contains in 16-bit mode
+    value about UINT_MAX (64K), and in 32-bit and more mode
+    value about INT_MAX.
+
+    The maximal number of elements, which is allowed by template
+    exarray, is returned by method max_size (); operational
+    system and equipment can impose additional restrictions.
+    If allocation fails, function assigned by set_exalloc_handler()
+    is called. If value of set_exalloc_handler() is NULL, processing
+    of memory allocation errors is carried out by function assigned
+    to exalloc_status.size_handler. Initial handler calls abort().
+
+    REMARK:
+      Use of set_exalloc_handler() instead of regular C++ function
+      set_new_handler() is caused by distinctions in compilers
+      created previously to the C++ standard of 1998.
+
+4.  Reference to to dynamic array by negative index triggers
+    processing of memory allocation error (except for array
+    exarray<char>, if 16-bit pointer is less then -10).
+    For conventional C arrays this error may remain unnoticed.
+
+5.  Do not index dynamic array by values of char types or carry out
+    arithmetic operations with arguments of char types on dynamic
+    arrays and pointers. Use explicit conversion to int.
+
+    The reaction of the compiler to these infringements consists
+    in message about inaccessibility of method.
+
+6.  As well as it is impossible to copy conventional C array, it is
+    impossible to copy dynamic array by initialization or giving,
+    and also to transfer in function on value as well as return
+    as result of function. Otherwise, message about inaccessibility
+    of the copying constructor or operator is given out.
+
+    To transfer dynamic array in function it is necessary to declare
+    either reference to a dynamic array, dynamic or restricted pointer,
+    or constant C pointer to element of base array. By transfer either
+    through restricted or constant pointer opportunity of automatic
+    increasing of the size is cut off (for transfer via constant pointer
+    check of bounds is also cut off); it is also required to ensure for
+    invariance of size of the dynamic array during execution of function.
+
+7.  Is is possible to assign to dynamic pointer dynamic arrays
+    and pointers, but no conventional C arrays and pointers, and also
+    restricted pointers.
+
+    It is possible to assign to restricted pointer dynamic arrays and
+    pointers, regulated arrays and other restricted pointers. Also,
+    when defining of restricted  pointer it is possible to assign C
+    array, for what it is necessary to transfer in the constrictor
+    pointer to the first element of the array and number of elements.
+
+8.  Under reference to either conventional or dynamic array by
+    restricted pointer only the previously placed elements are
+    accessible. At attempt of reference to non-placed element
+    abort() or other function assigned to exalloc_status.range_handler
+    is called. Restricted pointer to array is actual so long
+    as the number of elements in the array is not changed.
+
+9.  Any reference to either dynamic or restricted NULL-pointer
+    results in call of abort() or other function assigned to
+    exalloc_status.null_handler. In case of conventional C pointers
+    this error can remain unnoticed.
+
+10. As against conventional C pointer, the dynamic or restricted pointer
+    can take non zero numeric value with no explicit transformations.
+    Logic value of such pointer is true, but at attempt to refer
+    by is results in same error, as reference under NULL-pointer.
+
+11. As against conventional C pointers, at declaration of dynamic
+    or restricted pointer it is possible to assign constant dynamic
+    array or pointer without explicit transformation.
+
+    At attempt to assign to dynamic pointer constant dynamic
+    array or pointer, Borland compilers Borland produces the
+    message on presence of two duplicating methods, but other
+    compilers allows such assigning.
+
+    At attempt of change size of constant array (except for expand)
+    the message on absence of required method is given out.
+    In other cases the message on impossibility of updating of
+    constant object is given out.
+
+12. As against conventional C pointers, for dynamic and restricted
+    pointers the operations of reduction of a type, both explicit
+    and implicit (for example, to the pointer to element of a base
+    class) are not implemented. Exception is the reduction to
+    conventional const pointer to an element, which can be carried
+    out under explicit instruction or implicitly by initialization,
+    assigning and call of function or return of result of function.
+    The conventional pointer to element of dynamic array is actual
+    so long as the array exists and number of elements in the array
+    is not changed.
+
+    REMARK 1:
+      Reduction to the conventional const pointer can be used for
+      multistage reductions. For example, to case pointer
+      expoint<int> p to conventional pointer to char, it is necessary
+      to use reduction (char *)(const int *)p. The pointer obtained
+      this way is temporary and therefore cannot be modified.
+
+    REMARK 2:
+      For dynamic and restricted pointers the implicit reductions
+      yet are not provided: for this purpose are required C++
+      constructions, which are stipulated in the language
+      standard, but yet are not realized in any of accessible
+      compilers. The opportunity of implicit reduction of the
+      pointer on a derivative class to the pointer on a base class
+      is potentially dangerous, since allows to break a principle of
+      uniformity of array s and even to destroy data by completely
+      "innocent", on the first sight, instructions:
+        class Shape {...};
+        class Circle: public Shape {...};
+        Circle c [10];
+        Shape* ps = c;
+        Shape  s;
+        ps [2] = s; // copy s is stored somewhere
+                    // between c [0] and c [2].
+
+    REMARK 3:
+      As well as for conventional arrays, attempt to return pointer
+      to local dynamic array leads to error:
+        const char* func() { exarray<char> a; return a; }
+
+
+5.3. Processing of exception
+----------------------------
+
+Templates do not implement explicit exception handling. because
+they are designed for use with various compilers, including with
+such, which do not realize mechanism of exceptions. Nevertheless,
+the template allows to turn on the mechanism of exceptions and
+realize their correct processing according to the standard C++
+(ISO/IEC 14882).
+
+1.  Locally dynamic arrays deletes thereby by call of their
+    destructors during clearing of stack.
+
+2.  No memory leak will occur at start of exception in constructor
+    of element of dynamic array.
+
+3.  If destructors of elements of dynamic array can start
+    exceptions, for correct clearing of memory it is necessary
+    to define macro ALLOW_EXARRAY_EXCEPTIONS - in this case
+    all exceptions in destructors will be intercepted and then
+    be processed in destructor of a dynamic array.
+
+    REMARK:
+      Standard C++ recommends to organize interception of
+      exceptions in destructors, since destructor itself is
+      part of the mechanism of processing of exceptions.
+      In some compilers, including Visual C++ 6.0, this
+      recommendation is vital because of incorrect realization
+      of uncaught_exception().
+
+
+5.4. Preprocessing options
+--------------------------
+
+The template is designed for various compilers, including those,
+which do not implement completely requirement of standard C++
+(ISO/IEC 14882). Therefore some opportunities of the template
+may be turned off. To turn them on one must define one or more
+of the corresponding macro:
+    #define option
+
+1.  Language options are not defined by default as they may
+    cause problems if compiler does not comply to Standard C++.
+
+    ALLOW_EXARRAY_ADDSUB        - permits operators + and -
+            on dynamic array and integer index, returning
+            dynamic pointer. If macro is not defined, these
+            operators are permitted only for pointers.
+            * Causes swelling of debugging information in
+              Borland C++ 3.1.
+
+    ALLOW_EXARRAY_SELECTION     - permits operator ->.
+    ALLOW_EXARRAY_ITERATORS     - permits operator ->
+            and also defines properties and methods for
+            application of templates as iterators and
+            containers of library STL.
+            * Not supported by Borland C++ 3.1 and 4.5.
+            * STL container methods are partially implemented.
+
+    ALLOW_EXARRAY_EXCEPTIONS    - permits explicit processing
+            of exceptions. Option is mandatory if destructors
+            of elements of array can start exceptions.
+            * Not supported by the compiler Borland C++ 3.1.
+            * Visual C++ 6.0 does not implement correctly
+              processing of exceptions in destructors of
+              local objects and built-in arrays (but
+              correctly deletes dynamic arrays).
+
+2.  Compatibility options. Turn these options on if you have
+    troubles with your compiler.
+
+    ALLOW_EXARRAY_NEW_DELETE    - redefine operators
+            new[] and delete[] for EXNEW and EXDELETE.
+            * Is always defined if the compiler is full compatible
+              with C++ standard (__cplusplus >= 199711L), also for
+              Visual C++ 5.0 and above, Borland C++ 4.5 and above.
+
+    ALLOW_EXARRAY_PLACEMENT     - support for placement delete.
+            * Is always defined if the compiler is full compatible
+              with C++ standard (__cplusplus >= 199711L), also for
+              Visual C++ 6.0 and above.
+
+    ALLOW_EXARRAY_CHARTYPE      - type char is distinct
+            from signed/unsigned char.
+            * Is always defined if the compiler is full compatible
+              with C++ standard (__cplusplus >= 199711L), also for
+              Visual C++ 6.0 and above, Borland C++ 4.5 and above.
+
+    ALLOW_EXARRAY_SIZETYPE      - type size_t is greater
+            then all standard unsigned types, including long.
+            * Defined for all compilers that defined macro
+              SSIZE_MAX or _WIN64 and _I64_MAX greater ULONG_MAX,
+              for example, Visual C++ in 64 bit mode.
+
+    ALLOW_EXARRAY_PTRDIFFTYPE   - type ptrdiff_t is greater
+            then all standard unsigned types, including long,
+            but not greater size_t,
+            * Defined for all compilers that defined macro
+              SSIZE_MAX or _WIN64 and _I64_MAX greater ULONG_MAX,
+              for example, Visual C++ in 64 bit mode.
+
+    DISALLOW_EXARRAY_LONGTYPE   - disable use of long
+            and unsigned long indexes to access array.
+            * Also disables size_t and ptrdiff_t indexes on
+              64-bit g++.
+
+    DISALLOW_EXARRAY_INTTYPE    - disable use of int
+            and unsigned int indexes to access array.
+            * Also disables size_t and ptrdiff_t indexes on
+              16 and 32-bit compilers.
+
+    DISALLOW_EXARRAY_SHORTTYPE  - disable use of short
+            and unsigned short indexes to access array.
+
+    ALLOW_EXARRAY_USING         - include using directives
+            for members of parent class template.
+            * Is always defined if the compiler is full compatible
+              with C++ standard (__cplusplus >= 199711L), also for
+              Visual C++ 2005 and above, GNU g++ 3.4 and above.
+            * Not supported by Borland C++ 3.1 and 4.5.
+
+3.  Optimization options.
+
+    ALLOW_EXARRAY_SCHEDULING    - questionable optimization of
+            bound check code, targeted to superscalar Pentium
+            and Pentium MMX. NOT recommended to use.
+            * Deleterious for Borland C++ 3.1 and 4.5,
+              in some cases - for Borland C++ Builder,
+            * Effect for Visual C++ depends on application,
+              but can cause severe memory allocation bug
+              when compiling under Visual C++ 6.0.
+
+    NCHECKPTR                   - suppress debugging facilities.
+            * Defined under either NDEBUG or C mode.
+            * Visual C++ defines NDEBUG in Release mode.
+
+
+6. Supplementary capabilities
+=============================
+
+
+6.1. Service constants
+----------------------
+
+    EXSIZE_T_MAX        - maximal value, which can be given as
+        result of integer calculations with control of overflow.
+
+    EXARRAY_ALIGN       - alignment of block of memory, allocated
+        for dynamic array. Available values - 1, 2, 4, 8, 16.
+
+    EXCALCBLOCKSIZE_SYS - size of system heading of block of
+        dynamic memory dependent from compiler (if size is
+        unknown, it is possible to specify the top estimation,
+        but no more than 16).
+
+    EXCALCBLOCKSIZE_MOD - initial size of block of memory
+       including system heading for algorithm of function
+       excalcblocksize(), multiple of pow(64,n)+/-16 bytes.
+
+    EXCALCBLOCKSIZE1.. 5 - initial size of block of memory
+       excluding system heading obtained by algorithm of
+       function excalcblocksize() and some subsequent
+       sizes obtained by the same function.
+
+    EXCALCBLOCKSIZE_MAX - maximal size of block of memory
+       excluding system heading, which is permitted by
+       memory allocation functions (operational system
+       and equipment can impose additional restrictions).
+
+
+6.2. Service functions
+----------------------
+
+Inline functions of unsigned integer calculations with check
+of overflow:
+
+    exmuladd (s,n,k)   = s * n + k
+    exmul    (s,n)     = s * n
+    exadd    (n,k)     = n + k
+    exchkadd (n,k,max) = n + k, if < = max, else error.
+
+NOTES:
+1.  For generation of optimal code use C++ compiler and
+    substitute constants on place of s and k.
+2.  At overflow functions return EXSIZE_T_MAX (except for
+    exchkadd(), which calls exalloc_status.size_handler).
+
+Memory allocation functions:
+
+    size_t excalcblocksize (size_t blocksize);
+        Function excalcblocksize() calculated optimal size of
+        memory block in bytes, which must be not less then
+        required. If requested size is too great, it provides
+        for EXSIZE_T_MAX.
+
+    void* exmalloc  (size_t blocksize);
+    void* exaligned_malloc
+                    (size_t blocksize, size_t blockalign);
+        Allocate zero-initialized block of memory.
+
+    void exmrealloc (void ** p, size_t blocksize,
+                     size_t memset_start,
+                     size_t memset_stop);
+        Allocate, extend, shorten or free block of memory p,
+        and fill area [memset_start, memset_stop) by zeroes.
+
+    void exfree (void* p);
+    void exaligned_free (void* p);
+         Free block of memory p.
+
+    Size of block of memory is set in bytes.
+    On either integer overflow or memory allocation failure
+    function assigned by set_exalloc_handler() is called.
+
+    Functions exaligned_ are intended for work with memory
+    blocks, aligned to boundary of 1, 2, 4, 8 or 16 bytes.
+
+
+6.3. Service templates and structures
+-------------------------------------
+
+1.  Template of array with variable size
+        exblock<T>
+
+    Template exblock<T> implements all methods of template
+    exarray<T>, except for an overload of the regular operators
+    of C++ and is intended for generation of derivative classes
+    and templates. The opportunity of direct creation of objects
+    exblock<T> is not stipulated.
+
+    Constructor and destructor of exblock <T> are protected and
+    do not contain any operations, since it is supposed, that all
+    operations necessary for construction of objects must be
+    carried out in derivative classes.
+
+    In the constructor of a derivative class it is necessary to set
+    e = stub() and len = 0. After that, if necessary, it is possible
+    to allocate memory by calling suitable method of base class.
+    In destructor of derivative class must call method clear().
+
+    NOTE 1:
+      stub() is protected static method, which returns static
+      zero-initialized array containing sizeof(T) bytes.
+
+    NOTE 2:
+      If elements of array do not require construction, the memory
+      under a dynamic array can be allocated by service functions
+      excalcblocksize(), exaligned_malloc() and exaligned_free().
+      with alignment EXARRAY_ALIGN. It is prohibited to apply for
+      this purpose operators new and delete.
+
+2.  Template of array with variable size
+        explace<T>
+
+    Inherits exblock<T> and in addition can be assigned
+    to pointer expoint<T>.
+
+3.  Template for stack of arrays with variable sizes
+        exblockstack<T>
+
+    Template describes stack of arrays exblock<T>, from where
+    it is possible to get array and then it is possible to put
+    array, if it is not necessary any more. The template is
+    focused on application in the constructors and destructors
+    of classes derivative from exblock<T>.
+
+    Stack is created by instruction:
+        exblockstack (T) a name;
+
+    For creation of a array in constructor of derivative class
+    the method is called as
+        name.get(*this);
+    The method either get takes a array from stack or if stack is
+    empty - creates empty array exblock<T>.
+
+    For returning a array to stack in destructor of a
+    derivative class call method
+        name.put(*this);
+
+4.  Template for calling of constructors and destructors
+        exreloc_c <T>
+
+
+6.4. Service structures
+-----------------------
+
+Service structures are intended for application in that areas where
+using of our templates is impossible. For example, service variables
+helps create objects in thread local storage, where only aggregate
+types with no constructors can be used. Objects
+
+1.  Structure of array with variable size
+        exblock_t
+
+    Objects of structure exblock_t are identical in binary
+    representation to objects of types exblock, explace, exvector,
+    exarray and expoint, so they can be converted to any of
+    aforementioned forms by means static cast. Look for example
+    implementation of template exblockstack.
+
+    Object of structure exblock_t is properly initialized by zero
+    values if it is created in global, static or any another kind
+    of zero-initialized memory.
+
+2.  Structure of stack of arrays with variable sizes
+        exblockstack_t
+
+    Objects of structure exblockstack_t are identical in binary
+    representation to objects of types exblockstack, so they
+    can be converted to each other by means of static cast.
+
+    Object of structure exblockstack_t is properly initialized by
+    zero values if it is created in global, static or any another
+    kind of zero-initialized memory.
+
+
+6.5. Service header files
+-------------------------
+
+1.  Header file Exthread.h for support of thread local storage
+    defines macro EXTHREAD_LOCAL.
+
+    This header file actually is not used by our templates but
+    is intended for creation or programs which use thread local
+    storage variables. The file contains suitable definitions for
+    Borland C++, Microsoft Visual C++ and GNU gcc.
+
+    The header file defines macro EXTREAD_LOCAL which is empty
+    for single-threaded applications and compiler-specific
+    value for multi-threaded applications. Value is defined
+    only if is is not defined externally.
+
+    Also, the header file contains commented incomplete
+    definitions for some other compilers.
+
+
+Appendix 1. Summary of methods
+==============================
+
+The following templates are defined in file Exarray.h:
+    exblock <T>     Template of block of memory with variable size,
+                    accessible through restricted pointers.
+    explace <T>     Template of block of memory with variable sizes,
+                    accessible through dynamic and restricted pointers.
+    exarray <T>     Template of dynamic array.
+    expoint <T>     Template of dynamic pointer.
+    exvector <T>    Template of regulated array.
+    exptr <T>       Template of restricted pointer.
+    exblockstack<T> Template for stack of blocks of memory with
+                    variable size.
+Templates exblock, explace, and exblockstack are intended for the
+purposes of implementation of derivative classes. The opportunity of
+direct creation of objects exblock and explace is not stipulated.
+
+Interrelation of classes:
+
+        reference       aggregation
+exptr     --->   exblock    <---   exblockstack
+                 |
+                 +- exvector
+                 |
+expoint   --->   +- explace
+                    |
+                    +- exarray
+                 inheritance
+
+-----------------------------------------------------------
+                            exblock exvector        exptr
+                            explace exarray expoint
+-----------------------------------------------------------
+   = (int)                                     +
+   = (const*)                                          +
+   = (exblock&)                                        +
+   = (exvector&)                                       +
+   = (explace&)                                +       +
+   = (exarray&)                                +       +
+   = (expoint)                                 +       +
+   = (exptr)                                           +
+   [], *                               +       +       +
+   ->                                  #       #       #
+   += -=                               #       +       +
+   +  -  ++  --                                +       +
+   == != < > <= >= -                   +       +       +
+   const T*                            +       +       +
+-----------------------------------------------------------
+   m.size    ()                +       +       +
+   m.capacity()                +       +       +
+   m.max_size()                +       +       +
+   m.empty   ()                +       +       +
+   m.resize (n)                +       +       +
+-----------------------------------------------------------
+   m.confine(i)                +       +       +
+   m.adjust (i)                +       +       +
+   m.expand (i)                +       +       +
+   m.shrink (i)                +       +       +
+   m.checkadjust (i)           +       +
+   m.checkexpand (i)           +       +
+   m.checkshrink (i)           +       +
+   m.checkindex  (i)           +       +
+-----------------------------------------------------------
+   m.item   (i)                +       +       +       +
+   m.base    ()                +       +       +       +
+   m.at     (i)                +       +       +       +
+   m.access (i)                +       +       +       +
+-----------------------------------------------------------
+   value_type                  #       #       #       #
+   size_type                   #       #       #       #
+   difference_type             #       #       #       #
+   iterator                    #       #       #       #
+   const_iterator              #       #       #       #
+   pointer                     #       #       #       #
+   const_pointer               #       #       #       #
+   reference                   #       #       #       #
+   const_reference             #       #       #       #
+   iterator_category                           #       #
+-----------------------------------------------------------
+   m.begin   ()                #       #       #       #
+   m.end     ()                #       #       #       #
+   m.clear   ()                +       +
+   m.swap   (m)                +       +
+-----------------------------------------------------------
+                   exblockstack
+-----------------------------------------------------------
+   get       ()          +
+   put      (m)          +
+-----------------------------------------------------------
+
+Legend:
++   Implemented
+#   Implemented as option (ref. Section "Options").
+n   Size
+i   Index
+m   Either exblock, exvector, explace or exarray
+
+
+Appendix 2. Known issues
+========================
+
+1.  Do not use expressions like m [i] = func (m [j]) if i > j
+    and func receives reference to its argument, requested by
+    & sign in specification. This may cause GPF error, because
+    reference to m [j] becomes invalid when m is reallocated
+    for m [i]. The bug arises in some compilers, for example,
+    Visual C++ .NET and may be very confusing.
+
+    RECOMMENDATION: Use the following code to allocate m [i]
+                    either implicitly:
+                      m [i] = 0; m [i] = func (m [j]);
+                    or explicitly:
+                      m.expand (i); m [i] = func (m [j]);
+
+2.  When macro ALLOW_EXARRAY_SCHEDULING is turned on under
+    Visual C++ 6.0, expressions like m [i] = m [j] may cause
+    error if i > j, m belongs to template exarray and is
+    reallocated for m [i]. For some special cases compiler
+    Visual C++ 6.0 stores in a register reference to m [j],
+    which becomes invalid when m is reallocated for m [i]
+    and then uses this reference to address object m [j].
+    This may cause GPF error.
+
+    RECOMMENDATION: Do not turn on ALLOW_EXARRAY_SCHEDULING.
+
+3.  Compilation under option "auto inline" can significantly
+    increase size of executable code. This option is set by
+    default in Release mode of Visual C++ .NET and above.
+
+    RECOMMENDATION: Turn off "auto inline" either in compiler
+                    options or in source code. For Microsoft
+                    compilers you can use the following
+                    directives:
+
+                      #ifdef  _MSC_VER
+                      #pragma auto_inline (off)
+                      #endif/*_MSC_VER*/
+
+
+Appendix 3. What's new
+======================
+
+Feb 20, 1999 - The template is uploaded to Internet.
+
+
+Jul 18, 1999
+
+- Component-wise assignment of dynamic arrays is blocked.
+
+
+Sep 20, 1999
+
+- Operations on constant dynamic pointers are implemented.
+
+- Diagnostics of giving of dynamic files is improved.
+
+- FIXED: leaks of memory on call of method reserve()
+  for empty arrays and on call of method resize(0).
+
+- Optimized methods of management of size are implemented.
+
+
+Nov 25, 1999
+
+- Base template exblock for memory allocation is extracted
+  from template exarray.
+
+- Template exblockstack for purposes of optimization of
+  memory allocation is implemented.
+
+- Template of restricted pointers exptr and macro for check
+  of bounds at stage of debugging of program are implemented.
+
+- Support Visual C++ 5.0.
+
+
+Nov 28, 1999
+
+- Technique of processing of errors is modified.
+
+
+Dec 28, 1999
+
+- Compatibility with a mode __STDC__ is provided.
+
+
+Apr 12, 2000
+
+- Support for Visual C++ 6.0.
+
+- Maximal size of a 32-bit dynamic array is reduced twice - from
+  4G down to 2G. It was required to bypass a bug in Visual C++ 6.0:
+  if SP3 is not installed, in mode of optimization for speed compiler
+  calculates constant expressions such as (SIZE_T_MAX-4)/4 by rules
+  of sign arithmetics. Changes have touched functions exmuladd() and
+  exmul(). In 16-bit mode maximal size of array remains to be 64K.
+
+- Constant EXSIZE_T_MAX, specifying maximal possible result of
+  integer calculations with control overflow is provided instead of
+  constant SIZE_T_MAX
+
+
+May 17, 2000
+
+- Documentation in file Exarray.txt is prepared.
+
+- Methods of the template are redesigned. Stable method, which
+  must not be changed or deleted in the subsequent updates of
+  template are documented. Some methods are excluded or announced
+  as closed.
+
+- Eliminated opportunity of memory leak at start of exceptions
+  in constructors of elements of array.
+
+- Eliminated cross references resulting in swelling of debugging
+   information in compiler Borland C++ 3.1.
+
+- STL methods begin(), end(), at(), swap(), clean(), function
+  memmove() and overloaded operator -> are implemented.
+
+- Some opportunities of template now are optional.
+
+
+May 23, 2000
+
+- Code for reference to element of array with check of bounds
+  is optimized (5-10% faster on processor Pentium under compiler
+  Visual C++).
+
+
+May 25, 2000
+
+- Compatibility with cxx on platform Alpha (Digital Unix 4.0B).
+
+
+Aug  2, 2001
+
+- FIXED: Missed clearing of k in operators of assigning of
+         dynamic arrays and pointers to restricted pointers.
+
+
+Sep 22, 2002
+
+- Compatibility with GNU g++ 2.9.6.
+
+
+Dec  6, 2002
+
+- Names of error handlers changed, some functions are moved
+  to files Exdebug.h and Exstring.h.
+
+- New template exvec with check of bounds, but with no automatic
+  increase of size of array.
+
+- Functions for memory allocation with alignment are implemented
+  (for Visual C++ 7.0, differently they are reduced to call of
+   non-alignment functions).
+
+- Compatibility with Visual C++ 7.0.
+
+
+Jan 29, 2003 - Version 1.0 beta public
+
+- Assert-diagnostics at control of indexes and pointers
+  is implemented.
+
+- Memory allocation methods confine(), shrink() and checkshrink()
+  are implemented.
+
+- FIXED: mistake in definition of method chsize(), because of which
+  it was exactly similar to expand(); now method is renamed to
+  adjust().
+
+- Method checksize() is renamed to checkindex().
+
+- Debugging macro EXDEBUG is implemented in file Exdebug.h.
+
+- Refined license statement and documentation.
+
+- Now documentation is placed in one file.
+
+
+Mar 14, 2003 - Version 1.0 beta public update
+
+- Documentation is translated to English.
+
+
+Jul  5, 2003 - Version 1.1 beta public
+
+- Method stub() moved to template exblock thus fixing
+  incompatibility with Borland C++ 3.1.
+
+- Template exvec is renamed to exvector.
+
+- Source code with comments in English.
+
+
+Nov 12, 2005 - Version 1.1a beta public
+
+- Renewed documentation and comments in the code.
+
+- FIXED: Option ALLOW_EXARRAY_SCHEDULING now is turned off
+         by default (ref. Known issues).
+
+
+Sep  5, 2006 - Version 1.2 beta internal
+
+- New macro EXPTRINDEX.
+
+- New option ALLOW_EXARRAY_SIZETYPE for compatibility with
+  some 64 bit compilers.
+
+- FIXED: New option ALLOW_EXARRAY_USING for compatibility
+         of templates with standard ISO/IEC 14882.
+
+- FIXED: Macro EXPTRCHECK now returns const pointer for
+         const objects.
+
+- FIXED: Cannot assign NULL to const restricted or debug
+         pointer without explicit type conversion.
+
+
+Nov 29, 2006 - Version 1.2 beta public
+
+- FIXED: Program crushes when compiling in Release mode
+         under compilers Visual C++ .NET, SDK 2003 and 2005
+         with option /Ob2 (auto inline).
+
+
+Apr 30, 2007 - Version 1.2a beta public
+
+- Improved compatibility with GNU g++ 3.4 and above (not necessary
+  to define explicitly ALLOW_EXARRAY_USING).
+
+- FIXED: Header file now do not redefine NULL pointer for
+         GNU g++ compiler.
+
+
+Jun 12, 2007 - Version 1.2a beta public documentation update
+
+- Extended list of known issues.
+
+
+Jun 12, 2009 - Version 1.2a beta public documentation update
+
+- Compatibility with Visual C++ 2008.
+
+- Updated Section 5.2.
+
+
+Jul 28, 2009 - Version 1.2b public
+
+- Compatibility with GNU g++ 4.1.2 64 bit and g++ 4.2.3.
+
+- Long and unsigned long indexes are now allowed.
+
+- New options DISALLOW_EXARRAY_LONGTYPE, DISALLOW_EXARRAY_INTTYPE
+  and DISALLOW_EXARRAY_SHORTTYPE, for permitting indexes of type
+  (unsigned) long, int and short.
+
+- New option ALLOW_EXARRAY_PTRDIFFTYPE for using ptrdiff_t indexes
+  if they differs from long/int/short numeric type.
+
+- FIXED: Option ALLOW_EXARRAY_SIZETYPE is not set for Microsoft
+         64 bit compilers.
+
+- FIXED: Cannot use unsigned int indexes under 64 bit GNU gcc
+         compilers.
+
+- FIXED: Non-working detection of compatibility with
+         C++ ISO/IEC 14882:1998 and 14882:2003.
+
+- Beta test is finished.
+
+
+Jul 28, 2010 - Version 1.2c public
+
+- File Exthread.h defining prefix for thread local storage
+  EXTHREAD_LOCAL.
+
+- Documented structure exblock_t for allocating of array in
+  thread local storage.
+
+- Structure exblockstack_t for allocating of stack of arrays
+  in thread local storage.
+
+- Sections 6.4 and 6.5 of documentation.
+
+
+Sep 27, 2010 - Version 1.2c public documentation update
+
+- Corrected documentation and comments in Exarray.h
+
+
+Nov 20, 2010 - Version 1.2c public documentation update
+
+- Corrected description of macro EXARR.
+
+- Corrected comment in Exarray.h.
+
+
+Nov 20, 2010

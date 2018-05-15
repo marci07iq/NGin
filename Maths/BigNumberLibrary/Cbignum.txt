@@ -1,0 +1,3145 @@
+          Signed integers with unlimited range
+
+            (class cBigNumber, version 2.1c)
+
+                 The programmer manual
+
+                                      Devoted to my mom.
+
+Contents
+========
+
+1. Introduction
+
+1.1. Requirements
+1.2. Technical parameters
+1.3. Software license
+1.4. Disclaimer
+1.5. Third party components
+1.6. Technical support
+1.7. Contact information
+1.8. Acknowledgements
+
+2. Contents of the program folder
+
+2.1. Test programs
+
+3. Instructions
+
+3.1. Using of unlimited numbers
+3.2. Additional operations, functions and methods
+3.3. Function and methods for manual optimization of programs
+3.4. Testing numbers for primality and factoring
+
+4. Guidelines
+
+4.1. Possible areas of application
+4.2. Performance
+4.3. Consumption of memory
+4.4. Interaction with operation system
+4.5. Prevention of bugs
+4.6. Built-in bug prevention tools
+
+5. Technical information
+
+5.1. Information on implementation
+5.2. Peculiarities of implementation of regular operations
+
+Appendix 1. An explanatory slip to work for contest SofTool'99
+
+Appendix 2. Known issues
+
+Appendix 3. What's new
+
+
+1. Introduction
+===============
+
+A C++ class cBigNumber implements integers with unlimited range.
+The class provides for all regular operations of language C++,
+including arithmetic, logic and bit-wise operations, operations of
+comparison, shift operations, and also stream input-output with
+all of integer modifiers. Extra functions - power, power by
+module and Miller strong probable prime test.
+
+The class uses fast algorithms, such as the binary exponentiation,
+which are optimized for numbers containing up to 100,000 and more
+bits. More large numbers can also be used; the exponentiation tests
+were carried out for numbers containing up to 12,000,000 bits.
+
+
+1.1. Requirements
+-----------------
+
+The class is designed to conform to the standard C++
+ISO/IEC 14882:1998(E) and C++11 ISO/IEC 14882:2011.
+
+Implementation of class does not depend on CPU digit capacity,
+but it is assumed that numbers are internally represented in
+the complementary binary code. The class uses integer machine
+arithmetic and do not use operations on floating-point numbers.
+
+The class have been tested under:
+- Microsoft Visual C++ 6.0, 7.0, SDK 2003 R2, 2005-2010, 2015-2017.
+- Borland C++ 3.1 (16 bit).
+- Borland C++ 4.5 (32 bit).
+- Borland C++ Builder 1.0.
+- GNU g++ 2.9.6 (32 bit, Red Hat Linux 7.1).
+- GNU g++ 3.3.3 (ARM, Pocket GCC, Windows Mobile 5, 6.1).
+- GNU g++ 4.1.2 (32 and 64 bit, SuSE Linux 10).
+- GNU g++ 4.2.3 (32 bit, Workbench).
+
+On Microsoft Visual C++ 2005 and above the class uses 32/64 and
+64/128 bit intrinsics for hardware multiplication, shifts etc.
+The same optimization for wider scope of compilers and also
+for 64/32 and 128/64 bit hardware division is provided by
+optional assembler add-on package (ref. below).
+
+On Microsoft Visual C++ 2013 and above the class uses intrinsics
+for subtraction with borrow when dividing to short divider (two
+machine words). The same acceleration for larger dividers is
+provided by optional assembler add-on package (ref. below).
+
+Optional 32 bit code with assembler optimization is available
+as separate add-on package for:
+- Microsoft Visual C++ 6.0, 7.0, 2003-2017 and above.
+- Borland C++ Builder 1.0 and above.
+- Borland C++ 4.5 (except for multiplication with accumulation).
+
+Optional 64 bit code with assembler optimization is available
+as separate add-on package for Microsoft Visual C++ 2005-2017
+and above. It have been tested under:
+- Microsoft Visual C++ 2010, SDK 7.1 x64
+- Microsoft Visual C++ 2015
+
+Optional code with 32/64/128 bits assembler multiplication and
+division is available as separate add-on package for GNU g++,
+have been tested under:
+- GNU g++ 4.1.2 (32 and 64 bit, SuSE Linux 10).
+
+The class supports multithreading, ref. Sections 3 and 4.2.4
+for more information.
+
+
+1.2. Technical parameters
+-------------------------
+
+Technical parameters are given in assumption that byte contains
+8 bit, processor word contains 16, 32 or 64 bits of type size_t.
+Some estimations depends of size of CBNL word that contains either
+32 or 64 bits integer of either C type long or compiler-specific
+type defined in the file Cbnl.h.
+
+- Size of descriptor of number, in processor words:      2
+
+- Representation of number: normalized complementary binary code
+                            with variable number of CBNL words
+                            in the order from low to high word.
+
+- Initial value of number by default:                    0
+
+- Initial amount of dynamic memory allocated
+  for number 0, in bytes:                                0
+
+- Size of service information allocated for
+  a number, in CBNL words:      number 0            0 or 2
+                                non-0 number:            2
+
+- Minimal amount of dynamic memory required for
+  non-0 number, in CBNL words (*):                       3
+
+- Initial amount of dynamic memory allocated for
+  non-0 number, in bytes (*):   16 bits:                44
+                                32 bits:               104
+                                64 bits:               224
+
+- Maximal amount of memory to allocate
+  for a number, in bytes (*):   16 bits:            34,988
+                                32 bits:     1,607,077,576
+                                64 bits:            system
+
+- Maximal number of operations of memory
+  allocation for a number depending on
+  its size n, in bytes (*):     16 bits: 2*log3 ((n+4)/ 96)
+                                32 bits: 2*log3 ((n+8)/224)
+                                64 bits: 2*log3((n+16)/480)
+
+- Size of automatically reserved memory
+  in relation to the actual size of a code
+  of number (**)                         In average: 37.5%
+                                            Maximum:  100%
+
+- Maximal amount of memory required for
+  automatic optimization of multiplication,
+  in bytes (***,****)           16 bits:              1.5K
+                                32 bits and more:      90K
+
+- Amount of memory required for automatic
+  optimization of division, in relation to
+  size of divider (***,*****):  32 bits and less     3200%
+                                64 bits              6400%
+
+- Maximal amount of memory required for
+  automatic optimization of division,
+  in bytes (***,*****):         16 bits:                2K
+                                32 bits:               64M
+                                64 bits:              128M
+
+(*)     Includes service information.
+
+(**)    It is supposed that size of number is above minimal.
+
+(***)   Except for operations that use of table of shifts
+        explicitly. Maximal amount of memory depends on
+        settings in the file Cbignumf.h.
+
+(****)  Not including amount of memory required for copying
+        of operands.
+
+(*****) Optimization is provided for dividers up to 60 bytes
+        in 16 bit mode and up to 2M bytes in 32 and 64 bit mode.
+
+
+1.3. Software license
+---------------------
+
+The following copyright statement describes authorship of
+the software.
+
+(C) Copyright 1998-2017 by Dr. Raul N. Shakirov, IMach of RAS (UB).
+
+Source code written entirely on C++ without explicit use of
+machine assembler instructions is distributed as "Public
+domain", that is permission has been granted to copy,
+distribute and modify software in any context without fee,
+including a commercial application, provided that the
+aforesaid copyright statement is present in user-accessible
+supporting documentation, as well as exhaustive description
+of changes.
+
+This does not affect your ownership of the derived work
+itself, and the intent is to assure proper credit for the
+authors of this software, not to interfere with your
+productive use of this software. "Derived works" includes
+all programs that utilize this software. Credit must be
+given in user-accessible documentation.
+
+
+1.4. Disclaimer
+---------------
+
+Author ensures that he has secured all necessary consents
+and approvals to use third party intellectual property
+rights for this software.
+
+Author confirms that this software does not contain parts,
+which are intended for the purposes, others than central
+purpose announced in the software documentation.
+
+THIS SOFTWARE IS PROVIDED "AS IS". NO WARRANTY OF ANY KIND
+IS EXPRESSED OR IMPLIED. YOU USE AT YOUR OWN RISK. THE
+AUTHOR WILL NOT BE LIABLE FOR DATA LOSS, DAMAGES, LOSS OF
+PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR MISUSING
+THIS SOFTWARE.
+
+
+1.5. Third party components
+---------------------------
+
+1. Strong Probable Primarily test for base b
+   by Olivier Langlois <olanglois@sympatico.ca>
+   Public available source.
+
+2. Tausworth based random number generator.
+   Ref. Glenn Rhoads' home page at
+   http://remus.rutgers.edu/~rhoads/Code/code.html
+   Public available source.
+
+3. Microsoft(R) Visual C++ 6.0 Compiler (Enterprise Edition).
+   Licensed to Institute of Engineering Science of RAS (UB).
+
+4. MSDN Subscriptions library, April 2001.
+   Licensed to Institute of Engineering Science of RAS (UB).
+
+5. Microsoft(R) Visual C++ 2010 Express Compiler.
+   Public available software.
+
+6. Microsoft(R) Windows SDK v7.1 x64.
+   Public available software.
+
+7. Microsoft(R) Visual C++ 2015 Community Compiler.
+   Public available software.
+
+8. GNU C++ compiler g++ 2.9.6
+   Public available software.
+
+9. GNU C++ compiler g++ 4.1.2
+   Public available software.
+
+
+1.6. Technical support
+----------------------
+
+Technical support is carried out at a web cite
+http://www.imach.uran.ru/cbignum
+
+Please, send your comments and bug reports to the author.
+
+
+1.7. Contact information
+------------------------
+
+Author: Dr. Raul N. Shakirov,
+Institute of Engineering Science, Russian Ac. of Sci. (UB),
+34 Komsomolskaya str., Ekaterinburg, 620219, Russia.
+
+Phone:  +7 (343) 375-35-65
+Email:  raul@imach.uran.ru
+
+
+1.8. Acknowledgements
+---------------------
+
+My gratitude to Dr. Nickolai Nevesenko for live discussing
+of various ideas about numeric algorithms.
+
+
+2. Contents of the program folder
+=================================
+
+The class cBigNumber is implemented as the following files:
+
+   Cbignum.cpp  - implementation of class cBigNumber
+   Cbignum.h    - declaration of class cBigNumber
+   Cbignum.txt  - the programmer manual (eng)
+   Cbignumr.txt - the programmer manual (rus)
+   Cbignumf.cpp - implementation of base arithmetic functions for
+                  unlimited numbers with machine-level instructions
+                  (in add-on package)
+   Cbignumf.inl - implementation of base arithmetic functions for
+                  unlimited numbers on standard C++
+   Cbignumf.h   - macro parameters for base arithmetic functions
+   Cbignums.cpp - implementation of stream input-output operators
+   Cbignums.h   - declarations of stream input-output operators
+   Cbnl.h       - declarations for compiler detection
+   Cbnl.inl     - declarations for compiler detection
+   Cbnl64.inl     (in add-on package)
+   Cios.h       - declarations for standard stream input-output
+   Cthr.h       - declarations for multithreading support
+   Ctty.cpp     - handler functions for independent stream output
+   Ctty.h       - class for compiler independent stream output
+   Ctty.txt     - the programmer manual for independent output (eng)
+   Cttyr.txt    - the programmer manual for independent output (rus)
+   Exarray.cpp  - memory allocation functions
+   Exarray.h    - template of dynamic arrays
+   Exarray.txt  - the manual for Exarray templates (eng)
+   Exarrayr.txt - the manual for Exarray templates (rus)
+   Exdebug.h    - debugging macro definitions
+   Exstring.h   - redefinition of functions from string.h
+   Exthread.h   - macro for thread local storage
+   Prime.cpp    - functions for determining of prime numbers
+   ENG\         - sources with comments (eng)
+   RUS\         - sources with comments (rus)
+
+Add-on package also contains:
+   Cbnl32.obj   - 32 bit assembler object file
+   Cbnl64.obj   - 64 bit assembler object file
+   Cbnl64x.obj  - 64 bit assembler object file for BMI2
+
+File Cbignum.txt describes documented functions of the class
+which will be kept in the subsequent versions of the class if
+other is not stipulated in the appropriate section.
+
+For convenience of studying explanatory comment are built into
+the headers and source files. These comments can be considered
+as the additional documentation. If programmers will experience
+difficulties at acquaintance with texts the author will be glad
+to help.
+
+WARNING:
+All definitions is headers and source files, which are not
+providing for regular C operations and not listed in file
+Cbignum.txt, are considered to be not documented. They can be
+excluded or modified in the subsequent versions with no notices.
+
+
+2.1. Test programs
+------------------
+
+Test programs are compiled under 32 and 64 bit modes for operational
+systems Windows and Linux. Also are available special 64 bit
+programs that use BMI2 instruction set of modern processors
+(Intel Haswell/AMD Excavator).
+
+NOTE: The class determines support for BMI2 by presence of macro
+      __AVX2__ under Microsoft Visual C++.
+
+On large numbers programs for Windows work several times faster
+than appropriate programs for Linux, because programs for
+Windows were compiled using built-in assembler.
+
+To compile all the programs, use the following files:
+
+   Cbignum      - commands for GNU g++
+   Cbignum.dsw  - workspace for Microsoft Visual C++ 6.0
+   Cbignumd     - commands for GNU g++ (debug mode)
+
+Test programs and compiling instructions for PocketPC are in
+separate add-on package.
+
+
+2.1.1. Integer calculator Arifexp
+---------------------------------
+
+Program Arifexp carries out arithmetic calculations, which are
+set as the following expressions:
+a=      (print number)
+a+b=    (addition)
+a-b=    (subtraction)
+a*b=    (multiplication)
+a/b=    (division and module)
+a%b=    (module)
+a\b=    (power)
+a<<b=   (left shift)
+a>>b=   (right shift)
+a|b=    (disjunction)
+a&b=    (conjunction)
+a^b=    (excluding or)
+a?b=    (comparing, returns -1,0,1)
+a+b*c=  (multiplication with addition)
+a-b*c=  (multiplication with subtraction)
+a\b%c=  (power by module)
+2Va=    (square root with remainder)
+Each number may have suffix R, which provides for substitution
+of random number with given sign and number of meaning bits.
+
+One can insert blanks, tabulation and translations of lines
+between operands and marks of operations. Number of expressions
+is not restricted; all expressions are calculated independently
+from each other.
+
+The program recognizes the following options:
+-idle   idle priority
+-high   high priority
+-par n  run up to n concurrent threads (actually 1 or 2)
+-hex    hexadecimal input/output
+-hexi   hexadecimal input
+-hexo   hexadecimal output
+-div0   allow division by 0
+-rand   generate random numbers instead of computing
+    all including degree of power and shift
+      0 generate -8,-4,-2,-1,0,1,2,4,8 instead of 0
+-exp n  append up to n trailing zeroes to random numbers
+-dn  n  add/remove extra sign words to fit code to n words
+-size   show high word and size of numbers
+-time   show estimation of computing time in Athlon cycles
+-mhz n  CPU rate for estimation of computing time in ms
+-rep n  repeat operation n times
+-v      write expression before the result
+-check  check results of operations, if possible
+-help   information on the program
+
+Priority and multithreading options are supported under Windows
+depending on compiler. If supported, program tells "Idle priority",
+"High priority" and/or "Run concurrent thread for output".
+
+After options there may be name of file with expressions.
+
+   NOTE: To start random test, apply the following commands:
+   Arifexp -rand >input
+   Arifexp input >output
+
+Program returns the following codes:
+    0 - success
+    1 - detected error in result of calculation (-check option)
+  255 - detected error in either options or input data
+
+Files of the program:
+
+   Arif          - short test
+   Arif.bat      - start of test
+   Arif.res      - sample for comparison with result
+   Arif.sh       - start of test under Linux
+   Arif.wrk      - result
+
+   Arif1         - short test of multiplication with accumulation
+   Arif1.bat     - start of test
+   Arif1.res     - sample for comparison with result
+   Arif1.sh      - start of test under Linux
+   Arif1.wrk     - result
+
+   Arif2         - test of power by module
+   Arif2.bat     - start of test
+   Arif2.res     - sample for comparison with result
+   Arif2.sh      - start of test under Linux
+   Arif2.wrk     - result
+
+   Arif3         - test of multiplication
+   Arif3.bat     - start of test
+   Arif3.res     - sample for comparison with result
+   Arif3.sh      - start of test under Linux
+   Arif3.wrk     - result
+
+   Arif4         - test of division with the rest
+   Arif4.bat     - start of test
+   Arif4.res     - sample for comparison with result
+   Arif4.sh      - start of test under Linux
+   Arif4.wrk     - result
+
+   Arif5         - test of square root with the remainder
+   Arif5.bat     - start of test
+   Arif5.res     - sample for comparison with result
+   Arif5.sh      - start of test under Linux
+   Arif5.wrk     - result
+
+   Arifr         - pattern of test
+   Arifr.bat     - start of the random generator test
+   Arifr.sh      - start of the random generator test under Linux
+   Arifr.wrk     - last received result
+
+   Arifrand      - pattern of cyclic test
+   Arifrand.1    - test with short random numbers
+   Arifrand.2    - test with large random numbers
+   Arifrand.b1   - Arifrand.1 for last incorrect result
+   Arifrand.b2   - Arifrand.2 for last incorrect result
+   Arifrand.bad  - last incorrect result (look for NO MATCH)
+   Arifrand.bat  - start of cyclic test under Windows
+   Arifrand.res  - accumulated return codes for test cycles
+   Arifrand.sh   - start of cyclic test under Linux
+   Arifrand.wrk  - last result obtained
+
+   Arifexp       - executable file of the program for Linux
+   Arifexp.cpp   - source of the program
+   Arifexp.dsp   - project file for Microsoft Visual C++ 6.0
+   Arifexp.exe   - executable file of the program for Win32
+   Arifexp.prj   - project file for Borland C++ 3.1
+   Arifexp64     - executable file of the program for Linux x64
+   Arifexp64.exe - executable file of the program for Win64
+   Arifexp64x.exe- executable file of the program for Win64 BMI2
+
+   Gettimer.c    - functions for measuring of performance
+   Gettimer.h      and setting of priority
+
+   Random3.c     - generator of random numbers
+   Random3.h
+   Random3.txt   - documentation (eng)
+   Random3r.txt  - documentation (rus)
+
+Tests Arif1-Arif5 estimate number of CPU cycles to complete
+to test; if you need to get estimation in ms, set environment
+variable MHZ by actual value of CPU rate, for example:
+   SET MHZ=2000
+
+NOTE: Tests automatically choice 32 or 64 bit programs depending
+      on operation system, but do not select automatically
+      programs for Win64 BMI2; in order to run the programs
+      for Win64 BMI2 you must edit the tests manually.
+
+
+2.1.2. Program for multiplication of square matrixes Matrix
+-----------------------------------------------------------
+
+Program for multiplication of square matrixes is implemented
+thereby class cBigNumber and template of dynamic arrays exarray.
+
+The program demonstrates modern technique of programming, at
+which there is no necessity for a programmer to manage allocation
+of memory, since the dynamic arrays have the unlimited sizes on
+all dimensions. On a sight of the author, the idea of a unlimited
+array successfully supplements the concept of unlimited numbers.
+
+Source of the program contains macro definitions which allows
+at compilation time to refuse from dynamic arrays for the benefit
+of ordinary static memory allocation and also to change a format
+of numbers.
+
+Files of the program:
+
+   10            - input data for multiplication of matrixes 10*10
+   10.bat        - test of multiplication of matrixes 10*10
+   10.res        - sample for comparison with result of multiplication
+   10.sh         - test of multiplication of matrixes under Linux
+   10.wrk        - result of multiplication
+
+   100           - input data for multiplication of matrixes 100*100
+   100.bat       - test of multiplication of matrixes 100*100
+   100.res       - sample for comparison with result of multiplication
+   100.sh        - test of multiplication of matrixes under Linux
+   100.wrk       - result of multiplication
+
+   Gettimer.c    - functions for measuring of performance
+   Gettimer.h      and installation of a priority
+
+   Matrix        - executable file of the program for Linux
+   Matrix.cpp    - source of the program
+   Matrix.dsp    - project file for Microsoft Visual C++ 6.0
+   Matrix.exe    - executable file of the program for Win32
+   Matrix.prj    - project file for Borland C++ 3.1
+   Matrix.txt    - instruction on preparation of the input data (eng).
+   Matrix64      - executable file of the program for Linux x64
+   Matrix64.exe  - executable file of the program for Win64
+   Matrix64x.exe - executable file of the program for Win64 BMI2
+   Matrixr.txt   - instruction on preparation of the input data (rus).
+
+
+2.1.3. Program for primality testing Miller
+-------------------------------------------
+
+Program Miller asks for a number and estimates its
+primality using a technique stated on page
+   http://www.utm.edu/research/primes/prove/prove3.html
+
+The program recognizes the following options:
+-idle   low priority
+-high   high priority
+-hex    hexadecimal input/output
+-hexi   hexadecimal input
+-hexo   hexadecimal output
+-factor "brute force" full factor primality test (the slowest)
+-proved fast SPRP and full factor primality test (much better)
+-miller fast factor and full SPRP primality test (much faster)
+-strong fast factor and fast SPRP primality test (the fastest, but probable)
+-scan n number of increments by 2
+After options there may be name of file with number to check.
+
+If no test is selected program carry out full independent SPRP
+and factorization tests. If the programs works correctly results
+of these tests should not contradict to each other.
+
+Program returns the following codes:
+    0 - composite
+    1 - prime by factoring
+    2 - prime by fast SPRP
+    3 - probable prime by Miller
+    7 - probable prime by fast SPRP
+   11 - prime by factoring, but has missed SPRP  (error)
+   12 - prime by fast SPRP, but has factor       (error)
+   13 - probable prime by Miller, but has factor (error)
+  255 - detected error in either options or input data
+If a row of numbers is tested with option -scan, maximal code
+is returned.
+
+Files of the program:
+
+   Gettimer.c    - functions for measuring of performance
+   Gettimer.h      and installation of a priority
+
+   Mill.bat      - start of tests for numbers Miller.9 - Miller.1
+   Mill.sh       - start of tests for numbers Miller under Linux
+   Miller        - executable file of the program for Linux
+   Miller.1      - large simple number:
+                   tests do not reach the end, but helps
+                   to estimate a degree of probability...
+   Miller.2-9    - the numbers, which are smaller.
+   Miller.cpp    - source of the program
+   Miller.dsp    - project file for Microsoft Visual C++ 6.0
+   Miller.exe    - executable file of the program for Win32
+   Miller.prj    - project file for Borland C++ 3.1
+   Miller64      - executable file of the program for Linux x64
+   Miller64.exe  - executable file of the program for Win64
+   Miller64.exe  - executable file of the program for Win64 BMI2
+
+   Millrand      - pattern of cyclic test
+   Millrand.1    - random number
+   Millrand.2    - odd random number to test
+   Millrand.b1   - Millrand.1 for last incorrect result
+   Millrand.b2   - Millrand.2 for last incorrect result
+   Millrand.bad  - last incorrect result (look for NO MATCH)
+   Millrand.bat  - start of cyclic test under Windows
+   Millrand.res  - accumulated return codes for test cycles
+   Millrand.sh   - start of cyclic test under Linux
+   Millrand.wrk  - last result obtained
+
+
+3. Instructions
+===============
+
+To use class cBigNumber in your program do the following:
+
+1.  Copy to the project folder the following files:
+        Cbignum.cpp
+        Cbignum.h
+        Cbignumf.cpp
+        Cbignumf.h
+        Cbignumf.inl
+        Cbignums.cpp (option for stream input-output)
+        Cbignums.h   (option for stream input-output)
+        Cbnl.h
+        Cbnl.inl
+        Cbnl64.inl
+        Cios.h       (option required for input-output)
+        Ctty.cpp     (option for console output)
+        Ctty.h
+        Exarray.cpp
+        Exarray.h
+        Exdebug.h
+        Exthread.h
+        Prime.cpp    (option for check of numbers for primality)
+    If add-on package is in use add to the folder the following file:
+        Cbnl32.obj   (for 32 bit compiling mode, if the macro _CBNL_ML
+                      is set in Cbnl.inl)
+        Cbnl64.obj   (for 64 bit compiling mode, if the macro _CBNL_ML
+                      is set in Cbnl64.inl)
+
+2.  Include to the project the following files:
+        Cbignum.cpp
+        Cbignumf.cpp
+        Cbignums.cpp (option for stream input-output)
+        Ctty.cpp     (option for console output)
+        Exarray.cpp
+        Prime.cpp    (option for check of numbers for primality)
+    If add-on package is in use add to the project the following file:
+        Cbnl32.obj   (for 32 bit compiling mode, if the macro _CBNL_ML
+                      is set in Cbnl.inl)
+        Cbnl64.obj   (for 64 bit compiling mode, if the macro _CBNL_ML
+                      is set in Cbnl64.inl)
+
+    NOTE: Optional files for stream and console input-output use
+          C++ stream library which actually exists in two variants:
+          old (iostream.h) and standard (iostream). Old compilers
+          may not include standard library, whereas new compilers
+          produce obsolete warnings for old library or ever do not
+          include it at all, starting from Microsoft Visual C++ 2005.
+          If Microsoft compiler supports both libraries, you must
+          select one of them for the entire project, because this
+          libraries can not be mixed.
+
+          By default, the class uses old library, with exception
+          for Microsoft Visual C++ .NET, 2003-2017 and higher and
+          also for GNU g++ 3.x, 4,x and higher. To change this
+          default, add to the compiler options appropriate macro:
+            _CIOS_STDSTREAM (use standard library)
+            _CIOS_OLDSTREAM (use old library)
+
+3.  Insert into the source text the following directives:
+        #include "Cbignum.h"
+        #include "Cbignums.h" (option for stream input-output)
+
+When compiling in the release mode for maximal speed set macro NDEBUG
+to turn off debug asserts and check of indexes. For more details ref.
+Sections 4.6, 5.1. Macro NDEBUG is set by default at compilation under
+IDE Visual C++ in Release mode. On command line compilation macro can
+be set in options.
+
+For example, to compile program Arifexp (Section 2.1.1) under Linux
+you can use the following command lines:
+
+Debug mode:
+   g++ Arifexp.cpp Cbignum.cpp Cbignumf.cpp Cbignums.cpp
+       Ctty.cpp Exarray.cpp Gettimer.c Random3.c -o Arifexp
+
+Release mode:
+   g++ -O5 -DNDEBUG Arifexp.cpp Cbignum.cpp Cbignumf.cpp Cbignums.cpp
+       Ctty.cpp Exarray.cpp Gettimer.c Random3.c -o Arifexp
+
+NOTE: Current version of class is adapted for compiling under
+      Borland C++, Microsoft Visual C++ and GNU g++ (version 3.3 or
+      higher for multithreaded applications). If you use another
+      compiler, for better performance it is recommended to define
+      macro EXTHREAD_LOCAL as described below.
+
+      For compiling of single-treaded application macro EXTHREAD_LOCAL
+      should contain either no value or compiler-dependant prefix of
+      thread local storage (commonly __thread).
+
+      For compiling of multithreaded application macro EXTHREAD_LOCAL
+      should contain compiler-dependant prefix of thread local storage
+      (commonly __thread). Look for compiler documentation if it
+      supports thread local storage. If your compiler does not support
+      thread local storage, you MUST NOT define macro EXTHREAD_LOCAL
+      to compile multithreaded application in compatibility mode.
+
+      Note that program compiled in compatibility mode without macro
+      EXTHREAD_LOCAL may work significantly slower on small numbers,
+      for example Matrix in Section 2.1.2. Look also Section 4.2.4.
+
+
+3.1. Using of unlimited numbers
+-------------------------------
+
+1.  Unlimited number is declared as:
+        cBigNumber num
+
+2.  Initial values to cBigNumber variables can be set as expressions
+    and also as either numeric or string assigning constructors.
+
+    Numeric assigning constructor is limited to signed long integer
+    range, for example:
+        cBigNumber num = 2147483647;
+    For 64 bit compilers it is also possible assign constants i64
+    if they are supported:
+        cBigNumber num = 2147483648i64;
+    For assignment of i64 type CBNL must be defined in the file
+    Cbnl.h as 64 bit type - in the original file this is true for
+    all compilers with 64 bit long type and additionally for
+    Visual C++ in 64 bit mode.
+
+    As against, string assigning constructor has no limiting
+    range. It requires to indicate radix in range 2..16 or 0;
+    the latter means either decimal, hexadecimal or octal
+    constant formatted by rules of C, for example:
+        cBigNumber num ("0x80000000", 0):
+
+    Expressions and constructors are suitable for definition
+    of unlimited constants,for example:
+        const cBigNumber big_const ("2147483648", 10);
+
+3.  The class provides for all regular operations of language C++,
+    including arithmetic, logic and bitwise operations, operations
+    of comparison, shift operations, and also stream input-output
+    with all of integer modifiers. The class supports combined
+    operations on unlimited and signed integer numbers. Therefore
+    rules for processing of unlimited numbers basically coincide
+    with rules of built-in signed integer arithmetic.
+
+* Ref. Section 5.2 for essential peculiarities, including operations
+  with unsigned and floating-point numbers.
+
+
+3.2. Additional operations, functions and methods
+-------------------------------------------------
+
+Operations with result in stack.
+   cBigNumber (s,radix) Conversion of char string s to unlimited number
+                        for radix 2..16. Radix 0 means either decimal,
+                        hexadecimal or octal constant formatted by rules
+                        of C, that us hexadecimal after prefix 0x/0X,
+                        octal after prefix 0 and decimal otherwise.
+   cBigAbs    (a)       Absolute value of a.
+   cBigUnsign (a)       Unsigned value of a (sign bits become meaning bits).
+   cBigPow    (a,b)     Power a to b.
+   cBigPowMod (a,b,mod) Power a to b by module mod.
+   cBigSqrt   (a)       Integer part of square root of a.
+   cBigBits   (a)       Number of meaning bits in binary complement code of a.
+        Meaning bits are most senior bit, which is distinct from sign bit
+        and all younger bits. For example, 0 and -1 contain no meaning bits,
+        1 and -2 contain 1 meaning bit, 127 and -128 contain 7 meaning bits.
+        Absolute value of number containing n meaning bits is not greater
+        than 2 in power n.
+   cBigExBits (a)        Number of meaning low 0-bits in binary code of a.
+        Low 0-bits are all junior meaning zero bits.
+        For example, 0 and odd numbers contain no low 0-bits,
+        2 and -2 contain 1 low 0-bit, 128 and -128 contain 7 low 0-bits.
+        Absolute value of number containing n low 0-bits is not less
+        than 2 in power n.
+   cBigRandom (rand,n)  Random number of no more than n meaning bits.
+        Result is obtained thereby use of external random generator rand
+        getting no parameters and returning unsigned long integers with
+        uniform distribution within the range 0..ULONG_MAX. Please,
+        initialize this random generator properly before using.
+        Ref. file Random3.txt for an example of generator.
+
+Operations with result in stack and remainder in 1st argument.
+   cBigDivMod (a,b)     Division a/b with module stored in a.
+   cBigSqrtRm (a)       Square root of a with remainder stored in a.
+
+Console streams and methods.
+   cBigNumberMessages   Stream for console messages.
+   cBigNumberProgress   Stream for console progress indicators.
+        Here streams are objects of class cTTY used by various
+        methods and functions to provide for their output. Stream
+        accept insertion operator << for chars, strings and signed
+        numbers, including unlimited numbers cBigNumber. Additional
+        methods for format output are described in file Ctty.txt.
+
+   ATTENTION:   By default, console output is turned off. To view
+                it, include to project file Ctty.cpp and assign
+                to streams cTTY handlers:
+                        cBigNumberMessages = cTTY_StandardOutput;
+                        cBigNumberProgress = cTTY_ProgressOutput;
+
+   NOTE: As these streams are global, assign them handlers
+         in main thread of program only.
+
+   a.dump     ()        Full dump of hexadecimal internal code
+                        in order from high to low words.
+   a.info     ()        Short dump of hexadecimal internal code
+                        containing the high word followed by
+                        total number of words.
+   a.erange   ()        Show message "cBigNumber value out of range"
+                        and short dump then call abort().
+
+   NOTE: These methods yields no output if handler
+         cBigNumberMessages is not set.
+
+Machine-dependent access to number.
+   a.length   ()        Number of CBNL words in the internal code.
+   a.code     ()        Array of CBNL words containing the internal
+                        code, most young word have index 0.
+        Method code() returns const pointer, which is valid until no
+        arithmetic or memory allocation operations affect the number.
+        Convert it to CBNL* if you need for write access to the code.
+
+        To change length of number, write it to element with index -1.
+        Number of words can be decreased down to 1 or increased within
+        memory allocated for a number (ref. Section 3.3). For better
+        performance the number should be normalized, that is it must
+        contain minimal number of words. The most convenient way to
+        normalize number is to call method fit(). Ref. Section 5.2
+        for an example of code.
+
+        NOTE: Number of value 0 may contain either 1 word of value 0
+              or 0 words.
+
+   a.fit      ()        Normalization.
+        Normalization consists in deleting of redundant senior sign
+        words. It is not required for numbers generated exclusively
+        by methods of class, because they are normalized.
+        Non normalized numbers can be correctly processed by
+        all methods of class, but normalization or result thus
+        obtained generally is not guaranteed.
+
+        NOTE: 0 has two normalized forms - standard of 1 word
+              and compact of 0 words (compact form allows do
+              no allocate dynamic memory for 0 numbers),
+              Method fit() converts compact 0 to standard 0,
+
+   a.loword   ()        Most young CBNL word of the internal code.
+   a.hiword   ()        Most senior CBNL word of the internal code.
+        Both methods work for number 0 containing 0 words returning 0.
+        Method hiword() returns senior word of code taking no account
+        for normalization of number, that is if the internal code
+        contains redundant high either 0 or ~0 words, the method
+        returns accordingly either 0 or ~0.
+   a.words    ()        Number of meaning words in the internal code.
+        Meaning words are most senior word, which does not contain
+        only sign and sign extension bits and all younger words.
+   a.exwords  ()        Number of meaning low 0-words in the internal code.
+        Low 0-words are all junior meaning zero words.
+        If all words are 0, there are no low 0-words.
+
+Information on number with check of range.
+   a.bits     ()        Number of meaning bits in binary complement code.
+   a.exbits   ()        Number of meaning low 0-bits in binary code.
+        Methods returns CBNL number, if number of bits > CBNL_MAX
+        diagnostic is typed and abort() is called.
+
+Transformation of number with check of range.
+   a.toCBNL   ()        Transformation to CBNL integer.
+   a.tolong   ()        Transformation to long integer.
+   a.toint    ()        Transformation to integer.
+   a.toshort  ()        Transformation to short integer.
+        If number does no fit diagnostic is typed and abort() is called.
+
+Transformation of number to string.
+   a.toa (str)          Formatting of decimal representation of number a.
+   a.toa (str,radix)    Formatting of char representation of number a
+                        for radix 2..16.
+   Here str is object of type cBigString that can be automatically
+   converted to const char*, for example:
+        cBigString str;
+        a.toa (str);
+        cout << str;
+   Method toa() returns char* to content of cBigString that is consistent
+   until cBigString is not changed, for example:
+        cBigString str;
+        cout << a.toa (str);
+
+Excluded non-reenterable method (do not use).
+   a.toatmp   ()        Formatting of decimal representation of number a
+                        in the static buffer (*).
+   a.toatmp   (radix)   Formatting of char representation of number a
+                        in the static buffer (*) for radix 2..16.
+(*) The content of static buffer is replaced by each call of toatmp().
+
+   NOTE: This method are not available if macro _CBIGNUM_MT is set in
+         file Cbignum.h and macro _CBIGNUM_TOATMP is not set that is
+         the case by default beginning from version 1.2c. Use
+         reenterable method toa() instead.
+
+
+3.3. Function and methods for manual optimization of programs
+-------------------------------------------------------------
+
+Comparison.
+   a.comp     (b)       0 if a == b; -1 if a < b; 1 if a > b.
+   a.comp     ()        0 if a == 0; -1 if a < 0; 1 if a > 0.
+
+Operations with accumulation of result.
+   a.neg      ()        Inversion of sign.
+   a.abs      ()        Absolute value.
+   a.unsign   ()        Unsigned value.
+   a.add      (b)       Fast addition    (*).
+   a.sub      (b)       Fast subtraction (*).
+   a.mul2     ()        Multiplication by 2.
+   a.div2     ()        Division by 2 (integer part).
+   a.pow2     ()        Square.
+   a.pow      (b)       Power.
+   a.powmod   (b,mod)   Power by module mod.
+   a.sqrt     ()        Integer part of square root.
+(*) Optimized for operand containing 3 or more words and size of
+    accumulator not less than size of operand. Same as += and -=.
+
+Combined operations with accumulation of result.
+   c.addmul   (a,b)     Multiplication with accumulation c += a * b.
+   c.submul   (a,b)     Multiplication with accumulation c -= a * b.
+
+Operations with assigning of result to variable c.
+   c.set      (a)       Copying.
+   c.set      (s)       Conversion of C-formatted decimal string s.
+   c.set      (s,radix) Conversion of char string s to unlimited number
+                        for radix 2..16. Radix 0 means either decimal,
+                        hexadecimal or octal constant formatted by rules
+                        of C, that us hexadecimal after prefix 0x/0X,
+                        octal after prefix 0 and decimal otherwise.
+   c.setneg   (a)       Inversion of sign.
+   c.setabs   (a)       Absolute value.
+   c.setunsign(a)       Unsigned value.
+   c.setcompl (a)       Bit-by-bit inversion.
+   c.setxor   (a,b)     Bit-by-bit exclusive or.
+   c.setand   (a,b)     Bit-by-bit conjunction.
+   c.setor    (a,b)     Bit-by-bit disjunction.
+   c.setadd   (a,b)     Addition.
+   c.setsub   (a,b)     Subtraction.
+   c.setmul   (a,b)     Multiplication.
+   c.setdiv   (a,b)     Division (integer part).
+   c.setmod   (a,b)     Module (remainder of division).
+   c.setshl   (a,b)     Left shift.
+   c.setshr   (a,b)     Right shift.
+   c.setpow   (a,b)     Power.
+   c.setpowmod(a,b,mod) Power by module mod.
+   c.setsqrt  (a)       Integer part of square root.
+   c.setbits  (a)       Number of meaning bits in binary complement code.
+   c.setexbits(a)       Number of meaning low 0-bits bits in binary code.
+   c.setrandom(rand,n)  Random number of no more than n meaning bits.
+
+Combined operations storing the result to variables c and a.
+   c.setdivmod(a,b)     Division with module stored in a.
+   c.setsqrtrm(a)       Square root with remainder stored in a.
+
+   NOTE: Variables a and c must not overlap.
+
+Combined operations on preliminary prepared operands.
+   a.tab      ()        Normalization and preparing of table of shifts.
+   a.smp      ()        Normalization and preparing of table of shifts,
+                        if hardware multiplication is not in effect.
+
+   NOTE: Table of shifts does not prevent from conventional use of
+         the number. Table of shifts remains be consistent until
+         the number accepts result of some operation.
+
+   c.addmultab    (a,b) Multiplication with accumulation c += a * b.
+   c.submultab    (a,b) Multiplication with accumulation c -= a * b.
+                        Multiplicand a must contain table of shifts.
+                        Multiplier b must be non-negative.
+                        Operands must not overlap with buffer of result c.
+
+   NOTE: Methods addmultab() and submultab() do not use block
+         multiplication and fast hardware multiplication. These methods
+         are outdated, it is recommended to replace them by methods
+         addmulsmp() and submulsmp().
+
+   c.addmulsmp    (a,b) Multiplication with accumulation c += a * b.
+   c.submulsmp    (a,b) Multiplication with accumulation c -= a * b.
+                        Multiplicand a must contain table of shifts
+                        that is be prepared by either smp() or tab().
+                        Multiplier b must be non-negative.
+                        Operands must not overlap with buffer of result c.
+
+   NOTE: Methods addmulsmp() and submulsmp() use extra fast hardware
+         multiplication if it is in effect and table of shifts if hardware
+         multiplication is not available. In both cases these methods do
+         not use block multiplication targeted to large numbers and so
+         have less overhead for small numbers containing no more than
+         3000-6000 bits. Providing that at least one operand is small,
+         they can be several percents faster than addmul() and submul().
+
+   a.divtab         (b) Division a /= b (integer part).
+   a.modtab         (b) Module   a %= b.
+                        Operands must have identical signs.
+                        Divider b must contain table of shifts and
+                        must not overlap with dividend a.
+
+   c.setdivtab    (a,b) Division c = a / b (integer part).
+   c.setmodtab    (a,b) Module   c = a % b.
+                        Operands must have identical signs.
+                        Divider b must contain table of shifts and
+                        must not overlap with buffer of result c.
+
+   c.setdivmodtab (a,b) Division with module c = a / b, a %= b.
+                        Operands must have identical signs, must not
+                        overlap with each other and buffer of result c.
+                        Divider b must contain table of shifts.
+
+   NOTE: These division methods have less overhead than general methods
+         setdiv(), setmod() and setdivmod() if divider contains more
+         than _CBIGNUM_SMALL_DIV words, but for smaller dividers they
+         are much less effective.
+
+Machine-dependent operations (depends on size of word).
+   c.set       (a,n)    Copying c = a shifted left by n words.
+   c.setr      (a,n)    Copying c = a shifted right by n words.
+   c.add       (a,n)    Fast addition    c += a shifted left by n words.
+   c.sub       (a,n)    Fast subtraction c -= a shifted left by n words.
+
+   c.addmultab (a,b,n)  Multiplication c += a * b shifted left by n words.
+   c.submultab (a,b,n)  Multiplication c -= a * b shifted left by n words.
+                        Multiplicand a must contain table of shifts.
+                        Multiplier b must be non-negative.
+                        Operands must not overlap with buffer of result c.
+
+   NOTE: Ref. details above in description of combined operations.
+
+   c.addmulsmp (a,b,n)  Multiplication c += a * b shifted left by n words.
+   c.submulsmp (a,b,n)  Multiplication c -= a * b shifted left by n words.
+                        Multiplicand a must contain table of shifts
+                        that is be prepared by either smp() or tab().
+                        Multiplier b must be non-negative.
+                        Operands must not overlap with buffer of result c.
+
+   NOTE: Ref. details above in description of combined operations.
+
+   a.divtab       (b,n) Division a /= b after b shifted left by n words.
+   a.modtab       (b,n) Module   b %= b after b shifted left by n words.
+                        Operands must have identical signs.
+                        Divider b must contain table of shifts and
+                        must not overlap with dividend a.
+
+   c.setdivtab  (a,b,n) Division c = a / b after b shifted left by n words.
+   c.setmodtab  (a,b,n) Module   c = a % b after b shifted left by n words.
+                        Operands must have identical signs.
+                        Divider b must contain table of shifts and
+                        must not overlap with buffer of result c.
+
+   c.setdivmodtab       Division with module c = a / b, a %= b
+                (a,b,n) after b shifted left by n words.
+                        Operands must have identical signs, must not
+                        overlap with each other and buffer of result c.
+                        Divider b must contain table of shifts.
+
+   NOTE: Ref. details above in description of combined operations.
+
+Memory allocation.
+   a.expand    (n)      Increase number of available words
+                        to some optimal value the range n..2n.
+
+   NOTE: This operation does not change number of words in the
+         internal code, it only changes number of allocated words.
+         The operation does not decreases number of allocated words
+         if it is greater than n, it only can increase it.
+
+Optimization of use of memory.
+   a.gc        ()       Release superfluous memory.
+   a.pack      ()       Release all memory over minimally necessary.
+   a.clear     ()       Set number to 0 and release memory.
+
+   NOTE: These operations delete the table of shifts, for other
+         technical details ref. Section 4.3.
+
+Control of division.
+   cBigNumber::maskdiv0 (0)     Forbid division by 0 (default).
+   cBigNumber::maskdiv0 (1)     Permit division by 0 assuming that
+                                quotient = 0 and module = dividend.
+                                Also permit power by module 0, which
+                                will return 1.
+   cBigNumber::testdiv0 ()      Have been occurred division by 0?
+
+   NOTE: As this methods are static, use them in main thread of program.
+
+Excluded non-reenterable methods (do not use).
+   cBigNumber::lastdivmod ()    Last module generated by methods
+                                /, /=, setdiv, setdivtab.
+   cBigNumber::lastrootrm ()    Last remainder generated by methods
+                                cBigSqrt, sqrt, setsqrt.
+
+   NOTE: These static methods are not available if macro _CBIGNUM_MT
+         is set in file Cbignum.h that is the case by default beginning
+         from version 1.2c. Use reenterable operations cBigDivMod() and
+         cBigSqrtRm() or methods setdivmod() and setsqrtrm() instead.
+
+
+3.4. Testing numbers for primality and factoring
+------------------------------------------------
+
+Basic test.
+
+   b_SPRP         (a,b) Strong Probable Primality Test for base b.
+                        Result: 0 = composite,
+                                2 = strong probable prime for base b.
+
+   NOTE: Strong probable primes for base 2 are also jokingly called
+         "industrial grade primes" because the are approximately
+         99.9999% prime. This is a joke, no more. It is recommended
+         to combine SPRP tests with Small Factor Primality Test.
+
+Simple tests (prime.cpp).
+
+   SPRP           (a)   Strong Probable Primality Test.
+   SPRP           (a,b)         b = either missed or first untested SPRP base.
+                        Result: 0 = composite (missed SPRP base found),
+                                2 = prime by fast SPRP for initial bases,
+                                3 = probable prime by Miller, i.e. prime if
+                                    Riemann generalized gypothesis is true.
+
+   FastSPRP       (a)   Fast Strong Probable Primality Test for initial bases.
+   FastSPRP       (a,b)         b = either missed or first untested SPRP base.
+                        Result: 0 = composite (missed SPRP base found),
+                                2 = prime by fast SPRP for initial bases,
+                                7 = probable prime, but may be not prime.
+
+   LastSPRP       (a)   Miller Strong Probable Primality Test for upper bases.
+   LastSPRP       (a,b)         b = either missed or first untested SPRP base.
+                        Result: 0 = composite (missed SPRP base found),
+                                3 = probable prime by Miller, i.e. prime if
+                                    Riemann generalized gypothesis is true,
+                                    providing that FastSPRP() is also passed.
+
+   NOTE: Current implementation prove prime for a < 341,550,071,728,321
+         thereby test SPRP 2..17 and probable prime for greater a
+         thereby test SPRP 19..2297 and more depending of value of a.
+         Bases up to 1,373,639 are prime, larger are 2-3-SPRP prime.
+
+   TestFactor     (a)   Test square, then other possible factors.
+   TestFactor     (a,b)         b = either found or first untested factor.
+                        Result: 0 = composite (factor found),
+                                1 = prime.
+
+   TestSmallFactor(a)   Test square, then small prime factors.
+   TestSmallFactor(a,b)         b = either found or first untested factor.
+                        Result: 0 = composite (factor found),
+                                1 = prime,
+                               10 = no small factor found.
+
+   TestLargeFactor(a)   Test square, then large factors from Large table.
+   TestLargeFactor(a,b)         b = either found or first untested factor.
+                        Result: 0 = composite (factor found),
+                                1 = no large factor found.
+
+   NOTE: Current implementation use table of small prime factors
+         in the range 2..7919 for a <= 62,837,329, and wheel
+         factorization table for module 210 for greater a.
+         Square factor and factors above 7927 may not be prime.
+
+Combined tests, in order from fastest to slowest.
+
+   IsStrongPrime  (a)   Fast factor and fast SPRP primality test.
+                        Result: 0 = composite,
+                                1 = prime by factoring,
+                                2 = prime by fast SPRP for initial bases,
+                                7 = probable prime, but may be not prime,
+
+   IsMillerPrime  (a)   Fast factor and full SPRP primality test.
+                        Result: 0 = composite,
+                                1 = prime by factoring,
+                                2 = prime by fast SPRP for initial bases,
+                                3 = probable prime by Miller, i.e. prime if
+                                    Riemann generalized gypothesis is true,
+
+   IsProvedPrime  (a)   Fast SPRP and full factor primality test.
+                        Result: 0 = composite,
+                                1 = prime by factoring,
+                                2 = prime by fast SPRP for initial bases.
+
+   IsPrime        (a)   Full SPRP and factor double-checked primality test.
+                        Result: 0 = composite (factor found),
+                                1 = prime by both SPRP and factoring,
+                         error 11 = prime by factoring, but has missed SPRP,
+                         error 12 = prime by fast SPRP, but has factor,
+                         error 13 = probable prime by Miller, but has factor.
+
+
+4. Guidelines
+=============
+
+The initial purpose of the class and explanatory slip are cited
+in the Appendix 1.
+
+
+4.1. Possible areas of application
+----------------------------------
+
+The class was developed under a principles of maximal simplification
+of its external interface according to the standard of C++ and also
+maintenance of compatibility with various hardware and software
+platforms. The class is characterized by a low overhead of internal
+memory allocation routines and call of computing methods, and also
+absence of any restrictions related with size of numbers.
+
+The class can be recommended if determining criterion consists in
+minimization of time for development of a program. Performance of
+class methods and consumption of memory will be close to optimum
+for large numbers containing from 500 to 20,000 bits and machine
+32/64 bit numbers.
+
+
+4.2. Performance
+----------------
+
+The best results on performance are achieved on 64 bit compilers
+under 64 bit version of Windows. 64 bit code works 1.7-3 times
+faster than 32 bit code.
+
+To obtain best performance for 32/64 bit compilers under Windows,
+use assembler optimization for x386/x64, which is available as
+separate package. It is especially effective for AMD and Intel
+Core processors, where it yields 3x and more growth of performance
+on most operations on large numbers: accumulation +=, -=,
+multiplication, division, module, power, power by module and
+square root. Effect of optimization is remarkable if either
+addend, subtracter, one of multipliers, divider, result of power
+or base of square root consist of 3 or more words. Optimization
+effect for outdated Intel Pentium 4 is lower - only 1.5x.
+
+In the following tables assembler optimized version of Arifexp,
+included in this distribution is compared with:
+- C compiled versions of Arifexp which does not use assembler
+  optimization;
+- special version of Arifexp compiled with NTL library
+  (http://www.shoup.net/ntl, version 5.4).
+
+32 bit assembler code is compiled under Microsoft Visual C++ 6.0
+in Release mode using "Maximize Speed" optimization settings.
+Test results are obtained for version 1.2b of the class, which
+performance on discussed examples is similar to 32 bit performance
+of subsequent versions of the class.
+
+32 bit C++ code is compiled under Microsoft Visual C++ 2010
+Express in Release mode. We use version 2.1c, which performance
+on multiplication is greatly improved due to use of hardware
+multiplication; you can compare it with performance of old
+version 1.2b under column softmul C32.
+
+64 bit code, both assembler and C++ is compiled under Microsoft
+Visual C++ 2010 Express with SDK 7.1 x64 in Release mode.
+For assembler code we use version 2.0 and for C++ code we use
+version 2.1 with hardware multiplication; you can compare it
+with performance of older version 2.0 under column softmul C64.
+
+NTL library is compiled with macro NTL_STD_CXX disabled.
+
+32 bit ARM code is compiled under Pocket GCC 3.3.3 -O5 -DNDEBUG.
+
+                    Time of computing in milliseconds
+
+                        Test: Arif1 (+*)                       softmul
+CPU                           asm32  asm64  NTL   C32   C64   C32   C64
+-----------------------------------------------------------------------
+ARM S3C2440A        (400 MHz)                                 130
+ARM920T PXA312      (624 MHz)                                  80
+Atom N270          (1600 MHz)     2           6     8          22
+Pentium III/933     (933 MHz)     3          12     9          30
+Pentium 4C/2400    (2400 MHz)     3           4     5          16
+Athlon 900          (900 MHz)     2           8     7          28
+Athlon XP 2500+    (1826 MHz)     1           4                14
+Athlon 64 X2 3600+ (1900 MHz)     1     0     4     3     1    11     8
+Athlon 64 X2 3800+ (2000 MHz)     1     0     3     3     1    10     8
+Athlon 64 X2 4600+ (2400 MHz)     0           3                 9
+Phenom II X3 710   (2600 MHz)     0     0     2                 8     6
+Phenom II X6 1050T (2800 MHz)     0     0     2     1     0     7     5
+Phenom II X6 1090T (2800 MHz)     0     0     2     2     0     6     5
+FX-8150            (3600 MHz)     1     0     1     2     1     8     5
+FX-8320            (3500 MHz)     0     0     1     2     0     8     5
+Core Duo T2500     (2000 MHz)     2           4                13
+Core 2 Duo E6420   (2130 MHz)     1           4                11
+Core 2 Quad Q8200  (2330 MHz)     1     0     4     3     1    10     6
+Core i7-950        (3200 MHz)     1     0     1     2     0     6     4
+Core i7-6800K      (3600 MHz)     0     0     1     1     0     5     3
+Xeon E3-1230       (3200 MHz)     1     0     1                 7     6
+Xeon E3-1240v3     (3400 MHz)     0     0     1     1     0     5     3
+                    Accuracy of measurement ~1 ms
+
+                        Test: Arif2 (powmod)                   softmul
+CPU                           asm32  asm64  NTL   C32   C64   C32   C64
+-----------------------------------------------------------------------
+ARM S3C2440A        (400 MHz)                               62000
+ARM920T PXA312      (624 MHz)                               40000
+Atom N270          (1600 MHz)  2235        1859  5516        5969
+Pentium III/933     (933 MHz)  2906        3494  6750        8578
+Pentium 4C/2400    (2400 MHz)  2343         906  3922        4297
+Athlon 900          (900 MHz)  1892        2123  5477        8051
+Athlon XP 2500+    (1826 MHz)   906        1047              4094
+Athlon 64 X2 3600+ (1900 MHz)   890   562  1031  2512  1373  3406  1888
+Athlon 64 X2 3800+ (2000 MHz)   813   500   969  2344  1297  3172  1797
+Athlon 64 X2 4600+ (2400 MHz)   672         828              2640
+Phenom II X3 710   (2600 MHz)   603   344   834              2380  1188
+Phenom II X6 1050T (2800 MHz)   563   313   703  1610   750  2203  1094
+Phenom II X6 1090T (2800 MHz)   484   266   610  1406   656  1922   953
+FX-8150            (3600 MHz)   537   349   559  1571   765  2285  1152
+FX-8320            (3500 MHz)   469   266   282  1656   765  2348  1078
+Core Duo T2500     (2000 MHz)  1437         844              3765
+Core 2 Duo E6420   (2130 MHz)  1234         735              2937
+Core 2 Quad Q8200  (2330 MHz)  1125   578   656  1891   922  2688  1329
+Core i7-950        (3200 MHz)   848   443   307  1210   581  1686   844
+Core i7-6800K      (3600 MHz)   285   177   289  1026   499  1342   724
+Xeon E3-1230       (3200 MHz)   561   374   453              1747   873
+Xeon E3-1240v3     (3400 MHz)   313   187   297   984   479  1359   734
+                    Accuracy of measurement ~10 ms
+
+                        Test: Arif3 (*)                        softmul
+CPU                           asm32  asm64  NTL   C32   C64   C32   C64
+-----------------------------------------------------------------------
+ARM S3C2440A        (400 MHz)                                2200
+ARM920T PXA312      (624 MHz)                                1400
+Atom N270          (1600 MHz)    33         109   130         366
+Pentium III/933     (933 MHz)    55         214   158         494
+Pentium 4C/2400    (2400 MHz)    45          64    77         245
+Athlon 900          (900 MHz)    29         135   125         469
+Athlon XP 2500+    (1826 MHz)    14          66               230
+Athlon 64 X2 3600+ (1900 MHz)    12     3    61    56    14   189   133
+Athlon 64 X2 3800+ (2000 MHz)    11     3    56    53    14   175   127
+Athlon 64 X2 4600+ (2400 MHz)     9          48               147
+Phenom II X3 710   (2600 MHz)     8     2    44               133    95
+Phenom II X6 1050T (2800 MHz)     7     2    42    38     9   122    89
+Phenom II X6 1090T (2800 MHz)     6     2    36    33     8   106    78
+FX-8150            (3600 MHz)     7     3    27    37     9   137    91
+FX-8320            (3500 MHz)     7     2    24    31     8   138    84
+Core Duo T2500     (2000 MHz)    28          70               217
+Core 2 Duo E6420   (2130 MHz)    23          70               175
+Core 2 Quad Q8200  (2330 MHz)    21     8    64    42    11   161   105
+Core i7-950        (3200 MHz)    17     6    21    27     7   104    67
+Core i7-6800K      (3600 MHz)     6    2/1   15    19     5    87    57
+Xeon E3-1230       (3200 MHz)    10     4    23               103    81
+Xeon E3-1240v3     (3400 MHz)     7    2/1   16    19     5    92    58
+                    Accuracy of measurement ~1 ms
+
+                        Test: Arif4 (/)
+CPU                           asm32  asm64   NTL  C32   C64
+-----------------------------------------------------------
+ARM S3C2440A        (400 MHz)                   17000
+ARM920T PXA312      (624 MHz)                    9000
+Atom N270          (1600 MHz)   570         561  1242
+Pentium III/933     (933 MHz)   970        1056  2005
+Pentium 4C/2400    (2400 MHz)   611         278   981
+Athlon 900          (900 MHz)   543         705  1729
+Athlon XP 2500+    (1826 MHz)   263         345   900
+Athlon 64 X2 3600+ (1900 MHz)   264   153   305   758   374
+Athlon 64 X2 3800+ (2000 MHz)   236   141   298   697   358
+Athlon 64 X2 4600+ (2400 MHz)   195         256   581
+Phenom II X3 710   (2600 MHz)   161    91   233   479   211
+Phenom II X6 1050T (2800 MHz)   149    84   219   442   197
+Phenom II X6 1090T (2800 MHz)   128    74   189   386   170
+FX-8150            (3600 MHz)   126    90   146   478   205
+FX-8320            (3500 MHz)   127    78    83   499   213
+Core Duo T2500     (2000 MHz)   359         241   786
+Core 2 Duo E6420   (2130 MHz)   313         205   606
+Core 2 Quad Q8200  (2330 MHz)   286   149   186   553   242
+Core i7-950        (3200 MHz)   218   121    89   347   155
+Core i7-6800K      (3600 MHz)    70    48    88   262   126
+Xeon E3-1230       (3200 MHz)   111    78    97   323   150
+Xeon E3-1240v3     (3400 MHz)    75    47    92   264   133
+                    Accuracy of measurement ~10 ms
+
+                        Test: Arif4 (/)
+CPU                           asm32  asm64  NTL   C32   C64
+-----------------------------------------------------------
+ARM S3C2440A        (400 MHz)                   32000
+ARM920T PXA312      (624 MHz)                   12000
+Atom N270          (1600 MHz)  2922       23562  3125
+Pentium III/933     (933 MHz)  2360       44453  4453
+Pentium 4C/2400    (2400 MHz)  1531       11312  1891
+Athlon 900          (900 MHz)  1312       27380  4376
+Athlon XP 2500+    (1826 MHz)   656       13391  2141
+Athlon 64 X2 3600+ (1900 MHz)   484   297 13088  1594   780
+Athlon 64 X2 3800+ (2000 MHz)   453   234 12046  1469   750
+Athlon 64 X2 4600+ (2400 MHz)   391       10031  1234
+Phenom II X3 710   (2600 MHz)   364   203 10278  1140   563
+Phenom II X6 1050T (2800 MHz)   344   172  9031  1063   531
+Phenom II X6 1090T (2800 MHz)   297   156  7875   921   453
+FX-8150            (3600 MHz)   396   321  5898  1094   512
+FX-8320            (3500 MHz)   344   219  3474  1002   515
+Core Duo T2500     (2000 MHz)  1062        9826  1844
+Core 2 Duo E6420   (2130 MHz)  1141        8548  1422
+Core 2 Quad Q8200  (2330 MHz)  1047   469  7767  1297   594
+Core i7-950        (3200 MHz)   745   390  3658   960   408
+Core i7-6800K      (3600 MHz)   331   162  3610   624   295
+Xeon E3-1230       (3200 MHz)   530   328  3978   749   406
+Xeon E3-1240v3     (3400 MHz)   344   162  3828   641   297
+                    Accuracy of measurement ~10 ms
+
+NOTE: Results of program Arifexp64x for Intel Haswell remarkably
+      enhance only one test result (~25% faster in test Arif3,
+      CPU Core i7-6800K and Xeon E3-1240v3 and, column asm64).
+
+The test programs are available from:
+http://www.imach.uran.ru/cbignum/arifrun.htm
+
+Unlike the test programs, all programs for Windows in the
+distribution if the class are compiled under Microsoft
+Visual C++ 2015 Community with assembler optimization.
+Using of more recent compiler do not affect significantly
+results of tests Arif1-5.
+
+Assembler add-on package has limited support for Linux compilers
+because of differences in assembler support. By now, it implements
+32/64/128 bit hardware MUL and DIV instructions.
+
+
+4.2.1. Optimal length of number
+
+In 32 bit mode all operations except square root can will be
+carried out for numbers containing up to 12,800,000,000 bits if
+enough amount of RAM memory is available for storing of input,
+output and (for some operations) internal numbers. Limit for
+square root is CBNL_MAX = 2,147,483,647 bits in 32 bit mode.
+Also, degree of shift must fit into the range -CBNL_MAX..CBNL_MAX.
+
+The operations of addition, subtraction, multiplication, power
+in a power, shift, input-output, and also bit-by-bit and logic
+operations are optimized for operands of unlimited size. The
+overhead charge for multiplication is minimized for a case,
+when size even of one of operands is not less than 500 bits.
+For optimal performance of other operations size of result
+must be greater than 200-500 bits.
+
+The operations of division, module and power by module are
+optimized for single-word, double-word and multi-word dividers
+of size from ~500 up to ~16,000,000 bits.
+
+In 32 bit mode the best parameters are provided if size of divider
+is no more than 1/32 of size of on-chip processor cache, that is
+for cache of 512 Kbytes the optimum size of a divider will be up
+to ~120,000 bits. For processors with larger cache optimal size
+of divider will be propotionaly larger (i.e. for Intel Xeon with
+8 Mbytes cache the limit will be ~4,000,000 bits).
+
+In 64 bit mode the best parameters are provided if size of divider
+is no more than 1/64 of processor cache, that is ~60,000 bits for
+cache of 512 Kbytes.
+
+The operation of square root is optimized for operands of size
+no greater than twice of on-chip processor cache.
+
+
+4.2.2. Estimation of performance
+--------------------------------
+
+Performance estimation is given for case when x386/x64 assembler
+optimization is in use under processors AMD Phenom/Athlon/Sempron,
+which in this task provides for better performance, than old Intel
+Pentium and Core processors.
+
+NOTE: Assembler add-on package is not included in the public
+      distribution of class.
+
+Estimations for 32 bit mode
+---------------------------
+
+The operations of addition, subtraction, shift, and also bit-by-bit
+and logic operations require from 1/2 up to 1/5 processor cycles
+per bit of result, if size of result is more than 200 bits.
+Optimized operations += and -= take about 1/15 cycle per bit
+of result if size of result is more than 500 bits.
+
+The number of processor cycles for multiplication of numbers with
+at least one size from 1,000 bits and more can be roughly estimated
+as m * n / 200, where m and n are quantity of bits allocated for
+operands, rounded up to mod 32. Overhead is further reduced by
+Karatsuba method: if both operands contain 1,600 or more bits
+the estimation must be divided to 4/3 in power log2 (n / 2000),
+where n is quantity of bits in shorter multiplier.
+
+The number of processor cycles for division with size of divider
+from 2,000 bits to 1/32 of on-chip processor cache can be roughly
+estimated as (m - n) * n / 30, where m and n are quantity of bits
+allocated for dividend and divider.
+
+The similar rough estimation for calculation of square root is
+n * n / 120, where n is quantity of bits allocated for the number.
+
+Estimation for input and conversion from string is n * n / 400
+for numbers up to 100,000 bits. For larger numbers it must be
+divided to 4/3 in power log2 (n / 20000).
+
+Estimation for output and conversion to string is n * n / 75.
+
+Estimations for 64 bit mode
+---------------------------
+
+The operations of addition, subtraction, shift, and also bit-by-bit
+and logic operations require from 1/4 up to 1/10 processor cycles
+per bit of result, if size of result is more than 400 bits.
+Optimized operations += and -= take about 1/25 cycle per bit
+of result if size of result is more than 1000 bits.
+
+The number of processor cycles for multiplication of numbers with
+at least one size from 2,000 bits and more can be roughly estimated
+as m * n / 800, where m and n are quantity of bits allocated for
+operands, rounded up to mod 64. Overhead is further reduced by
+Karatsuba method: if both operands contain 3,200 or more bits
+the estimation must be divided to 4/3 in power log2 (n / 4000),
+where n is quantity of bits in shorter multiplier.
+
+The number of processor cycles for division with size of divider
+from 4,000 bits to 1/64 of on-chip processor cache can be roughly
+estimated as (m - n) * n / 50, where m and n are quantity of bits
+allocated for dividend and divider.
+
+The similar rough estimation for calculation of square root is
+n * n / 200, where n is quantity of bits allocated for the number.
+
+Estimation for input and conversion from string is n * n / 1200
+for numbers up to 200,000 bits. For larger numbers it must be
+divided to 4/3 in power log2 (n / 40000).
+
+Estimation for output and conversion to string is n * n / 125.
+
+Other estimations
+-----------------
+
+Number of big numeric operations for calculation of power and
+power by module is proportional to size of degree in bits.
+Estimation for power by module is n * m * m / 17 in 32 bit mode
+or n * m * m / 28 in 64 bit mode, where where n is quantity of
+bits allocated for degree and m is quantity of bits allocated
+for module.
+
+NOTE: Power is based on big multiplication whereas power
+      by module is based on multiplication-division pair.
+      The slowest operation is division, so it determines
+      overall performance.
+
+Algorithm for primality checking IsStrongPrime() proves primality
+of numbers less than 341,550,071,728,321 for time less than 1 ms.
+For greater numbers it detects probable prime with certainty
+approximately 99,99999999%. Time of checking is proportional
+n in power 3, when n is quantity of bits in a number.
+
+More strict algorithm, IsMillerPrime() proves primality for
+numbers of any size providing that Riemann generalized hypothesis
+is true. It works approximately 100 times slower for closer
+numbers and for numbers or greater size time is proportional
+to n in power 5, when n is quantity of bits in a number.
+
+
+4.2.3. Technical features of implementation
+-------------------------------------------
+
+For best optimization of programs it is necessary to take into
+account the following differences between this implementation
+of unlimited numbers and built-in long arithmetic of C ++:
+
+1.  Assigning operations +=, -=, *=, /=, %= etc. are more effective
+    (up to 20% on short numbers) than operations, which create
+    temporary stack objects: +, -, *, /, % etc. For the same
+    reason prefix increment and decrement work faster, than
+    postfix variants of these operations.
+
+2.  Compiler do not carries out automatic optimization of
+    operations with unlimited numbers and numeric constants.
+    For example, no automatic replacement of addition/subtraction
+    of 1 to increment/decrement and multiplication/division by
+    power of 2 to left/right shift is provided. Nevertheless,
+    multiplication by power of 2 is implemented near optimality
+    (may be ever better than left shift), but division by power
+    of 2 is much slower than right shift.
+
+3.  If necessary, you can turn off some optimizations
+    by undefining the following macro in Cbignumf.h:
+
+    _CBIGNUM_HARDWARE_CBR   Use hardware add/subtract/shift
+                            operations with carry/borrow.
+
+    NOTE: Operations with carry are used from early versions of
+          the class and are completely implemented in version 1.2.
+          On modern Athlon/Core processors they are about 3
+          times faster than alternative C++ portable code, but
+          hardware and compiler dependent (look for Section 1.1).
+          Consequently, they are included in separate add-on
+          package instead of public distribution of portable class.
+
+    _CBIGNUM_HARDWARE_MUL   Use hardware multiplication of
+                            single-word operands to double-word.
+
+    NOTE: Hardware multiplication is first implemented in version
+          1.2a. On modern Athlon/Core it can be dozens times faster
+          than alternative bit multiplication (depending of using
+          in the latter either hardware operations with carry or
+          replacing C++ code).
+
+          Starting from version 2.1, hardware multiplication is
+          available in public distribution of class for Microsoft
+          Visual C++ 64 bit compilers, and starting from version
+          2.1c - for all 32 and 64 bit compilers. But its much
+          effective implementation is still contained in separate
+          add-on assembler package, which is available for common
+          32 and 64 bit compilers (look for Section 1.1).
+
+    _CBIGNUM_HARDWARE_DIV   Use hardware division.
+
+    NOTE: Hardware division is turned off by default in the code
+          of class, except for conversion of unlimited number to
+          string and factorization of single-word numbers in
+          Prime.cpp when compiling in 64 bit mode. The reason
+          why is limited effect on most microprocessors.
+
+          Hardware division can be used since version 1.2c for
+          division and module of single-word numbers, since
+          version 2.1 - to  optimize power by single-word module,
+          since version 2.1a - to optimize division/module
+          of unlimited number by single-word divider. Maximal
+          effect is about 3 times and can be reached for limited
+          double-word dividends and single-word dividers.
+
+          Starting from version 2.1c all 64 bit test programs
+          are being compiled with _CBIGNUM_HARDWARE_DIV turned on
+          (this is set by options of compilers, not in the code
+          of class). 32 bit programs are still being compiled
+          without _CBIGNUM_HARDWARE_DIV.
+
+    _CBIGNUM_KARATSUBA_MUL  Use Karatsuba multiplication
+                            if both numbers have 100 or
+                            more words, in case of hardware
+                            multiplication 50 or more words.
+
+    NOTE: Karatsuba method is first implemented in version 1.2a.
+          It is relatively complex in coding and required
+          excessive testing, which have been completed in
+          version 1.2b public. It is effective for large
+          numbers, otherwise one can consider to turn it off
+          for more reliable computations.
+
+    _CBIGNUM_BLOCK_MUL      Use block multiplication if both
+                            numbers have 715 or more words.
+
+    NOTE: Block method is implemented since version 1.0 to fit
+          multiplication into processor cache L1. Now it is
+          superceded by much more effective Karatsuba method,
+          except for case when one number is shorter than 100
+          words in case of bit mutiplication and shorter than
+          50 words in case of hardware multiplication.
+
+    _CBIGNUM_TERNARY_MUL    Use 30% faster ternary method for
+                            multiplication with table of shifts
+                            instead of simpler binary method.
+
+    NOTE: Ternary method is first implemented in version 1.2.
+          Now both binary and ternary methods are superceded by
+          much more effective hardware multiplication, if the
+          latter can be used.
+
+    _CBIGNUM_SHIFTTAB_MUL   Build temporary tables of shifts for
+                            accelerating of multiplication, if
+                            both numbers have 3 or more words
+
+    NOTE: Tables of shifts are implemented since version 1.0.
+          Now they are is superceded by much more effective
+          hardware multiplication, if the latter can be used.
+
+    _CBIGNUM_SHIFTTAB_DIV   Build temporary table of shifts for
+                            accelerating of division and module,
+                            if divider have at least 3 words less
+                            than dividend but no more than about
+                            512K words in 32 bit mode and 256K
+                            words in 64 bit mode.
+
+    NOTE: Division with table of shifts is implemented since
+          version 1.0.
+
+    _CBIGNUM_SMALL_DIV      Use special algorithms for small
+                            divider and module, currently
+                            single-word and double-word.
+
+    NOTE: These algorithms are implementing since version 2.1.
+
+    _CBIGNUM_SMALL_POWMOD   Use special algorithm for power by
+                            small, currently single-word module.
+
+    NOTE: The algorithm is implemented in version 2.1.
+
+    _CBIGNUM_REVERSE_MOD    Calculate single-word module thereby
+                            reverse multiplication after hardware
+                            division.
+
+    NOTE: Option is effective if _CBIGNUM_HARDWARE_DIV is set.
+          It is turned off by default because compiler's
+          optimization is much effective.
+
+    _CBIGNUM_REDUCE_JUMPS   Use code with extra operations to
+                            reduce number of conditional jumps.
+
+    NOTE: Implemented for division of single-word numbers in
+          version 1.2c and turned off by default. Ignored since
+          version 2.1 because compiler's optimization is much
+          effective.
+
+4.  Combined methods with table of shifts may speed up multiple
+    operations with the same multiplicand or divider, because
+    these operations allow to build table of shifts only once
+    a time. Also, this methods do not use internal copying of
+    operands assuming that operands do no overlap.
+
+    Combined multiplication addmultab() and submultab() with table
+    of shifts is effective only if hardware multiplication is not
+    available. Size of first multiplicand should fit into the range
+    from 500 bits to 6,000 bits; it can smaller than 500 bits if it
+    is larger than multiplier, the latter must not be shorter the
+    100 bits. If size of operands goes far out of these restrictions,
+    general multiplication will show better performance due to
+    automatic block optimization.
+
+    Combined multiplication addmulsmp() and submulsmp() is effective
+    also in case when if hardware multiplication is used. Other
+    conditions for affectivity are the same as for multiplication
+    with table of shifts. Performance gain is several percents due
+    to elimination of internal copy operations.
+
+    Combined division and module with table of shifts are effective
+    in general for dividers of any size.
+
+5.  Implementation of multiplication, division, module, power and
+    power by module contains effective internal optimization for
+    single-word numbers and numbers divisible by large power of 2
+    (~100 and more).
+
+6.  Transfer of unlimited number to function by reference is faster
+    than transfer by value, since in the latter case copy of number
+    must be made. If the function does not modify the number passed,
+    it is recommended to replace transfer by value with transfer by
+    constant reference:
+        const cBigNumber&
+
+7.  Construction and destruction if local unlimited numbers,
+    determined inside functions and blocks, occupies approximately
+    as much time, as 2-3 short arithmetic operations. To avoid this
+    overhead, take out local definitions of unlimited numbers from
+    critical cycles.
+
+    NOTE: If you do not need to write reenterable code you also can
+          prepend "static" keyword and initialize numbers in separate
+          assignment operator:
+            cBigNumber a = 1;           // Local definition
+            static cBigNumber a; a = 1; // Optimized definition
+
+8.  Conversion of very long integer (> 100,000 digits) to
+    external decimal format can occupy a lot of time. Conversion
+    to external hexadecimal format is 5 times faster, but also
+    may be very slow. The fastest output of very long integer
+    in hexadecimal format can be carried out by method dump().
+
+
+4.2.4. Support for multithreaded applications
+---------------------------------------------
+
+Complete support of multithreading is introduced in version 1.2c,
+where macro _CBIGNUM_MT is set in file Cbignum.h by default.
+
+The macro _CBIGNUM_MT excludes non-reenterable static methods
+lastdivmod(), lastrootrm(). Instead, use cBigDivMod(),
+cBigSqrtRm() or methods setdivmod(), setsqrtrm().
+Also, it excludes non-reenterable method toatmp() unless
+macro _CBIGNUM_TOATMP is set, use method toa() instead.
+
+Starting from version 2.1b the macro _CBIGNUM_MT prevents
+using of methods fit(), tab(), smp(), gc() and pack() for
+const numbers unless macro _CBIGNUM_CONSTCAST is set.
+
+NOTE: If you compile program in compatibility mode on compilers
+      that do not support thread local storage (look Section 3),
+      you must take into account that macro _CBIGNUM_MT slow down
+      binary operations, which create temporary stack objects:
+      +, -, *, /, % etc.
+
+      If you compile program do not require for multithreading
+      support you can undefine this macro to return to non-reenterable
+      implementation. This is especially useful for operations
+      on relatively small numbers which becomes 3-4 times faster.
+      Also, you can use assigning operations +=, -=, *=, /=, %= etc.
+      that are not affected by _CBIGNUM_MT.
+
+
+4.3. Consumption of memory
+--------------------------
+
+From the point of view of consumption of memory, the class is
+optimized for numbers, which size is more than 500 bits in
+32 bit mode and 1000 bits in 64 bit mode. In this case amount
+of allocated memory will be on the average on 37.5% more than
+minimal necessary.
+
+The additional optimization can be achieved at observance of the
+following rules:
+
+1.  Use common long or special CBNL variables for limited numbers,
+    whenever possible, as long variables and constants can be freely
+    combined with cBigNumber variables.
+
+2.  For duly destruction of the unlimited numbers place them in
+    local variables. At use for this purpose global and static
+    variable it is necessary to take into account, that due to
+    reasons of performance optimization class does not implement
+    automatic freeing of superfluous memory allocated for unlimited
+    numbers.
+
+3.  Version 2.0 of class and higher versions do not allocate
+    memory in the default constructor in order to save memory
+    allocated for sparse arrays (in which most values are 0)
+    So it is not good idea to initialize variables in sparse
+    arrays explicitly by 0, because any explicit assignment
+    including assignment of 0 causes for memory allocation,
+    for example:
+
+    cBigNumber a [1000];                // Initializes array by 0.
+    for (i = 0; i < 1000; i++) {        // Allocates about 25
+      a [i] = 0;                        // processor words for each
+    }                                   // element of array.
+
+    If necessary, you can turn off this optimization by defining
+    the following macro in Cbignum.h:
+
+    _CBIGNUM_DEF_ALLOC      allocate memory in default constructor
+                            as in versions 1.x of class.
+
+4.  To free superfluous memory use method gc().
+
+    * The method gc() is optimized to minimize fragmentation of
+      dynamic memory. It leaves zone of expansion, which size is
+      average 37.5% of size of number, except for relatively small
+      numbers, because the final size of memory allocated for
+      cBigNumber variable will be not less than 104 bytes in 32 bit
+      mode and 224 bytes in 64 bit mode. Exception is normalized 0
+      that is converted to compact zero-length form with releasing
+      of all allocated dynamic memory if macro _CBIGNUM_DEF_ALLOC
+      is not set.
+
+    * The method gc() does not normalize numbers.
+
+5.  Maximal clearing of memory is achieved at application of method
+    pack().
+
+    * The method pack() reduces size of number down to minimal,
+      determined exclusively by actual length of stored number.
+      The zone of expansion no longer persists, and the class keeps
+      in memory only indispensable service information (which size is
+      two CBNL words) and binary code of stored number. Exception is
+      normalized 0 that is converted to compact zero-length form
+      with releasing of all allocated dynamic memory if macro
+      _CBIGNUM_DEF_ALLOC is not set.
+
+    * The method pack() does not normalize numbers.
+
+    * Packed condition are not preserved at assignment of any kind,
+      including transfer to function by value, because these
+      operations are performed by copying binary code of number
+      to new object.
+
+    * Packed variable is automatically unpacked at applying of
+      any modifying operation except if it is necessary to allocate
+      additional memory.
+
+    * The method pack() increases fragmentation of dynamic memory
+      that can result in fall of performance.
+
+6.  To set value 0 and free all allocated dynamic memory one can
+    use method clear(), which works as gc() after assigning 0.
+
+
+4.4. Interaction with operation system
+--------------------------------------
+
+The class does not limit size of numbers, for what the automatic
+allocation of memory is implemented. Depending on size of numbers,
+formed by algorithm, amount of allocated memory can result in
+exhaustion of system resources and sharp delay of work of operational
+system. Therefore in crucial cases it is necessary to restrict maximal
+volume of operative memory selected for program.
+
+
+4.5. Prevention of bugs
+-----------------------
+
+The external interface of a class is constructed in maximum exact
+conformity with the agreements of language C++ (ref. details in
+section "Technical information"), therefore programmers should
+pay attention basically to observance of common rules of safe
+programming in language C++:
+
+1.  At application of the operators of assignment inside expressions
+    it is necessary to take into account, that the order of execution
+    is not fixed.
+
+2.  At input of numbers it is recommended to set explicit radix
+    thereby modifier dec, oct or hex. Otherwise, radix will be
+    determined automatically depending on presence of 0 before
+    number.
+
+3.  At usage of the optimized methods it is necessary to observe
+    all restrictions, stipulated in the documentation. In particular,
+    some optimized methods do not permit their operands to overlap.
+
+
+4.6. Built-in bug prevention tools
+----------------------------------
+
+All methods of a class include tools for the prevention of internal
+bugs, which are divided into two classes:
+
+1.  Tools for diagnostics of errors are included at compilation
+    in a debugging mode. The given tools are intended for
+    revealing the special situations, at which the probability
+    of occurrence of so-called irregular errors is increased. In
+    particular, the situations of escaping of index out of array
+    bounds, missed fulfillment of internal invariants etc. are
+    traced. When diagnostic situation is triggered, program
+    shows assert message and stops its execution.
+
+    NOTE: If it is necessary to switch off control of indexes at
+          the debugging stage, compile program with macro NCHECKPTR.
+
+          Also, you can switch off control of indexes only for
+          input (const) arrays by compiling program with macro
+          _CBIGNUM_NCHECKPTR.
+
+2.  Tools for correction of errors are included at compilation
+    of the program in a release mode with macro NDEBUG. These
+    tools are effective enough meaning that they will neutralize
+    consequences of some widespread latent errors, including
+    some buffer overflow errors.
+
+Due to presence of tools of correction, triggering of tools of
+diagnostics at debug mode does not mean that in release mode
+methods of class cBigNumber will work incorrectly. Nevertheless,
+some probability of incorrect work exists, therefore it is
+necessary to inform author of a class about all such cases.
+
+NOTE: Bug prevention tools prevent about 70% of internal bugs,
+      but some bugs may remain undiscovered, in particular is
+      recently implemented algorithms. It is possible to turn
+      recent algorithms off and revert to the previous version
+      of code to provide for more reliable computations. Look
+      for specific information in Section 4.2.3.
+
+
+5. Technical information
+========================
+
+This section contains technical information about current
+implementation of class without granting guarantees that all
+information will be true for the subsequent versions of a class.
+
+
+5.1. Information on implementation
+----------------------------------
+
+The template of dynamic arrays Exarray.h, which is carrying out
+allocation of operative memory is put in a basis of a class
+cBigNumber. Also, this file contains template of restricted
+pointers exptr, which is used in a file Cbignumf.cpp for
+organization of check of indexes at a stage of debugging.
+
+To turn off check of indexes set either macro NDEBUG or NCHECKPTR.
+Macro NDEBUG is set by default at compilation under IDE Visual C++
+in Release mode.
+
+Check of indexes, if turned on, slows down performance of methods
+(approximately 150-400 percents), but all incorrect references to
+arrays trapped, just as in Java or C#. Thus it is possible to use
+safe index arithmetic, which is present neither in Java, nor in
+C#.
+
+
+5.2. Peculiarities of implementation of regular operations
+----------------------------------------------------------
+
+The operations on unlimited numbers are carried out by regular
+rules of language C++ with use of all regular operators. Some
+distinctive features of class are caused by restrictions of
+language C++:
+
+1.  Operation sizeof provides for size of descriptor of unlimited
+    number (object of class cBigNumber), instead of size of
+    internal representation of number in bytes. Size of internal
+    representation of unlimited number in CBNL words is provide
+    by method length(). Size of unlimited number in bytes is equal
+    to production length() * sizeof (CBNL).
+
+2.  Operation & provides for the pointer to descriptor of
+    unlimited number (object of a class cBigNumber), instead of
+    pointer to internal representation of number in memory.
+    The pointer to internal representation of unlimited number
+    as array of CBNL words is provided by method base().
+
+3.  No operation on unlimited numbers can cause integer overflow.
+    If not enough virtual memory is available for storing of
+    intermediate data and result of the operation, the class
+    invokes abort() to terminate execution of program.
+
+4.  Before assignment of unsigned C number to unlimited number
+    or operation on these numbers the unsigned number is converted
+    to signed CBNL number. If unsigned number is greater than
+    maximal CBNL number, it silently transmutes to negative number.
+
+    To assign exact unsigned number, use method code():
+        cBigNumber a;                   // Unlimited number.
+        unsigned CBNL n = 0xFFFFFFFFUL; // Large unsigned number to assign,
+        {                               // value is set as an example.
+          a.expand (2);                 // Allocate 2 words.
+          CBNL *pa = (CBNL*) a.code();  // Get pointer to modify code.
+          pa [0] = n;                   // Assign number.
+          pa [1] = 0;                   // Set zero sign word.
+          pa [-1] = 2;                  // Set length.
+          a.fit();                      // Normalize.
+        }                               // Delete the pointer.
+    Instead of calling fit(), here it is possible to use the following
+    assignment:
+          pa [-1] = 1 + ((CBNL)n < 0);  // Set normalized length.
+
+5.  Before assignment of floating-point number to unlimited number
+    or operation on these numbers the floating-point number is
+    converted to signed CBNL number. On conversion, fraction bits
+    are discarded; if resulting number does not fit to the CBNL
+    range, result of conversion is undefined.
+
+6.  As against usual numbers, for unlimited numbers the operations
+    of reduction of a type are not stipulated.
+    Conversion of unlimited number to an CBNL integer is carried out
+    explicitly by method loword(), which returns CBNL integer.
+    Conversion is correct if unlimited number fits into CBNL integer
+    range. To ensure that CBNL range is enough, check that size
+    size of internal representation of unlimited number is not
+    greater than 1:
+        if (bignum.length() <= 1) num = bignum.loword();
+        else bignum.erange()    /* Error */
+
+    To convert unlimited number with check of range use methods
+    toCBNL(), tolong(), toint() and toshort().
+
+7.  To prevent naming conflict with library math.h the function
+    of power is named cBigPow().
+
+8.  The power to negative degree is interpreted, as the power of
+    reciprocal value to positive degree, where fractional part of
+    reciprocal value is discarded. That is, result of operation
+    will be as the following: divide error for base 0, 1 for base 1
+    and 0 for any base > 1.
+
+9.  The negative shift index is interpreted, as change of a
+    direction of shift. In standard C result of negative shift
+    is not defined.
+
+10. The square root of negative number is equal to 0.
+
+11. Beginning with version 1.2 output of numbers with hex and oct
+    modifier is singed. If you need for unsigned output, use function
+    cBigUnsign() or compile with macro _CBIGNUM_UNSIGN_OCT_HEX.
+
+
+Appendix 1. An explanatory slip to work for contest SofTool'99
+==============================================================
+
+                 Task 1 (company Aladdin)
+
+Write a C++ class cBigNumber, allowing to work with integers of
+any length. To realize the overloaded operators of addition,
+subtraction, multiplication, integer division, reception of the
+rest from division and power. Arguments of the operators can be
+objects cBigNumber and usual integers (int).
+
+Implement functions of input of number from the keyboard and
+output to the screen in decimal and hexadecimal format.
+
+                     Explanatory slip.
+
+The task is formulated briefly, therefore I have directed to a
+competitive commission the letter with the request to specify
+criteria of an estimation of competitive works. As the answer was
+not received, the conclusion was made that all necessary items of
+information contain in conditions of a task in either explicit
+or implicit kind.
+
+On the basis of task conditions there were formulated the following
+requirements:
+
+1) Size of numbers and choice of algorithms of multiplication and
+   division.
+
+The optimal algorithms of multiplication and division significantly
+depend of size numbers; it is not obviously possible to implement
+all algorithms in competitive work
+
+Analyzing conditions of a task, it is possible to assume, that the
+algorithms should br oriented to numbers of any size and be optimal:
+- for operations on large and short number, since these
+  operations are especially stipulated in a task 1;
+- for operations on small large numbers (up to 1000 bits),
+  since successive task 2 devoted to check for simplicity
+  of number.
+Because of this:
+1. The numbers are represented in an binary complement code.
+2. For multiplication and division there were choused "school"
+   algorithms in binary variant.
+3. At implementation of the class the special attention was
+   given to reduction of overheads of call of computing methods.
+
+The performance of a class at work with numbers located within the
+limits of a 32 bit numbers, makes about 500 thousand arithmetic
+operations per one second on Pentium-166, that is approximately 20
+times slowly, than built-in arithmetic.
+
+On increase of size of both operands of addition and subtraction
+and one of operands of of multiplication and division performance
+falls proportionally to size of operand; on increase of size of
+both operands of multiplication and division performance falls
+proportional to production of sizes.
+
+The algorithms were tested for numbers of size up to 100,000 bits.
+
+2) Portability.
+
+As program platform hardware is not stipulated in conditions of the
+task, and the compiler Visual C++ is mentioned only, it means,
+that the class should be portable at least between those
+platforms, for which work brave fellows from Microsoft. That is,
+Intel, Alpha, Strong ARM etc.
+
+Therefore class cBigNumber is written on standard C++ without
+application of machine-sensitive assembler instructions and
+non-standard types of the data, such, as _int64. I believe,
+that this decision will create the good preconditions for
+portability of the class.
+
+3) Completeness of realization of regular operations of language C.
+
+The programmer using class cBigNumber, should have an opportunity
+to use all regular operations of language C without any
+restrictions.
+
+
+Appendix 2. Known issues
+========================
+
+1. Some compilers reject operator ? if parts contains expressions
+   with different operations, for example: (a < 0? -a: a).
+
+2. Class can not get square root for numbers of size greater
+   than CBNL_MAX bits and provide for shift for degree outside the range
+   of -CBNL_MAX..CBNL_MAX bits (reports "cBigNumber value out of range").
+
+3. On assignment of C number to unlimited number and on any operation
+   on these numbers the C number undergo preliminary conversion
+   to singed long type. This conversion will not be correct if C
+   number is of either unsigned or floating-point type and value
+   of number is greater than CBNL_MAX.
+
+4. For some unclear reason GNU g++ 2.9.6 builds strange programs with
+   malfunctioned streams cout and cerr if global cBigNumber is
+   initialized by string values, for example:
+        static const cBigNumber big_const ("2147483648", 10);
+
+   If you need write Unix portable code, please, either declare
+   such objects locally inside {} or initialize them separately.
+
+5. Compiler C++ of Microsoft SDK 2003 R2 (64 bit) generates messy
+   warnings when working with new iostream library. To complete
+   with compilation, one must either force use of old library by
+   macro _CIOS_OLDSTREAM or turn off option "treat warning as
+   errors" (/WX-).
+
+6. Since version 1.2c test programs may not compile under
+   16 bit Borland C++ 3.1 due to memory issues. To use this
+   compiler you should set macro NCHECKPTR and/or turn off
+   redundant block of code in the file Cbignumf.h.
+
+
+Appendix 3. What's new
+======================
+
+Sep 15, 1999 - Work for contest SofTool'99
+
+- Basic long integer arithmetic, power and tests for primality.
+
+
+Oct  8, 1999 - The class is uploaded to Internet.
+
+- Accelerated division (2 times) using table of shifts.
+
+- Accelerated output (5 times).
+
+
+Oct 10, 1999
+
+- Accelerated division (2 times) using x386 instructions on
+  Borland C++ 4.5.
+
+
+Apr 12, 2000
+
+- Support for Visual C++ 6.0, except for x386 instructions.
+
+
+Sep  5, 2001
+
+- Methods tolong(), toint() and toshort() for obtaining of common
+  C integers with check of range.
+
+
+Mar 14, 2003 - Version 1.0 beta public
+
+- Methods for calculation of square root.
+
+- Program Arifexp and command file Arifrand.bat for testing
+  of class on random numbers.
+
+- Testing on 20,000,000+ random numbers.
+
+- Accelerated (3-4 times) multiplication using table of shifts,
+  block method and optional x386 instructions on Borland C++ 4.5.
+- Accelerated input (5 times).
+
+- Optimized shift for Intel x386 and Borland C++ 4.5.
+
+- Methods setdivmod() and setdivmodtab() for division with remainder,
+  which does not affect cBigNumber::lastdivmod().
+
+- Output and conversion to string now keeps cBigNumber::lastdivmod()
+  intact.
+
+- Methods gc() and pack() for memory release purposes.
+
+- Method set() now suggests decimal number by default.
+
+- Removed method compl(), which name is reserved in C++.
+
+- FIXED: some arithmetical errors in division and power by module.
+
+- FIXED: a number of memory allocation bugs.
+
+- FIXED: some inconsistencies of output operator with C++ standard.
+
+- Compiling under GNU g++ 2.9.6, except for x386 instructions.
+
+- Refined license statement and augmented documentation.
+
+- Documentation is translated to English.
+
+
+Mar 31, 2003 - Version 1.0 beta public update
+
+- Compatibility with Borland C++ Builder 6.0.
+
+
+Jul  5, 2003 - Version 1.1 beta public
+
+- Compatibility with Visual C++ 7.0.
+
+- Source code with comments in English.
+
+- Some changes in the template Exarray.h.
+
+
+Sep 12, 2005 - Version 1.1a beta public
+
+- FIXED: Sign of result for power by module now does not depend
+         on sign of module.
+  ATTENTION: Check if your programs does not depend on this
+             specification bug!
+
+- FIXED: Power by module now work correctly for negative base.
+
+- FIXED: Memory allocation bug on power by negative module with
+         high word 0x80000000.
+
+- FIXED: Memory allocation bug on power by module 0 if division
+         by 0 is allowed.
+
+- FIXED: Minor memory allocation bug in debug mode when
+         multiplying two large (more 480 words) negative
+         numbers with high words 0x80000000.
+
+- FIXED: Assert error in debug mode of setdivtab(), setmodtab(),
+         setdivmodtab() when dividing negative number by 0.
+
+- FIXED: Shift operations overwrite cBigNumber::lastdivmod
+         if number of bits is given by unlimited number.
+
+- FIXED: Overflow bug in square root if size of numbers greater
+         INT_MAX bits.
+
+- FIXED: Description of argument n for method addmultab (a,b,n).
+
+- Corrections in Section 1.2 and additions to Section 4.2.3
+  of documentation.
+
+- Recently discovered issues, including reenterability issue
+  are described in Appendix 2 of documentation.
+
+
+Sep 28, 2005 - Version 1.1a beta public update
+
+- FIXED: Power by module returns 1 if the high word of module is 0
+         (thanks to Alexander).
+
+- Example of compiling for Linux in Section 3.
+
+
+Oct 31, 2005 - Documentation update
+
+- Accent on issues related with unsigned and floating point numbers.
+
+- Documented method expand() for memory allocation.
+
+- Guidelines for using of method code().
+
+
+Nov 12, 2005 - Version 1.1a beta public update
+
+- Assembler code now is distributed as separate add-on package.
+
+- Test programs now are built by Microsoft Visual C++ 6.0
+  with assembler optimization.
+
+- Performance tests for various processors in Section 4.2.
+
+- Updated estimations of performance in Section 4.2.2.
+
+- FIXED: Method setneg() does not invert sign of number LONG_MIN.
+
+- FIXED: Memory allocation bug in exarray.h.
+
+
+Nov 26, 2005 - Version 1.1a beta public update
+
+- Files Random.h and Random.c renamed to Random3.h and Random3.c.
+
+- FIXED: Wrong Wheel Factorization Table in Prime.cpp (thanks to Nicolas).
+
+- FIXED: Method b_SPRP() returns probable prime on even numbers (Nicolas).
+
+
+Sep  5, 2006 - Version 1.2 beta internal
+
+- Compatibility with Visual C++ Express 2005 and other compilers
+  that does no support old library iostream.h.
+
+- Link of iostream library now is necessary only for appropriate
+  stream input-output operators. In particular, basic conversions
+  of number to string and string to number now does not require
+  for class iostream.
+
+- Improved performance of multiplication (50%) for numbers
+  containing 3 or more words.
+
+- Optimized operations += and -=. In addition to more effective
+  C code these operation now take advantage of assembler
+  optimization in add-on package.
+
+- More flexible functions for primality proving with optimized
+  algorithm. Now SPRP() and trial division works approximately
+  two times faster for modules > 7919.
+
+- CHANGED: Function HasFactor() renamed to TestFactor().
+           To get it back define macro _CBIGNUM_HASFACTOR.
+
+- CHANGED: Non-0 return codes of SPRP() and IsPrime().
+
+- CHANGED: To use operators of console input-output << and >>
+           include new header file Cbignums.h. Header file
+           Cbignum.h now does not link iostream library.
+
+- CHANGED: Output of numbers with hex and oct modifier is now singed.
+           If you need for unsigned output, use function cBigUnsign()
+           or compile with macro _CBIGNUM_UNSIGN_OCT_HEX.
+
+- CHANGED: Methods and functions of class now do console output
+           via special streams cTTY, ref. Section 3.2.
+           By default, output is TURNED OFF.
+
+- CHANGED: Static methods lastdivmod() and lastrootrm() are deprecated
+           and will be excluded in version 2.0. Instead, use
+           setdivmod() and setsqrtrm().
+
+- CHANGED: Method erange() now types short dump of number.
+
+- CHANGED: Method bits() now returns long value instead of int,
+           and calls erange() on overflow.
+
+- New methods: setbits(), exbits(), setexbits(), words(), exwords().
+
+- New constructors and methods cBigAbs(), abs(), setabs(),
+  cBigUnsign(), unsign(), setunsign().
+
+- Random generator: constructor cBigRandom(), method setrandom(),
+  long functions in Random3.h and Random3.cpp.
+
+- New methods submul(), submultab().
+
+- Methods setdivtab(), setmodtab(), setdivmodtab() now do not
+  require for dividend to be normalized.
+
+- Optimized multiplication of large numbers (more 480 words)
+  by small numbers (1 or 2 words).
+
+- Minor optimization of division (for very large numbers).
+
+- Power is allowed for numbers of size greater than INT_MAX bits.
+
+- FIXED: Method dump() is dependant on CPU digit capacity.
+
+- FIXED: Minor bugs in operations with non-normalized 0 numbers.
+
+- FIXED: Minor bugs in diagnostic of insufficient resources
+         for left shift and power.
+
+- New version of program Arifexp:
+    Keys -div0, -size, -v, -rep n, -rand 0, -rand all.
+    New operations ++a, --a, a-b*c, aR, removed operations a+b\c, a*b%c.
+    Suffix R for substitution of random number with given number of bits.
+    Key -check now handles all operations, except for power with
+    degree other than 2,4,8.
+
+- Extra tests in Arifrand.bat.
+
+- Random generator test Arifr.bat.
+
+
+Nov 29, 2006 - Version 1.2 beta public
+
+- Functions for factor and SPRP test get optional output parameter for
+  last tested either factor or SPRP base. If number proved composite,
+  this argument contains either obtained factor or missed SPRP base.
+
+- CHANGED: Renamed some functions introduced in internal version:
+           FastExactSPRP() to FastSPRP(), PostExactSPRP() to PostSPRP().
+
+- Options to select algorithm in program Miller.
+
+- Extended testing of program Miller on 1,000,000,000+ examples.
+
+- FIXED: Program crushes when compiling in Release mode under compilers
+         Visual C++ .NET, SDK 2003 and 2005 with option /Ob2 (auto inline).
+
+
+Apr 30, 2007 - Version 1.2a beta internal
+
+- Fast multiplication of large numbers by Karatsuba method. Performance
+  is greatly improved if both operands contain more than 6,000 bits.
+
+  NOTE: Karatsuba method is relatively complex in implementation
+        and testing. It is included in version 1.2a as a part
+        of beta test process. If you need for more reliable
+        computations, turn this method off thereby undefining
+        macro _CBIGNUM_KARATSUBA_MUL in file Cbignumf.inl.
+
+- Due to Karatsuba optimization, recommended upper limit for
+  addmultab() and submultab() methods is now 6,000 bits.
+
+- Experimental limited support for multithreading applications,
+  under macro _CBIGNUM_MT.
+
+- New operations cBigDivMod() and cBigSqrtRm().
+
+- New machine-dependant methods set() and setr().
+
+- FIXED: Stack overflow for shift with negative degree LONG_MIN.
+
+- FIXED: Power and power by module overwrites cBigNumber::lastdivmod
+         if degree is negative.
+
+- FIXED: Mistyping in English introduction to internal functions
+         cBigNumberMAddM(), cBigNumberMSubM(), _cBigNumberMSubD()
+         (not a bug in the code).
+
+- Class uses standard iostream library as a default under compilers
+  Microsoft Visual C++ .NET, GNU g++ 3.x, 4.x and higher.
+
+- Compiling under GNU g++ 4.1, except for x386 instructions.
+
+- Test of power by module Arif2.bat.
+
+- 32 bit assembler for Microsoft Visual C++ and Borland C++ Builder
+  (as add-on package).
+
+
+Sep 22, 2007 - Version 1.2a beta public
+
+- Hardware multiplication using assembler MUL command
+  (as add-on package), approximately 10 times faster.
+
+  NOTE: Assembler add-on package is not included in the public
+        distribution of class.
+
+- Two implementations of Karatsuba method, optimized accordingly
+  for public C code and for assembler add-on package.
+
+  NOTE: Karatsuba method is relatively complex in implementation
+        and testing. It is included in version 1.2a as a part
+        of beta test process. If you need for more reliable
+        computations, turn this method off thereby undefining
+        macro _CBIGNUM_KARATSUBA_MUL in file Cbignumf.inl.
+
+- Fast copying in debug mode if add-on package is used.
+
+- Auxiliary algorithmic acceleration of input of numbers.
+
+- Performance comparison with NTL library.
+
+- FIXED: Multiplication of negative and positive number
+         may be incorrect in version 1.2a beta internal
+
+- FIXED: Macro _CBIGNUM_BLOCK_MUL can cause for buffer overflow.
+         in version 1.2a beta internal
+
+- FIXED: Stream operator << can ignore ios::uppercase and ios::showbase
+         flags (thanks to Nicolas).
+
+- FIXED: Ignored width() modifier of output stream.
+
+- FIXED: Internal function cBigNumberCopyShr() do not work
+         for non-normalized 0.
+
+- FIXED: Increased size of buffers for internal functions
+         cBigNumberPow(), cBigNumberPowMod().
+
+- FIXED: Size of buffer in specification to internal functions
+         cBigNumberMAddMulShl(), cBigNumberMSubMulShl(),
+         cBigNumberMAddMulShlKar(), cBigNumberMSubMulShlKar()
+         (not a bug in the code).
+
+- FIXED: Program Arifexp do not test remainder during reverse check
+         of multiplication.
+
+- FIXED: Option -size of program Arifexp and method dump() do not
+         work properly under Visual C++ .NET.
+
+- Improvements in program Arifexp:
+  - Average time under option -rep.
+  - Much effective multiplication test under option -check.
+  - Option -time.
+
+- Tested compatibility with Microsoft Visual C++ Express 2008.
+
+
+Jun 12, 2009 - Version 1.2b beta public
+
+- Reenterable method toa() instead of deprecated toatmp().
+
+- Operations cBigBits() and cBigExBits().
+
+- New files Cbignumf.h and Cbnl.h provides compiler-time
+  information for more accurate time estimation in program Arifexp.
+
+- Program Arifexp now checks for correctness of output conversion, if
+  option -check is set.
+
+- Operator ? for comparing in program Arifexp and test of comparing in
+  command file Arifrand.bat.
+
+- FIXED: Program Arifexp do not shows error codes for wrong expressions.
+
+- FIXED: Estimation of multiplication time in program Arifexp.
+
+- FIXED: Estimation of division time in program Arifexp and documentation.
+
+- FIXED: Estimations for Linux in program Arifexp.
+
+
+Jul 28, 2009 - Version 1.2b public
+
+- Optimization of block multiplication in add-on assembler package
+  when Karatsuba method is not applicable (performance gain up to 5%
+  when one operand is less than 50 long words and second operand is
+  10 times and more greater).
+
+- New methods addmulsmp() and submulsmp() use hardware multiplication
+  if it is in effect instead of table of shifts. Methods addmultab()
+  and submultab() always use table of shifts.
+
+- New method smp() builds table of shifts if hardware multiplication
+  is not in effect.
+
+- New version of template Exarray.h for 64 bit mode.
+
+- Generator Random3.c updated to support 64 bit mode.
+
+- Compatibility with GNU g++ 4.1.2 in 64 bit mode.
+
+- Compatibility with GNU g++ 4.2.3.
+
+- Gettimer.c can be compiled under DPMI in Borland C++ 4.5.
+
+- Gettimer.c use long operations instead of double if possible.
+
+- FIXED: Wrong ++ and -- in program Arifexp under option -v.
+
+- FIXED: Programs do not return error code 255.
+
+- Command file Millrand.bat for testing for primality.
+
+- 32 bit executable files for Pocket PC in add-on package.
+
+- 64 bit executable files for Linux and .sh test files.
+
+- Performance in 64 bit mode under Linux in Section 4.2.
+
+- Performance under ARM Pocket PC in Section 4.2.
+
+- FIXED: Performance of assembler code for processors Pentium III/933
+         and Pentium 4C/2400 by tests Arif1-3 in Section 4.2.
+
+- Express testing in 64 bit mode.
+
+- Beta test is finished.
+
+
+Aug 27, 2009 - Version 1.2b public documentation update
+
+- Performance tests for ARM, Intel Atom and AMD Phenom.
+
+
+Nov 19, 2009 - Version 1.2b public addendum
+
+- Voting by addmultab()/submultab() multiplication in program Arifexp.
+
+- Fast factorization of 64 bit numbers thereby 64 bit machine divide
+  in Prime.cpp, actual for 64 bit g++ compiler.
+
+- Program Miller64 for fast factorization of 64 bit numbers
+  under 64 bit Linux.
+
+
+Dec 15, 2009 - Version 1.2c beta internal
+
+- Class now has reenterable code and supports multithreading.
+
+- CHANGED: Macro _CBIGNUM_MT is set by default.
+
+- CHANGED: Static non-reenterable methods lastdivmod(), lastrootrm()
+           are excluded unless macro _CBIGNUM_MT is unset, Instead,
+           use operations cBigDivMod(), cBigSqrtRm() or methods
+           setdivmod(), setsqrtrm().
+
+- CHANGED: Non-reenterable method toatmp() is excluded unless either
+           macro _CBIGNUM_MT is unset or macro _CBIGNUM_TOATMP
+           is set. Use method toa() instead.
+
+- String<>number conversions and square root are optimized for use
+  with macro _CBIGNUM_MT.
+
+- Multiplication, division, module, power and power by module are
+  optimized for numbers divisible by large power of 2 (~100 and more),
+  when macro _CBIGNUM_MT is set.
+
+- Power by module is optimized for module divisible by large power
+  of 2 (~100 and more).
+
+- Special code for ~10 times faster division/module of numbers
+  with single meaning word.
+
+- Several times faster code for for bits() and exbits() methods.
+
+
+Jan 10, 2010 - Version 1.2c beta internal update
+
+- Header file Cthr.h for multithreading support in applications.
+
+- FIXED: Racing condition in class cBigTemp in multithreading mode
+         (but class now works slower - will improve performance
+         in beta public version).
+
+- FIXED: Incorrect implementation of method set(a,n) for type long.
+
+
+Jul 28, 2010 - Version 1.2c beta pubic
+
+- Implemented support for thread local storage in class cBigTemp
+  make version 1.2c as fast in multithreaded mode as the previous
+  version 1.2b in single-threaded mode. Look description of macro
+  EXTHREAD_LOCAL in Section 3.
+
+- Header file Exthread.h automatically defines macro EXTHREAD_LOCAL
+  for Borland/Microsoft compilers and GNU g++.
+
+- New option -par n in program Arifexp for output of data in parallel
+  thread under Windows.
+
+- Program Arifexp now do not output of check data if they conforms
+  to output data.
+
+- Command file Arifrand.bat works 2-3 times faster due to output of
+  data in parallel thread and regretting of output of check data
+  if they conforms to output data.
+
+- FIXED: Several racing conditions in input-output methods in
+         multithreading mode.
+
+
+Sep 27, 2010 - Version 1.2b public update
+
+- FIXED: Incorrect implementation of cBigAbs() and setabs().
+
+- FIXED: Incorrect implementation of cBigExBits() and setexbits(),
+         wrong example in description of cBigExBits().
+
+
+Sep 28, 2010 - Version 1.2c beta public update
+
+- Performance test for Intel Core i7.
+
+- Program Arifexp and test file Arifrand.bat implement operations
+  ~, @(abs), U(unsign), M(bits), U(exbits).
+
+- Enhanced time estimation method in program Arifexp.
+
+- FIXED: Incorrect implementation of cBigAbs() and setabs().
+
+- FIXED: Incorrect implementation of cBigExBits() and setexbits(),
+         wrong example in description of cBigExBits().
+
+- FIXED: Memory allocation bug in string to number and number to
+         string conversion.
+
+- FIXED: Incorrect result of cBigCompl() and setcompl()
+         for 0-word numbers.
+
+- FIXED: Incorrect result of +, -, ^, &, | for 0-word and
+         machine number.
+
+- FIXED: Possible incorrect result of method loword()
+         for 0-word numbers.
+
+- FIXED: Heap damage caused by tab() and smp() for 0-word numbers.
+
+- FIXED: Assert error in debug mode when calculating power by
+         module for 0-word base.
+
+- FIXED: Time estimation for add/sub in program Arifexp.
+
+- Updated time estimation for division.
+
+
+Oct  1, 2010 - Version 2.0 beta internal
+
+- CHANGE: Use type CBNL defined in Cbnl.h instead of long to handle
+          64 bit numbers under Visual C++ in 64 bit mode.
+
+- CHANGE: Methods code(), loword(), hiword(), bits(), exbits() now
+          returns CBNL value, which may be long, __int64, __int128
+          etc. depending of compiler.
+
+- CHANGE: Number of value 0 may contain 0 words in the code.
+
+- All constructors, assign operations and method set now do not
+  allocates memory for number 0, if is was not allocated earlier
+  (memory is allocated when assigning non-0 value and after
+  modifying operations ever if result is 0).
+
+- Methods gc() and pack() frees all memory allocated for number 0.
+
+- 64 bit assembler for Microsoft Visual C++ (as add-on package),
+  performance gain 3-40x for AMD processors.
+
+- Compiler detection files Cbnl.inl and Cbnl64.inl (in add-on package).
+
+- Programs Arifexp64, Matrix64, Miller64 for 64 bit Windows.
+
+- Test files .bat call 64 bit programs under 64 bit Windows.
+
+- New conversion method toCBNL().
+
+- Documented and corrected method clear().
+
+- Performance tests and estimation for 64 bit mode in Section 4.2,
+  including Intel Core i7 and AMD Phenom.
+
+
+Nov 20, 2010 - Version 2.0 beta internal update
+
+- Fastcall calling convention for time-critical functions under
+  Visual C++ in 32 bit mode as compilation option in Cbnl.h.
+  Not used by default because not effective.
+
+- Alternative 32 bit assembler code using fastcall calling
+  convention under Visual C++ as compilation option in Cbnl.h
+  Not used by default because not effective.
+
+- Remove redundant operations from 64 bit assembler code.
+
+- Documented macro _CBIGNUM_DEF_ALLOC and _CBIGNUM_NCHECKPTR.
+
+- Reviewed Sections 1.1, 1.2 and 4.3.
+
+
+Nov 22, 2010 - Version 2.0 beta internal addendum
+
+- Hardware 32/64 bit multiplication using assembler MUL instruction
+  for GNU g++ (as add-on package), approximately 8 times faster.
+
+- Executable files for Linux with accelerated 32/64 bit hardware
+  multiplication.
+
+
+Mar 30, 2011 - Version 1.2c public
+
+- Documented and corrected method clear().
+
+- Reviewed Sections 1.1, 1.2 and 4.3 of documentation.
+
+- Beta test is finished.
+
+
+Mar 30, 2011 - Version 2.0 beta public
+
+- Internal test is finished.
+
+
+Mar  5, 2013 - Version 2.0 public
+
+- Performance test for AMD FX.
+
+- Beta test is finished.
+
+
+Mar 12, 2013 - Version 2.0 public documentation update
+
+- Removed issue concerning restricted reenterablilty.
+
+- Information about sparse arrays in Section 4.3.
+
+
+May 05, 2013 - Version 2.0 public documentation update
+
+- Performance test for Intel Xeon E3-1230.
+
+
+Jan 16, 2015 - Version 2.0 public documentation update
+
+- Performance test for Intel Xeon E3-1240v3.
+
+- Performance test for Core 2 Quad Q8200.
+
+
+Jul 29, 2016 - Version 2.0a public
+
+- Compatibility with Microsoft Visual C++ 2015.
+
+- 25% faster assembler multiplication code for Intel Haswell
+  using MULX instruction.
+
+- Programs Arifexp64x, Matrix64x and Miller64x for processors
+  with BMI2 instruction set under 64 bit Windows.
+
+
+Dec 28, 2016 - Version 2.1 beta internal (now beta public)
+
+- Use of Microsoft Visual C++ intrinsics as an option for
+  portable 64 bit C code.
+
+- Fast hardware multiplication without add-on assembler package
+  under 64 bit Microsoft Visual C++, approximately 10 times
+  improve in performance.
+
+- Optimized division of 2-3 words number to 32/64 bit divider
+  with option to use hardware division if macro
+  _CBIGNUM_HARDWARE_DIV is set.
+
+- Optimized 32/64 bit module of 2-3 words number with option to
+  use hardware division if macro _CBIGNUM_HARDWARE_DIV is set.
+
+- Optimized power by 32/64 bit module, 10 times faster under
+  Microsoft Visual C++ 2015 (for other compilers effect may be
+  smaller). It is possible to use to use hardware division if
+  macro _CBIGNUM_HARDWARE_DIV is set.
+
+- Option _CBIGNUM_REDUCE_JUMPS is ignored because optimization
+  of compiler Microsoft Visual C++ 2015is more effective.
+
+- Restarting beta test process due to development of new code.
+
+- FIXED: Mistype in test of division within Arifrand test file.
+
+
+Jun 9, 2017 - Version 2.1a beta internal
+
+ONLY FOR EVALUATION AND TESTING, NOT FOR COMPUTATIONS
+
+- New simplified and faster algorithm for division of unlimited
+  number to 32/64 bit divider with option to use hardware division
+  if macro _CBIGNUM_HARDWARE_DIV is set. This algorithm replaces
+  algorithms previously developed for versions 1.2c and 2.1.
+
+- New simplified and faster algorithm for 32/64 bit module of
+  unlimited with option to use hardware division if macro
+  _CBIGNUM_HARDWARE_DIV is set. Replaces algorithms previously
+  developed for versions 1.2c and 2.1. Accelerates Miller strong
+  probable prime test to run approximately twice faster for
+  single-word numbers and 20% faster for double-word numbers.
+
+- Updated Millrand test file for larger numbers.
+
+
+Jun 27, 2017 - Version 2.1a beta internal update (now beta public)
+
+FOR EVALUATION AND TESTING
+
+- Use of intrinsics for 32 bit Microsoft Visual C++.
+
+- Macro _CBIGNUM_SMALL_DIV and _CBIGNUM_SMALL_POWMOD for
+  algorithms implemented since version 2.1 for small divider/module.
+
+  NOTES: Unsetting macro _CBIGNUM_SMALL_DIV allows using this beta
+         internal test version for computational purposes.
+
+         Unsetting macro _CBIGNUM_SMALL_DIV and _CBIGNUM_SMALL_POWMOD
+         limits this test version to algorithms of version 2.0 public.
+
+- FIXED: Wrong result of division CBNL_MIN/CNBL_MIN.
+
+
+Jul 27, 2017 - Version 2.1b beta internal
+
+FOR EVALUATION AND TESTING
+
+Unset macro _CBIGNUM_SMALL_DIV and (possibly) _CBIGNUM_SMALL_POWMOD
+when using this beta internal test version for computational purposes.
+
+- Fast new algorithm for division of unlimited number to 64/128 bit
+  double-word divider, 2-3 times improve in performance.
+
+- Fast new algorithm for 64/128 bit double-word module of unlimited
+  number, 2-3 times improve in performance.
+
+- Faster power by 64/128 bit module (2-3 times).
+
+- Using LZCNT instruction instead of BSR if compiling for AVX2
+  under Microsoft Visual C++.
+
+- Check of division/module to small divider by alternative
+  shift table algorithm in program Arifexp.
+
+- FIXED: Methods toCBNL(), tolong(), toint() and toshort()
+         do not work for non-normalized numbers.
+
+- FIXED: Shift to non-normalized number does not work.
+
+- FIXED: Incorrect check of indexes in power of non-normalized
+         base.
+
+- FIXED: Memory allocation bug in power by non-normalized degree.
+
+- FIXED: Possibly incorrect clearing of numbers in methods
+         clear(), gc() and pack() (bug in version 2.1a beta).
+
+
+Sep 10, 2017 - Version 2.1b beta public
+
+IMPORTANT NOTE:
+Unsetting macro _CBIGNUM_SMALL_DIV and _CBIGNUM_SMALL_POWMOD
+limits this beta version to algorithms that have been tested
+in version 2.0 public. The class uses new, recently developed
+division algorithms only if these macros are set (by default).
+The new algorithms now undergo public beta test process and
+are not recommended for purposes of reliable computations.
+
+- Optimization of algorithms for division of unlimited number
+  to 32/64/128 bit (single-word or double-word) divider
+  in order to avoid conditional branches. This optimization
+  gains about 2 times grow of performance in comparison with
+  initial implementation in versions 2.1a and 2.1b internal.
+
+- Optimization of 32/64/128 bit (single-word or double-word)
+  module of unlimited number in order to avoid conditional
+  branches. This optimization gains about 2 times grow of
+  performance in comparison with initial implementation in
+  versions 2.1a and 2.1b internal and also accelerates power
+  by double-word module up to 60-80%.
+
+- Optimization of algorithm for power by single-word module
+  in order to avoid conditional branches when compiling under
+  Microsoft Visual C++ 2010 (gains 2-3 times grow of performance,
+  later we can see it only under Visual C++ 2015).
+
+- Minor optimization of hardware division with module. Old
+  method is available if macro _CBIGNUM_REVERSE_MOD is set.
+
+- Optimization of output of unlimited number (about 10% or more
+  percents of performance for relatively small numbers).
+
+- Optimization of methods of division and module with table
+  of shifts in purpose to reduce class overheads.
+
+- CHANGED: Methods fit(), tab(), smp(), gc() and pack() now are
+           not available for const numbers because of possible
+           multithreading issues. Set macro _CBIGNUM_CONSTCAST
+           in file Cbignum.h if you need to use these methods
+           as before.
+
+- New methods divtab() and modtab(), extra documentation for
+  methods setdivtab(), setmodtab() and setdivmodtab().
+
+- Removed register qualifier from Cbignum.cpp and Cbignumf.inl
+  for conformance with C++11 standard.
+
+- Tested compatibility with Microsoft Visual C++ 2017.
+
+- All programs for Windows now are compiled under Microsoft
+  Visual C++ 2015 Community because of implemented support
+  for carry/borrow intrinsic functions. Programs compiled
+  under Visual C++ 2012 and below will work remarkably slower
+  for double-word divider/module.
+
+- Test programs Miller64 and Miller64x for Windows compiled
+  with macro CBIGNUM_HARDWARE_DIV turned on.
+
+- New executable files for Linux with improved code of 32/64
+  bit hardware multiplication and accelerated operations with
+  small divider/module.
+
+- FIXED: Prime.cpp do not turn on hardware division for
+         factorization of single-word numbers when compiling
+         under Microsoft Visual C++ in 64 bit mode.
+
+- FIXED: Compiler warning in Prime.cpp related with Ctty.h.
+
+- FIXED: Test programs Arifexp64x, Matrix64x and Miller64x
+         for processors with BMI2 do not start under 64 bit
+         Windows XP.
+
+- FIXED: Overvalued estimation of division time in program
+         Arifexp for large dividers below ~16,000,000 bits.
+
+- FIXED: Random generator may not work properly if compiling
+         in more then 64 bit mode (not actual for modern
+         compilers).
+
+
+Nov 10, 2017 - Version 2.1b beta public documentation update
+
+- Minor corrections in documentation and comments.
+
+
+Nov 12, 2017 - Version 2.1c beta public
+
+FOR EVALUATION AND TESTING
+When used for computational purposes it is recommended to unset
+macro _CBIGNUM_HARDWARE_MUL for all translators, except for
+64 bit Microsoft Visual C++. Look also important note concerning
+_CBIGNUM_SMALL_DIV and _CBIGNUM_SMALL_POWMOD in version 2.1b.
+
+- Being prepared to be future high-performance stable version
+  to replace the current 2.0 public.
+
+- Operations on machine numbers now are located in file Cbnl.h.
+
+- Using of type long long for CBNL if compiler is compatible
+  with C++11.
+
+- Fast hardware multiplication without add-on assembler package
+  under 32 bit Microsoft Visual C++, approximately 10 times
+  improve in performance.
+
+- Using of probably faster hardware multiplication instead
+  of binary method for generic C++ compiler (binary method
+  is also available if macro _CBIGNUM_HARDWARE_MUL is unset).
+
+- Support for 128/64 and 64/32 bit hardware division in add-on
+  assembler package under Visual C++ and GNU C++.
+
+- All 64 bit test programs for Windows and Linux now are being
+  compiled with macro _CBIGNUM_HARDWARE_DIV that enables
+  use of hardware division.
+
+- Programs Arifexp and Miller show information on bit count
+  and methods used to accelerate computations.
+
+- Updated time estimation for multiplication in program Arifexp.
+
+- Documented option -mhz in program Arifexp.
+
+- Test results for 32 bit C++ code with hardware multiplication.
+
+
+Nov 30, 2017 - Version 2.1c beta public documentation update
+
+- Performance test for Core i7-6800K and Phenom II X6.
+
+
+Nov 30, 2017
