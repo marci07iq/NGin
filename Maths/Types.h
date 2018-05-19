@@ -13,3 +13,5 @@ typedef longDouble scalar_type;
 typedef longDouble en_flux_type_Jpermm;
 //typedef longDouble en_flux_type_Jy; //1Jy = 10e-26 J/m m
 typedef longDouble mass_density_type_kgpermmm;
+typedef longDouble area_type_mm;
+typedef longDouble volume_type_mmm;

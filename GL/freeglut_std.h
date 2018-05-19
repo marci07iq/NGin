@@ -88,10 +88,10 @@
 
             /* Link with Win32 shared freeglut lib */
 #           if FREEGLUT_LIB_PRAGMAS
-#               ifdef NDEBUG
-#                   pragma comment (lib, "freeglut.lib")
+#               ifdef _WIN64
+#                   pragma comment (lib, "freeglut64.lib")
 #               else
-#                   pragma comment (lib, "freeglutd.lib")
+#                   pragma comment (lib, "freeglut32.lib")
 #               endif
 #           endif
 

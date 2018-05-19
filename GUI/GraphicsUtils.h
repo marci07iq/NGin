@@ -5,7 +5,13 @@
 #include "ClientCore.h"
 #include "stb_image.h"
 
+#ifdef _WIN64
+#pragma comment(lib, "glew64.lib")
+#else
+#ifdef WIN32
 #pragma comment(lib, "glew32.lib")
+#endif
+#endif
 
 extern map<string, map<string, colorargb>> colors;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Huffman.h"
+#include "Compress.h"
 
 //#ifdef WIN32
 #include <winsock2.h>

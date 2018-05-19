@@ -1,24 +1,33 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
+#include "BigNumberLibrary/Cbignums.h"
 #include <cmath>
 #include <ciso646> //defines and, or, not for visual studio, does nothing elsewhere.
-#include "BigNumberLibrary/Cbignums.h"
+#include <climits>
+#include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
+#include <exception>
 #include <fstream>
 #include <functional>
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <list>
 #include <locale>
 #include <map>
+#include <memory>
 #include <mutex>
 #include "../rapidxml/rapidxml.hpp"
 #include <set>
 #include <shared_mutex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <queue>
@@ -30,7 +39,6 @@ typedef std::shared_timed_mutex shared_mutex;
 using namespace rapidxml;
 using namespace std;
 typedef uint32_t colorargb;
-
 
 //----------------random number generator from numerical recipies ran1()--------
 //returns a number flatly distributed between 0 and 1

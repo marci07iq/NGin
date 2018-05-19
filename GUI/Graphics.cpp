@@ -108,7 +108,7 @@ void Graphics::defaultResizeManager(int x, int y) {
 }
 void Graphics::defaultKeyManager(unsigned char keyc, int x, int y) {
   key_location keyd;
-  keyd.fromKey(keyc);
+  keyd.fromKey(tolower(keyc));
   keyd.setLocation(x, y);
   if (!keysdown.count(keyd)) { //If new key, down
     keysdown.insert(keyd);
@@ -138,7 +138,7 @@ void Graphics::defaultSpecialKeyManager(int keyc, int x, int y) {
 }
 void Graphics::defaultKeyUpManager(unsigned char keyc, int x, int y) {
   key_location keyd;
-  keyd.fromKey(keyc);
+  keyd.fromKey(tolower(keyc));
   keyd.setLocation(x, y);
   keysdown.erase(keyd);
   if (1 & elementGUIEventManager(GetWinHwnd(glutGetWindow()), gui_event(keyd, gui_event::evt_up), x, glutGet(GLUT_WINDOW_HEIGHT) - y, keysdown)) {

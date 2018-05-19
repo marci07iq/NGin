@@ -1,6 +1,6 @@
 #pragma once
 
-#include "constants.h"
+#include "BinTree.h"
 
 template<typename T> class vec3;
 //typedef vec2<float>           fVec3;
@@ -145,22 +145,22 @@ public:
   }
 
   bVec3 operator==(vec3<T> rhs) const {
-    return bvec3(x == rhs.x, y == rhs.y, z == rhs.z);
+    return bVec3(x == rhs.x, y == rhs.y, z == rhs.z);
   }
   bVec3 operator!=(vec3<T> rhs) const {
-    return bvec3(x != rhs.x, y != rhs.y, z != rhs.z);
+    return bVec3(x != rhs.x, y != rhs.y, z != rhs.z);
   }
   bVec3 operator<(vec3<T> rhs) const {
-    return bvec3(x < rhs.x, y < rhs.y, z < rhs.z);
+    return bVec3(x < rhs.x, y < rhs.y, z < rhs.z);
   }
   bVec3 operator<=(vec3<T> rhs) const {
-    return bvec3(x <= rhs.x, y <= rhs.y, z <= rhs.z);
+    return bVec3(x <= rhs.x, y <= rhs.y, z <= rhs.z);
   }
   bVec3 operator>=(vec3<T> rhs) const {
-    return bvec3(x >= rhs.x, y >= rhs.y, z >= rhs.z);
+    return bVec3(x >= rhs.x, y >= rhs.y, z >= rhs.z);
   }
   bVec3 operator>(vec3<T> rhs) const {
-    return bvec3(x > rhs.x, y > rhs.y, z > rhs.z);
+    return bVec3(x > rhs.x, y > rhs.y, z > rhs.z);
   }
 
   fVec3 at(float t) { //Only for polynomial vectors
@@ -215,6 +215,11 @@ public:
     z = strTo<T>(me->first_node("z")->value());
   }
 };
+
+template<typename T>
+vec3<T> rotateVecZ(vec3<T> what, float with) {
+  return {cos(with) * what.x - sin(with) * what.y, sin(with) * what.x + cos(with) * what.y, what.z };
+}
 
 struct polar_vec3 {
   double r;
@@ -431,6 +436,7 @@ inline bool bor(bVec3 v) { return v.x || v.y || v.z; }
 inline bool bxor(bVec3 v) { return v.x != v.y != v.z; }
 
 
+
 template<typename T> std::ostream& operator<<(std::ostream& os, const vec3<T>& v)
 {
   //throw 1;
@@ -443,6 +449,16 @@ template<typename T> std::istream& operator>> <>(std::istream& is, vec3<T>& v)
   is >> v.x >> v.y >> v.z;
   return is;
 }
+
+template<typename T> std::ostream& operator<<(std::ostream& os, const vec2<T>& v) {
+  os << v.x << " " << v.y;
+  return os;
+}
+template<typename T> std::istream& operator>> <>(std::istream& is, vec2<T>& v) {
+  is >> v.x >> v.y;
+  return is;
+}
+
 
 template<typename T> inline T dot(vec2<T> lhs, vec2<T> rhs) {
   return lhs.x * rhs.x + lhs.y * rhs.y;
@@ -479,4 +495,12 @@ template<typename T> vector<vec3<T>> randstartpos(T radius)
   vec3<T> firstship(modrad + modx1, modrad + mody1, modrad + modz1);
   vec3<T> secondship(-modrad - modx2, -modrad - mody2, -modrad - modz2);
   return {firstship, secondship};
+}
+
+template<typename T> vec3<T> vecSwitch(bVec3& s, vec3<T> lhs, vec3<T> rhs) {
+  return {
+  s.x ? lhs.x : rhs.x,
+  s.y ? lhs.y : rhs.y,
+  s.z ? lhs.z : rhs.z
+  };
 }
