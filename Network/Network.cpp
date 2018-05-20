@@ -172,7 +172,6 @@ int NetworkS::SendData(char *Data, int Id, int DataLen) {
     WSACleanup();
     return -1;
   }
-  //NetLog.LogString("Bytes sent: " + to_string(iSendResult));
   return iSendResult;
 }
 
@@ -184,7 +183,6 @@ int NetworkS::SendData(DataElement* Data, int Id) {
   if (start != len) {
     throw 1;
   }
-  //Data->~DataElement();
   delete Data;
   return SendData(datac, Id, len);
 }
@@ -242,10 +240,11 @@ int NetworkS::ReciveData() {
   if (start != dlen) {
     throw 1;
   }
+  delete[dlen] data;
+  
   netlock.lock();
   bool t = RecivePacket(datae, pid, this, ConnectedBinder);
   netlock.unlock();
-  //datae->~DataElement();
   delete datae;
 
   //delete data;
@@ -386,11 +385,8 @@ int NetworkC::SendData(char *Data, int Id, int DataLen) {
   //delete Data;
   //delete SendRaw;
   
-  delete[] Data;
-  delete[] SendRaw;
-
-
-  //TODO: Free memory properly
+  delete[DataLen + 2 * PACKET_HEADER_LEN] SendRaw;
+  delete[DataLen] Data;
 
   if (iSendResult != DataLen + 2 * PACKET_HEADER_LEN) {
     NetworkError(NetworkErrorCodeClientSendData, error, 0);
@@ -471,6 +467,7 @@ int NetworkC::ReciveData() {
   if (start != dlen) {
     throw 1;
   }
+  delete[dlen] data;
   netlock.lock();
   bool t = RecivePacket(datae, pid, this, ConnectedBinder);
   netlock.unlock();

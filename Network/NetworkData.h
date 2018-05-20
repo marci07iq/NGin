@@ -23,11 +23,11 @@ public:
     _data = new unsigned char[_len];
   }
   template<typename T> void fromTypeV(T val) {
-    delete[] _data;
+    delete[_len] _data;
     serialize<T>(val, &_data, _len, 0);
   }
   template<typename T> void fromType(T& val) {
-    delete[] _data;
+    delete[_len] _data;
     serialize<T>(val, &_data, _len, 0);
   }
   template<typename T> T toType() {
@@ -35,7 +35,7 @@ public:
   }
 
   ~DataPair() {
-    delete[] _data;
+    delete[_len] _data;
   }
 };
 
