@@ -170,11 +170,18 @@ void compress(DataPair* in, DataPair** out) {
   if (i != globals::dms)
     res.push_back(i);
 
-  *out = new DataPair(res.size() * sizeof(CodeType));
+  *out = new DataPair(res.size() * sizeof(CodeType) + PACKET_HEADER_LEN);
+
+  Packet_Header_Convertor conv;
+  conv.i = in->_len;
+
+  for (int lit = 0; lit < PACKET_HEADER_LEN; lit++) {
+    (*out)->_data[lit] = conv.chararr.chars[lit];
+  }
 
   int itnum = 0;
   for (auto&& lit : res) {
-    *(reinterpret_cast<CodeType*>((*out)->_data + itnum*sizeof(CodeType))) = lit;
+    *(reinterpret_cast<CodeType*>((*out)->_data + PACKET_HEADER_LEN + itnum*sizeof(CodeType))) = lit;
     ++itnum;
   }
 }
@@ -187,7 +194,14 @@ void compress(DataPair* in, DataPair** out) {
 void decompress(DataPair* in, DataPair** out) {
   vector<pair<CodeType, char>> dictionary;
 
-  list<char> res;
+  Packet_Header_Convertor conv;
+  for (int lit = 0; lit < PACKET_HEADER_LEN; lit++) {
+    conv.chararr.chars[lit] = in->_data[lit];
+  }
+
+  int oit = 0;
+
+  *out = new DataPair(conv.i);
 
   // "named" lambda function, used to reset the dictionary to its initial contents
   const auto reset_dictionary = [&dictionary] {
@@ -223,7 +237,7 @@ void decompress(DataPair* in, DataPair** out) {
   CodeType i{ globals::dms }; // Index
   CodeType k; // Key
 
-  int dit = 0;
+  int dit = PACKET_HEADER_LEN;
   while (dit < in->_len) {
     k = *reinterpret_cast<CodeType*>(in->_data + dit);
     // dictionary's maximum size was reached
@@ -246,18 +260,16 @@ void decompress(DataPair* in, DataPair** out) {
     }
 
     for (size_t rit = 0; rit < s->size(); ++rit) {
-      res.push_back((*s)[rit]);
+      (*out)->_data[oit] = (*s)[rit];
+      ++oit;
     }
 
     i = k;
     dit += sizeof(CodeType);
   }
 
-  *out = new DataPair(res.size());
-
-  int itnum = 0;
-  for (auto&& lit : res) {
-    (*out)->_data[itnum] = lit;
-    ++itnum;
+  if (oit != conv.i) {
+    cout << "Corrupt decrypt data!" << endl;
+    throw 1;
   }
 }

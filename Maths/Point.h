@@ -227,7 +227,7 @@ struct polar_vec3 {
   double theta;
   void reNormalize() {
     phi = modulo(phi, 2*PI);
-    theta = min(max(theta, 0.1), PI - 0.1);
+    theta = min(max(theta, 0.01), PI - 0.01);
   }
   fVec3 toCartesian() {
     return {r * cos(phi) * sin(theta), r * sin(phi) * sin(theta), r * cos(theta)};
@@ -504,3 +504,63 @@ template<typename T> vec3<T> vecSwitch(bVec3& s, vec3<T> lhs, vec3<T> rhs) {
   s.z ? lhs.z : rhs.z
   };
 }
+
+template<typename T>
+class Matrix4 {
+public:
+  T _vals[16];
+
+  T& at(int i, int j) {
+    return _vals[i*4 + j];
+  }
+
+  void setNull() {
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        at(i, j) = 0;
+      }
+    }
+  }
+
+  void setIdentity() {
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        at(i, j) = (i == j) ? 1: 0;
+      }
+    }
+  }
+
+  Matrix4 & operator*(Matrix4 rhs) {
+    Matrix4 res;
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        res.at(i, j) = 0;
+        for (int k = 0; k < 4; k++) {
+          res.at(i, j) += at(i, k) * rhs.at(k, j);
+        }
+      }
+    }
+    return res;
+  }
+
+  void set(float from[16]) {
+    for (int i = 0; i < 16; i++) {
+      _vals[i] = from[i];
+    }
+  }
+  void transpose() {
+    for (int i = 0; i < 4; i++) {
+      for (int j = i + 1; j < 4; j++) {
+        swap(at(i, j), at(j, i));
+      }
+    }
+  }
+
+  Matrix4() {
+    setNull();
+  }
+};
+
+typedef Matrix4<int> Matrix4i;
+typedef Matrix4<float> Matrix4f;
+typedef Matrix4<double> Matrix4d;

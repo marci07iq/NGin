@@ -92,10 +92,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
 IN THE SOFTWARE.
 
-######################## EIGEN #################
-
-Copyrigh files for EIGEN are named as EIGEN.*
-
 #################### LZW file compressor ########################
 Original source: http://www.cplusplus.com/articles/iL18T05o/
 Modified to fit data structures.
@@ -120,3 +116,28 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+################### CBigNumber License ###################
+Original source: http://www.imach.uran.ru/cbignum/index.html
+
+The following copyright statement describes authorship of
+the software.
+
+(C) Copyright 1998-2017 by Dr. Raul N. Shakirov, IMach of RAS (UB).
+
+Source code written entirely on C++ without explicit use of
+machine assembler instructions is distributed as "Public
+domain", that is permission has been granted to copy,
+distribute and modify software in any context without fee,
+including a commercial application, provided that the
+aforesaid copyright statement is present in user-accessible
+supporting documentation, as well as exhaustive description
+of changes.
+
+This does not affect your ownership of the derived work
+itself, and the intent is to assure proper credit for the
+authors of this software, not to interfere with your
+productive use of this software. "Derived works" includes
+all programs that utilize this software. Credit must be
+given in user-accessible documentation.
+
