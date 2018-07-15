@@ -18,18 +18,44 @@
 namespace Graphics {
   void defaultRenderManagerL();
   void defaultRenderManagerNL();
-
   extern RenderManager defaultRenderManager;
 
-  void defaultResizeManager(int x, int y);
-  void defaultKeyManager(unsigned char key, int x, int y);
-  void defaultSpecialKeyManager(int key, int x, int y);
-  void defaultKeyUpManager(unsigned char key, int x, int y);
-  void defaultSpecialKeyUpManager(int key, int x, int y);
-  void defaultMouseEntryManager(int state);
-  void defaultMouseMoveManager(int x, int y);
-  void defaultMouseClickManager(int button, int state, int x, int y);
-  void defaultMouseWheelManager(int keys, int delta, int x, int y);
+  void defaultResizeManagerL(int x, int y);
+  void defaultResizeManagerNL(int x, int y);
+  extern ResizeManager defaultResizeManager;
+
+  void defaultKeyManagerL(unsigned char key, int x, int y);
+  void defaultKeyManagerNL(unsigned char key, int x, int y);
+  extern KeyManager defaultKeyManager;
+
+  void defaultSpecialKeyManagerL(int key, int x, int y);
+  void defaultSpecialKeyManagerNL(int key, int x, int y);
+  extern SpecialKeyManager defaultSpecialKeyManager;
+
+  void defaultKeyUpManagerL(unsigned char key, int x, int y);
+  void defaultKeyUpManagerNL(unsigned char key, int x, int y);
+  extern KeyManager defaultKeyUpManager;
+
+  void defaultSpecialKeyUpManagerL(int key, int x, int y);
+  void defaultSpecialKeyUpManagerNL(int key, int x, int y);
+  extern SpecialKeyManager defaultSpecialKeyUpManager;
+
+  void defaultMouseEntryManagerL(int state);
+  void defaultMouseEntryManagerNL(int state);
+  extern MouseEntryManager defaultMouseEntryManager;
+
+  void defaultMouseMoveManagerL(int x, int y);
+  void defaultMouseMoveManagerNL(int x, int y);
+  extern MouseMoveManager defaultMouseMoveManager;
+
+  void defaultMouseClickManagerL(int button, int state, int x, int y);
+  void defaultMouseClickManagerNL(int button, int state, int x, int y);
+  extern MouseClickManager defaultMouseClickManager;
+
+  void defaultMouseWheelManagerL(int keys, int delta, int x, int y);
+  void defaultMouseWheelManagerNL(int keys, int delta, int x, int y);
+  extern MouseWheelManager defaultMouseWheelManager;
+
 
   class GWindow {
   public:

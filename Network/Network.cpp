@@ -234,6 +234,7 @@ int NetworkS::ReciveData() {
     //NetLog.LogString("RECiRes: " + to_string(iRes));
   }
 
+  netlock.lock();
   DataElement* datae = new DataElement();
   int start = 0;
   datae->empty(reinterpret_cast<unsigned char*>(data), start);
@@ -242,7 +243,6 @@ int NetworkS::ReciveData() {
   }
   delete[dlen] data;
   
-  netlock.lock();
   bool t = RecivePacket(datae, pid, this, ConnectedBinder);
   netlock.unlock();
   delete datae;
@@ -461,19 +461,13 @@ int NetworkC::ReciveData() {
     //NetLog.LogString("RECiRes: " + to_string(iRes));
   }
 
+  netlock.lock();
   DataElement* datae = new DataElement();
   int start = 0;
   datae->empty(reinterpret_cast<unsigned char*>(data), start);
-  if (pid == 8 && datae->_children.size() && datae->_children[0] == NULL) {
-    cout << "ERROR" << endl;
-  }
-  if (pid == 8) {
-    this_thread::sleep_for(chrono::milliseconds(100));
-  }
   if (start != dlen) {
     throw 1;
   }
-  netlock.lock();
   bool t = RecivePacket(datae, pid, this, ConnectedBinder);
   netlock.unlock();
   //datae->~DataElement();

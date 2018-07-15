@@ -1,6 +1,15 @@
 #include "Graphics.h"
 
 RenderManager Graphics::defaultRenderManager = Graphics::defaultRenderManagerL;
+ResizeManager Graphics::defaultResizeManager= Graphics::defaultResizeManagerL;
+KeyManager Graphics::defaultKeyManager= Graphics::defaultKeyManagerL;
+SpecialKeyManager Graphics::defaultSpecialKeyManager= Graphics::defaultSpecialKeyManagerL;
+KeyManager Graphics::defaultKeyUpManager= Graphics::defaultKeyUpManagerL;
+SpecialKeyManager Graphics::defaultSpecialKeyUpManager= Graphics::defaultSpecialKeyUpManagerL;
+MouseEntryManager Graphics::defaultMouseEntryManager= Graphics::defaultMouseEntryManagerL;
+MouseMoveManager Graphics::defaultMouseMoveManager= Graphics::defaultMouseMoveManagerL;
+MouseClickManager Graphics::defaultMouseClickManager= Graphics::defaultMouseClickManagerL;
+MouseWheelManager Graphics::defaultMouseWheelManager= Graphics::defaultMouseWheelManagerL;
 
 Graphics::WinHwnd Graphics::CreateMainWindow(string caption, WindowManagers managers, int width, int height, bool setsize, int x, int y, bool setposition) {
   if(setsize) {
@@ -97,7 +106,15 @@ void Graphics::defaultRenderManagerNL() {
 
   glutSwapBuffers();
 }
-void Graphics::defaultResizeManager(int x, int y) {
+
+void Graphics::defaultResizeManagerL(int x, int y) {
+  netlock.lock();
+
+  defaultResizeManagerNL(x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultResizeManagerNL(int x, int y) {
   WinHwnd h = GetWinHwnd(glutGetWindow());
   int width = x;//glutGet(GLUT_WINDOW_WIDTH);
   int height = y;//glutGet(GLUT_WINDOW_HEIGHT);
@@ -111,7 +128,15 @@ void Graphics::defaultResizeManager(int x, int y) {
 
   elementResizeManager(h, width, height);
 }
-void Graphics::defaultKeyManager(unsigned char keyc, int x, int y) {
+
+void Graphics::defaultKeyManagerL(unsigned char keyc, int x, int y) {
+  netlock.lock();
+
+  defaultKeyManagerNL(keyc, x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultKeyManagerNL(unsigned char keyc, int x, int y) {
   key_location keyd;
   keyd.fromKey(tolower(keyc));
   keyd.setLocation(x, y);
@@ -126,7 +151,15 @@ void Graphics::defaultKeyManager(unsigned char keyc, int x, int y) {
     glutPostRedisplay();
   }
 }
-void Graphics::defaultSpecialKeyManager(int keyc, int x, int y) {
+
+void Graphics::defaultSpecialKeyManagerL(int keyc, int x, int y) {
+  netlock.lock();
+
+  defaultSpecialKeyManagerNL(keyc, x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultSpecialKeyManagerNL(int keyc, int x, int y) {
   key_location keyd;
   keyd.fromSpecial(keyc);
   keyd.setLocation(x, y);
@@ -141,7 +174,15 @@ void Graphics::defaultSpecialKeyManager(int keyc, int x, int y) {
     glutPostRedisplay();
   }
 }
-void Graphics::defaultKeyUpManager(unsigned char keyc, int x, int y) {
+
+void Graphics::defaultKeyUpManagerL(unsigned char keyc, int x, int y) {
+  netlock.lock();
+
+  defaultKeyUpManagerNL(keyc,x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultKeyUpManagerNL(unsigned char keyc, int x, int y) {
   key_location keyd;
   keyd.fromKey(tolower(keyc));
   keyd.setLocation(x, y);
@@ -150,7 +191,15 @@ void Graphics::defaultKeyUpManager(unsigned char keyc, int x, int y) {
     glutPostRedisplay();
   }
 }
-void Graphics::defaultSpecialKeyUpManager(int keyc, int x, int y) {
+
+void Graphics::defaultSpecialKeyUpManagerL(int keyc, int x, int y) {
+  netlock.lock();
+
+  defaultSpecialKeyUpManagerNL(keyc, x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultSpecialKeyUpManagerNL(int keyc, int x, int y) {
   key_location keyd;
   keyd.fromSpecial(keyc);
   keyd.setLocation(x, y);
@@ -159,17 +208,41 @@ void Graphics::defaultSpecialKeyUpManager(int keyc, int x, int y) {
     glutPostRedisplay();
   }
 }
-void Graphics::defaultMouseEntryManager(int state) {
+
+void Graphics::defaultMouseEntryManagerL(int state) {
+  netlock.lock();
+
+  defaultMouseEntryManagerNL(state);
+
+  netlock.unlock();
+}
+void Graphics::defaultMouseEntryManagerNL(int state) {
   if (1 & elementMouseEnterManager(GetWinHwnd(glutGetWindow()), state)) {
     glutPostRedisplay();
   }
 }
-void Graphics::defaultMouseMoveManager(int x, int y) {
+
+void Graphics::defaultMouseMoveManagerL(int x, int y) {
+  netlock.lock();
+
+  defaultMouseMoveManagerNL(x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultMouseMoveManagerNL(int x, int y) {
   if (1 & elementMouseMoveManager(GetWinHwnd(glutGetWindow()), x, glutGet(GLUT_WINDOW_HEIGHT) - y)) {
     glutPostRedisplay();
   }
 }
-void Graphics::defaultMouseClickManager(int button, int state, int x, int y) {
+
+void Graphics::defaultMouseClickManagerL(int button, int state, int x, int y) {
+  netlock.lock();
+
+  defaultMouseClickManagerNL(button, state, x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultMouseClickManagerNL(int button, int state, int x, int y) {
   key_location keyd;
   keyd.fromMouse(button);
   keyd.setLocation(x, y);
@@ -192,7 +265,15 @@ void Graphics::defaultMouseClickManager(int button, int state, int x, int y) {
     }
   }
 }
-void Graphics::defaultMouseWheelManager(int state, int delta, int x, int y) {
+
+void Graphics::defaultMouseWheelManagerL(int state, int delta, int x, int y) {
+  netlock.lock();
+
+  defaultMouseWheelManagerNL(state, delta, x, y);
+
+  netlock.unlock();
+}
+void Graphics::defaultMouseWheelManagerNL(int state, int delta, int x, int y) {
   key_location keyd;
   keyd.fromWheel(delta);
   keyd.setLocation(x, y);
@@ -540,7 +621,7 @@ void Graphics::setElements(PanelHwnd id, string filename) {
 
   setElements(id, doc.first_node("body"));
 
-  defaultResizeManager(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+  defaultResizeManagerNL(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
   glutPostRedisplay();
 }
 
