@@ -110,6 +110,20 @@ GUIElement* Panel::getElementById(string id) {
   }
 }
 
+int Panel::activateElement(GUIElement* id) {
+  auto it = elements.end();
+
+  int bstate = 0;
+
+  while (it != elements.begin()) {
+    --it;
+    if (!(*it)->toDelete) {
+      bstate |= (*it)->activateElement(id);
+    }
+  }
+  return bstate;
+}
+
 Panel::~Panel() {
   while (elements.size()) {
     if (elements.front() != NULL) {

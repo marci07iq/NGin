@@ -80,9 +80,10 @@ vector<string> tokenize(string str, char split)
   while (it != str.end()) {
     if (*it == split) {
       tokens.push_back(string(begin, it));
-      begin = it;
+      begin = ++it;
+    } else {
+      ++it;
     }
-    ++it;
   }
   tokens.push_back(string(begin, it));
 

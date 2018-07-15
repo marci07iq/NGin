@@ -70,6 +70,20 @@ int TableRow::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down
   return state;
 }
 
+int TableRow::activateElement(GUIElement* id) {
+  auto it = data.end();
+
+  int bstate = 0;
+
+  while (it != data.begin()) {
+    --it;
+    if (!(*it)->toDelete) {
+      bstate |= (*it)->activateElement(id);
+    }
+  }
+  return bstate;
+}
+
 int TableRow::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   auto it = data.end();
 
@@ -252,6 +266,20 @@ int Table::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
     }
     return state;
   }
+}
+
+int Table::activateElement(GUIElement* id) {
+  auto it = data.end();
+
+  int bstate = 0;
+
+  while (it != data.begin()) {
+    --it;
+    if (!(*it)->toDelete) {
+      bstate |= (*it)->activateElement(id);
+    }
+  }
+  return bstate;
 }
 
 GUIElement* Table::getElementById(string id) {

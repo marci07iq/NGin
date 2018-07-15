@@ -16,8 +16,11 @@
 #include "Popup.h"
 
 namespace Graphics {
-  
-  void defaultRenderManager();
+  void defaultRenderManagerL();
+  void defaultRenderManagerNL();
+
+  extern RenderManager defaultRenderManager;
+
   void defaultResizeManager(int x, int y);
   void defaultKeyManager(unsigned char key, int x, int y);
   void defaultSpecialKeyManager(int key, int x, int y);
@@ -149,8 +152,10 @@ namespace Graphics {
   void setElements(PanelHwnd id, string filename);
 
   ElemHwnd getElementById(PanelHwnd pId, string id);
-
   ElemHwnd getElementById(WinHwnd winId, string id);
-
   ElemHwnd getElementById(string id);
+
+  void activateElement(PanelHwnd pId, ElemHwnd id);
+  void activateElement(WinHwnd winId, ElemHwnd id);
+  void activateElement(ElemHwnd id);
 }

@@ -17,6 +17,8 @@ public:
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
   void getRect();
 
+  int activateElement(GUIElement* id);
+
   GUIElement* getElementById(string id);
   /*bool keyPressed(unsigned char key, int mx, int my);
   bool specialPressed(int key, int mx, int my);

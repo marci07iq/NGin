@@ -26,5 +26,6 @@ public:
   virtual int getHeight();
   virtual int getHeight(int winHeight);
   virtual GUIElement* getElementById(string id);
+  virtual int activateElement(GUIElement* id);
   ~GUIElement();
 };

@@ -72,6 +72,17 @@ void TextInput::render(set<key_location>& down) {
   //shapesPrintf(0, 0, text.c_str());
 }
 
+int TextInput::activateElement(GUIElement* id) {
+  bool oactive = active;
+  active = (this == id);
+  if (active) {
+    cursor = text.size();
+  } else {
+    cursor = -1;
+  }
+  return oactive ^ active;
+}
+
 TextInput::~TextInput() {
 
 }

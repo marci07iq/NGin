@@ -2,7 +2,9 @@
 
 void Slider::mouseAt(int x, int y) {
   val = minv + (maxv - minv) * float(x - cax) / float(cbx - cax - 1);
-  val = val + quanta / 2.0f - fmod(val + quanta/2.0f, quanta);
+  if(quanta != 0) {
+    val = val + quanta / 2.0f - fmod(val + quanta / 2.0f, quanta);
+  }
   val = min(max(val, minv),maxv);
   clickCallback(val);
 }

@@ -88,7 +88,7 @@ public:
 
 key loadKey(xml_attribute<>* me);
 
-typedef void(*ClickCallback)();
+typedef void(*ClickCallback)(string);
 typedef void(*CheckCallback)(bool);
 typedef void(*TextInputFunc)(string);
 typedef void(*ControlInputFunc)(key, int);

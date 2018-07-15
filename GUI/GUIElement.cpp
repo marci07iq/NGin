@@ -69,6 +69,12 @@ int GUIElement::getHeight(int winHeight) {
   return location.getHeight(winHeight);
 }
 
+int GUIElement::activateElement(GUIElement* id) {
+  bool oactive = active;
+  active = (this == id);
+  return oactive ^ active;
+}
+
 GUIElement::~GUIElement() {
 
 }

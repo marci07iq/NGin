@@ -270,6 +270,6 @@ void decompress(DataPair* in, DataPair** out) {
 
   if (oit != conv.i) {
     cout << "Corrupt decrypt data!" << endl;
-    throw 1;
+    //throw 1;
   }
 }

@@ -404,7 +404,7 @@ void Graphics::resetViewport() {
   glMatrixMode(GL_MODELVIEW);
   //glPushMatrix();
   glLoadIdentity();
-  glColor3ub(0, 255, 0);
+  //glColor3ub(0, 255, 0);
 }
 
 LinearScale::LinearScale() {

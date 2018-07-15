@@ -17,6 +17,9 @@ public:
   int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
 
   GUIElement* getElementById(string id);
+
+  int activateElement(GUIElement* id);
+
   ~TableRow();
 };
 
@@ -38,5 +41,8 @@ public:
   int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
 
   GUIElement* getElementById(string id);
+
+  int activateElement(GUIElement* id);
+
   ~Table();
 };

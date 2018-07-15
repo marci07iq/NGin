@@ -1,5 +1,7 @@
 #include "Graphics.h"
 
+RenderManager Graphics::defaultRenderManager = Graphics::defaultRenderManagerL;
+
 Graphics::WinHwnd Graphics::CreateMainWindow(string caption, WindowManagers managers, int width, int height, bool setsize, int x, int y, bool setposition) {
   if(setsize) {
     glutInitWindowSize(width, height);
@@ -78,19 +80,22 @@ void Graphics::GWindow::getWin(float pax, float pay, float pbx, float pby) {
   by = pby + location.getRight(pby - pay);
 }
 
-void Graphics::defaultRenderManager() {
+void Graphics::defaultRenderManagerL() {
   netlock.lock();
-  
+
+  defaultRenderManagerNL();
+
+  netlock.unlock();
+}
+void Graphics::defaultRenderManagerNL() {
   glutSetWindow(glutGetWindow());
 
   glClear(GL_COLOR_BUFFER_BIT);
   resetViewport();
 
   elementRenderManager(GetWinHwnd(glutGetWindow()));
-  
-  glutSwapBuffers();
 
-  netlock.unlock();
+  glutSwapBuffers();
 }
 void Graphics::defaultResizeManager(int x, int y) {
   WinHwnd h = GetWinHwnd(glutGetWindow());
@@ -558,11 +563,9 @@ void Graphics::setElements(TablerowHwnd id, xml_node<> *data) {
 Graphics::ElemHwnd Graphics::getElementById(Graphics::PanelHwnd pId, string id) {
   return pId->getElementById(id);
 }
-
 Graphics::ElemHwnd Graphics::getElementById(Graphics::WinHwnd winId, string id) {
   return getElementById(winId->myPanel, id);
 }
-
 Graphics::ElemHwnd Graphics::getElementById(string id) {
   auto it = windows.begin();
 
@@ -580,4 +583,21 @@ Graphics::ElemHwnd Graphics::getElementById(string id) {
   }
 
   return res;
+}
+
+void Graphics::activateElement(PanelHwnd pId, ElemHwnd id) {
+  if(pId->activateElement(id)) {
+    glutPostRedisplay();
+  }
+}
+void Graphics::activateElement(WinHwnd winId, ElemHwnd id) {
+  return activateElement(winId->myPanel, id);
+}
+void Graphics::activateElement(ElemHwnd id) {
+  auto it = windows.begin();
+
+  while (it != windows.end()) {
+    activateElement(it->second, id);
+    ++it;
+  }
 }

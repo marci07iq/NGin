@@ -210,7 +210,8 @@ public:
       DataElement* paire = new DataElement();
 
       DataElement* timee = new DataElement();
-      timee->_core->fromType<T>(it.first);
+      T timev = it.first;
+      timee->_core->fromType<T>(timev);
       paire->_children.push_back(timee);
 
       DataElement* vale = new DataElement();
@@ -221,7 +222,9 @@ public:
     }
   }
   void set(DataElement* data) {
-    _frames.clear();
+    if(_frames.size()) {
+      _frames.clear();
+    }
     for (DataElement* it : data->_children) {
       T nt = it->_children[0]->_core->toType<T>();
       V nv;

@@ -108,6 +108,7 @@ public:
         int nlen = conv.i;
 
         delete _core;
+
         _core = new DataPair(nlen);
 
         for (int i = 0; i < _core->_len; i++) {

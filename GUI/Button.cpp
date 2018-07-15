@@ -13,11 +13,11 @@ int Button::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) 
 
 int Button::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   if (isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
-    clickCallback();
+    clickCallback(name);
     return 3;
   }
   if (triggerkey == evt._key && evt._type == evt.evt_pressed) {
-    clickCallback();
+    clickCallback(name);
     return 3;
   }
   return 0;
