@@ -226,28 +226,27 @@ int NetworkS::ReciveData() {
 
   //DATA
 
+  netlock.lock();
   char* data;
   data = new char[dlen];
   iRes = 0;
   while (iRes != dlen) {
     iRes += recv(ClientSocket, data + iRes, dlen - iRes, 0);
-    //NetLog.LogString("RECiRes: " + to_string(iRes));
   }
 
-  netlock.lock();
   DataElement* datae = new DataElement();
   int start = 0;
   datae->empty(reinterpret_cast<unsigned char*>(data), start);
   if (start != dlen) {
     throw 1;
   }
-  delete[dlen] data;
   
   bool t = RecivePacket(datae, pid, this, ConnectedBinder);
-  netlock.unlock();
+
+  delete[dlen] data;
   delete datae;
 
-  //delete data;
+  netlock.unlock();
 
   if (t) {
     return 0;
@@ -449,31 +448,31 @@ int NetworkC::ReciveData() {
   }
 
   pid = conv.i;
-  //NetLog.LogString("pid: " + to_string(pid));
 
   //DATA
+
+  netlock.lock();
 
   char* data;
   data = new char[dlen];
   iRes = 0;
   while (iRes != dlen) {
     iRes += recv(ConnectSocket, data + iRes, dlen - iRes, 0);
-    //NetLog.LogString("RECiRes: " + to_string(iRes));
   }
 
-  netlock.lock();
   DataElement* datae = new DataElement();
   int start = 0;
   datae->empty(reinterpret_cast<unsigned char*>(data), start);
   if (start != dlen) {
     throw 1;
   }
-  bool t = RecivePacket(datae, pid, this, ConnectedBinder);
-  netlock.unlock();
-  //datae->~DataElement();
-  delete[dlen] data;
 
+  bool t = RecivePacket(datae, pid, this, ConnectedBinder);
+
+  delete[dlen] data;
   delete datae;
+
+  netlock.unlock();
 
   if (t) {
     return 0;

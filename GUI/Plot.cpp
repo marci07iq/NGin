@@ -6,18 +6,17 @@ int Plot::mouseEnter(int state) {
   return 0;
 }
 
-int Plot::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
-  int dx = mx - mxold;
-  int dy = my - myold;
+int Plot::mouseMoved(int mx, int my, int mox, int moy, set<key_location>& down) {
+  int dx = mx - mox;
+  int dy = my - moy;
 
   if (mousebuttons & 1) { //left, drag
     ox -= sx * dx;
     oy -= sy * dy;
+    return 1;
   }
 
-  mxold = mx;
-  myold = my;
-  return 1;
+  return 0;
 }
 
 int Plot::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
