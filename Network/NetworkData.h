@@ -23,11 +23,11 @@ public:
     _data = new unsigned char[_len];
   }
   template<typename T> void fromTypeV(T val) {
-    delete[_len] _data;
+    delete[] _data;
     serialize<T>(val, &_data, _len, 0);
   }
   template<typename T> void fromType(T& val) {
-    delete[_len] _data;
+    delete[] _data;
     serialize<T>(val, &_data, _len, 0);
   }
   template<typename T> T toType() {
@@ -35,7 +35,7 @@ public:
   }
 
   ~DataPair() {
-    delete[_len] _data;
+    delete[] _data;
   }
 };
 
@@ -55,6 +55,20 @@ public:
     len += 5;
     len += _core->_len;
     return len;
+  }
+  bool verify() {
+    for (auto&& it : _children) {
+      if (it == NULL) {
+        return false;
+      }
+      if(!it->verify()) {
+        return false;
+      }
+    }
+    if (_core == NULL) {
+      return false;
+    }
+    return true;
   }
   void fill(unsigned char* data, int &start) {
     Packet_Header_Convertor conv;

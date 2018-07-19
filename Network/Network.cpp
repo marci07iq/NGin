@@ -163,8 +163,8 @@ int NetworkS::SendData(char *Data, int Id, int DataLen) {
 
   int iSendResult = send(ClientSocket, SendRaw, DataLen + 2 * PACKET_HEADER_LEN, 0);
 
-  delete[DataLen + 2 * PACKET_HEADER_LEN] SendRaw;
-  delete[DataLen] Data;
+  delete[] SendRaw;
+  delete[] Data;
 
   if (iSendResult != DataLen + 2 * PACKET_HEADER_LEN) {
     NetworkError(NetworkErrorCodeServerSendData, error, WSAGetLastError());
@@ -240,10 +240,21 @@ int NetworkS::ReciveData() {
   if (start != dlen) {
     throw 1;
   }
-  
-  bool t = RecivePacket(datae, pid, this, ConnectedBinder);
 
-  delete[dlen] data;
+  bool t = false;
+
+  if (!datae->verify()) {
+    LOG LERROR "COULD NOT DECODE PACKET" END;
+    start = 0;
+    delete datae;
+    __debugbreak();
+    datae->empty(reinterpret_cast<unsigned char*>(data), start);
+    //try to re-decode (to check in debugger)
+  } else {
+    t = RecivePacket(datae, pid, this, ConnectedBinder);
+  }
+
+  delete[] data;
   delete datae;
 
   netlock.unlock();
@@ -384,8 +395,8 @@ int NetworkC::SendData(char *Data, int Id, int DataLen) {
   //delete Data;
   //delete SendRaw;
   
-  delete[DataLen + 2 * PACKET_HEADER_LEN] SendRaw;
-  delete[DataLen] Data;
+  delete[] SendRaw;
+  delete[] Data;
 
   if (iSendResult != DataLen + 2 * PACKET_HEADER_LEN) {
     NetworkError(NetworkErrorCodeClientSendData, error, 0);
@@ -467,9 +478,20 @@ int NetworkC::ReciveData() {
     throw 1;
   }
 
-  bool t = RecivePacket(datae, pid, this, ConnectedBinder);
+  bool t = false;
 
-  delete[dlen] data;
+  if (!datae->verify()) {
+    LOG LERROR "COULD NOT DECODE PACKET" END;
+    start = 0;
+    delete datae;
+    __debugbreak();
+    datae->empty(reinterpret_cast<unsigned char*>(data), start);
+    //try to re-decode (to check in debugger)
+  } else {
+    t = RecivePacket(datae, pid, this, ConnectedBinder);
+  }
+
+  delete[] data;
   delete datae;
 
   netlock.unlock();

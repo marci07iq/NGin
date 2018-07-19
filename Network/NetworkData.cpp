@@ -11,7 +11,7 @@ void saveToFile(DataElement * data, string fileName) {
   out.write(reinterpret_cast<char*>(res), len);
   out.close();
 
-  delete[len] res;
+  delete[] res;
   delete data;
 }
 
