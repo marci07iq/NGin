@@ -361,26 +361,26 @@ public:
     return *this;
   }
 
-  bVec3 operator==(vec2<T> rhs) const {
-    return bvec2(x == rhs.x, y == rhs.y, z == rhs.z);
+  bVec2 operator==(vec2<T> rhs) const {
+    return bVec2(x == rhs.x, y == rhs.y);
   }
-  bVec3 operator!=(vec2<T> rhs) const {
-    return bvec2(x != rhs.x, y != rhs.y, z != rhs.z);
+  bVec2 operator!=(vec2<T> rhs) const {
+    return bVec2(x != rhs.x, y != rhs.y);
   }
-  bVec3 operator<(vec2<T> rhs) const {
-    return bvec2(x < rhs.x, y < rhs.y, z < rhs.z);
+  bVec2 operator<(vec2<T> rhs) const {
+    return bVec2(x < rhs.x, y < rhs.y);
   }
-  bVec3 operator<=(vec2<T> rhs) const {
-    return bvec2(x <= rhs.x, y <= rhs.y, z <= rhs.z);
+  bVec2 operator<=(vec2<T> rhs) const {
+    return bVec2(x <= rhs.x, y <= rhs.y);
   }
-  bVec3 operator>=(vec2<T> rhs) const {
-    return bvec2(x >= rhs.x, y >= rhs.y, z >= rhs.z);
+  bVec2 operator>=(vec2<T> rhs) const {
+    return bVec2(x >= rhs.x, y >= rhs.y);
   }
-  bVec3 operator>(vec2<T> rhs) const {
-    return bvec2(x > rhs.x, y > rhs.y, z > rhs.z);
+  bVec2 operator>(vec2<T> rhs) const {
+    return bVec2(x > rhs.x, y > rhs.y);
   }
 
-  fVec3 at(float t) { //Only for polynomial vectors
+  fVec2 at(float t) { //Only for polynomial vectors
     return{ to_double(x.at(t)), to_double(y.at(t)), to_double(z.at(t)) };
   }
 
@@ -412,21 +412,15 @@ public:
     DataElement* yy = new DataElement();
     yy->_core->fromType<T>(y);
     data->addChild(yy);
-
-    DataElement* zz = new DataElement();
-    zz->_core->fromType<T>(z);
-    data->addChild(zz);
   }
   void set(DataElement* data) {
     x = data->_children[0]->_core->toType<T>();
     y = data->_children[1]->_core->toType<T>();
-    z = data->_children[2]->_core->toType<T>();
   }
 
   void load(xml_node<> *me) {
     x = strTo<T>(me->first_node("x")->value());
     y = strTo<T>(me->first_node("y")->value());
-    z = strTo<T>(me->first_node("z")->value());
   }
 };
 
@@ -435,6 +429,9 @@ inline bool band(bVec3 v) { return v.x && v.y && v.z; }
 inline bool bor(bVec3 v) { return v.x || v.y || v.z; }
 inline bool bxor(bVec3 v) { return v.x != v.y != v.z; }
 
+inline bool band(bVec2 v) { return v.x && v.y; }
+inline bool bor(bVec2 v) { return v.x || v.y; }
+inline bool bxor(bVec2 v) { return v.x != v.y; }
 
 
 template<typename T> std::ostream& operator<<(std::ostream& os, const vec3<T>& v)
