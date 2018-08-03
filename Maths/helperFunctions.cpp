@@ -187,6 +187,41 @@ double ran1(long int nseed) {
   }
 }
 
+bool validateTickType(float minLogValDist, float maxLogValDist, float tickType, float &mid) {
+  mid = ceil(minLogValDist / tickType);
+  bool b = (mid <= (maxLogValDist / tickType));
+  mid *= tickType;
+  return b;
+}
+
+float getValPerTick(float valPerPixel, float minPixelDist, float maxPixelDist) {
+  float minValDist = minPixelDist * valPerPixel;
+  float maxValDist = maxPixelDist * valPerPixel;
+
+  int logScale = pow(10, floor(log10(maxValDist)));
+  float minLogValDist = minValDist / logScale;
+  float maxLogValDist = maxValDist / logScale;
+
+  float res;
+
+  if (validateTickType(minLogValDist, maxLogValDist, 1, res)) {
+    return res * logScale;
+  }
+  if (validateTickType(minLogValDist, maxLogValDist, 0.5, res)) {
+    return res * logScale;
+  }
+  if (validateTickType(minLogValDist, maxLogValDist, 0.2, res)) {
+    return res * logScale;
+  }
+  if (validateTickType(minLogValDist, maxLogValDist, 0.25, res)) {
+    return res * logScale;
+  }
+  if (validateTickType(minLogValDist, maxLogValDist, 0.4, res)) {
+    return res * logScale;
+  }
+  return (minPixelDist + maxPixelDist) / 2;
+}
+
 uint64_t mix(uint64_t a, uint64_t b) {
   return (a << 32) + b;
 }

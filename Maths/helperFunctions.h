@@ -509,6 +509,8 @@ inline T ceilDiv(const T& lhs, const T& rhs) {
   return -floorDiv(-lhs, rhs);
 }
 
+float getValPerTick(float valPerPixel, float minPixelDist, float maxPixelDist);
+
 uint64_t mix(uint64_t a, uint64_t b);
 uint32_t low(uint64_t a);
 uint32_t high(uint64_t a);

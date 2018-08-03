@@ -1,12 +1,16 @@
 #include "Slider.h"
 
-void Slider::mouseAt(int x, int y) {
-  val = minv + (maxv - minv) * float(x - cax) / float(cbx - cax - 1);
-  if(quanta != 0) {
-    val = val + quanta / 2.0f - fmod(val + quanta / 2.0f, quanta);
+void Slider::setVal(float nval) {
+  if (quanta != 0) {
+    val = nval + quanta / 2.0f - fmod(nval + quanta / 2.0f, quanta);
   }
-  val = min(max(val, minv),maxv);
+  val = min(max(val, minv), maxv);
   clickCallback(val);
+  cursor = -1;
+}
+void Slider::mouseAt(int x, int y) {
+  float nval = minv + (maxv - minv) * float(x - cax) / float(cbx - cax - 1);
+  setVal(nval);
 }
 
 int Slider::mouseEnter(int state) {
@@ -40,11 +44,58 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
       else {
         mdown = false;
         active = false;
+        if(textActive) {
+          setVal(strTo<float>(text));
+          textActive = false;
+          cursor = -1;
+        }
       }
       return 1;
     }
   }
-  return oactive xor active; //rerender if changed
+
+  bool otextActive = textActive;
+
+  if (!otextActive && isIn(mx, my) && (evt._key._type == key::type_special || evt._key._type == key::type_key) && evt._type == gui_event::evt_pressed) {
+    textActive = true;
+    cursor = text.size();
+  }
+  if(textActive) {
+    if (evt._key._type == key::type_special && evt._type == gui_event::evt_pressed) {
+      if (evt._key._keycode == GLUT_KEY_LEFT) {
+        cursor = max(0, cursor - 1);
+        return 1;
+      }
+      if (evt._key._keycode == GLUT_KEY_RIGHT) {
+        cursor = min(int(text.size()), cursor + 1);
+        return 1;
+      }
+    }
+    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
+      if (evt._key._keycode == '\b' && text.length() && cursor > 0) {
+        text.erase(cursor - 1, 1);
+        cursor--;
+        return 1;
+      }
+      if (evt._key._keycode == 127 && text.length() && cursor < text.size()) {
+        text.erase(cursor, 1);
+        return 1;
+      }
+      if (evt._key._keycode == '\n' || evt._key._keycode == '\r') {
+        textActive = false;
+        cursor = -1;
+        setVal(strTo<float>(text));
+        return 3;
+      }
+      if (floatValidator(text, cursor, evt._key._keycode)) {
+        text.insert(cursor, 1, evt._key._keycode);
+        cursor++;
+        return 1;
+      }
+    }
+  }
+
+  return (oactive xor active) | (otextActive xor textActive); //rerender if changed
 }
 
 void Slider::render(set<key_location>& down) {
@@ -76,7 +127,12 @@ void Slider::render(set<key_location>& down) {
   glVertex2d(cax, cby);
   glEnd();
 
-  renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, to_string(val), textColor, true);
+  if(textActive) {
+    renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, text, textColor, true, cursor);
+  } else {
+    text = to_string(val);
+    renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, text, textColor, true);
+  }
   //shapesPrintf(0, 0, text.c_str());
 }
 

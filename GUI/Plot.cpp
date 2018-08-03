@@ -77,21 +77,8 @@ void Plot::render(set<key_location>& down) {
 
   glViewport(cax, cay, cbx - cax, cby - cay);
 
-  double tickx = pow(10, floor(log10(100 * sx)));
-  double ticky = pow(10, floor(log10(100 * sy)));
-
-  if (tickx < 40 * sx) {
-    tickx *= 2;
-  }
-  if (tickx < 40 * sx) {
-    tickx *= 2;
-  }
-  if (ticky < 40 * sy) {
-    ticky *= 2;
-  }
-  if (ticky < 40 * sy) {
-    ticky *= 2;
-  }
+  double tickx = getValPerTick(sx, 80, 120);
+  double ticky = getValPerTick(sy, 40, 60);
 
   double minx = ox - (cbx - cax) / 2.0*sx;
   double maxx = ox + (cbx - cax) / 2.0*sx;
@@ -161,24 +148,8 @@ void Plot::render(set<key_location>& down) {
 
   setColor(textColor);
 
-  tickx = pow(10, floor(log10(100 * sx)));
-  ticky = pow(10, floor(log10(100 * sy)));
-
-  if (tickx < 80 * sx) {
-    tickx *= 2;
-  }
-  if (tickx < 80 * sx) {
-    tickx *= 2;
-  }
-  if (tickx < 80 * sx) {
-    tickx *= 2;
-  }
-  if (ticky < 40 * sy) {
-    ticky *= 2;
-  }
-  if (ticky < 40 * sy) {
-    ticky *= 2;
-  }
+  /*tickx = getValPerTick(sx, 50, 100);
+  ticky = getValPerTick(sy, 0, 40);*/
 
   minx = ox - (cbx - cax) / 2.0*sx;
   maxx = ox + (cbx - cax) / 2.0*sx;
