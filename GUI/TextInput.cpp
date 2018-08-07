@@ -32,11 +32,13 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
     if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
       if (evt._key._keycode == '\b' && text.length() && cursor > 0) {
         text.erase(cursor - 1, 1);
+        input(text);
         cursor--;
         return 1;
       }
       if (evt._key._keycode == 127 && text.length() && cursor < text.size()) {
         text.erase(cursor, 1);
+        input(text);
         return 1;
       }
       if (evt._key._keycode == '\n' || evt._key._keycode == '\r') {
@@ -45,6 +47,7 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       }
       if (validator(text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
+        input(text);
         cursor++;
         return 1;
       }

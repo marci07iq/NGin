@@ -844,6 +844,11 @@ ScriptIBlock::~ScriptIBlock() {
 
 #ifdef SCRIPT_GUI
 
+ScriptGUI::ScriptGUI(string name, LocationData llocation, colorargb lbgcolorodd, colorargb lactivecolor, colorargb ltextcolor, colorargb lbgcoloreven) : GUIElement(name, llocation, lbgcolorodd, lactivecolor, ltextcolor) {
+  bgcolor_even = lbgcoloreven;
+  bgcolor_odd = lbgcolorodd;
+}
+
 void ScriptGUI::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
   cax = offsetX + location.getLeft(winWidth);
   cay = offsetY + location.getBot(winHeight);
@@ -859,13 +864,22 @@ int ScriptGUI::mouseEnter(int state) {
   return code->mouseEnter(state);
 }
 int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
-  return code->mouseMoved(mx, my);
+  dragOffset = {mx, my};
+  return code->mouseMoved(mx, my, ox, oy, down) | (dragging != NULL);
 }
 int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return code->guiEvent(evt, mx, my, down);
+  return code->guiEvent(this, evt, mx, my, down);
 }
 void ScriptGUI::render(set<key_location>& down) {
   code->render(this, 1);
+  if (dragging) {
+    dragging->getRect(dragOffset.x, dragOffset.y);
+    dragging->render(this, 1);
+  }
+}
+
+bool ScriptGUIBase::isIn(int mx, int my) {
+  return (cax <= mx && mx <= cbx) && (cay <= my && my <= cby);
 }
 
 void ScriptGUIBase::getRect(int lcax, int lcby) {
@@ -876,7 +890,7 @@ int ScriptGUIBase::mouseEnter(int state) {
 int ScriptGUIBase::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
   return 0;
 }
-int ScriptGUIBase::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptGUIBase::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
   return 0;
 }
 void ScriptGUIBase::render(ScriptGUI* base, int depth) {
@@ -954,7 +968,7 @@ void ScriptIAssign::getRect(int offsetX, int offsetY) {
 void ScriptIConstant::getRect(int offsetX, int offsetY) {
   cax = offsetX;
   cay = offsetY;
-  cbx = cax + 100;
+  cbx = cax + 10*_val->_data->getString().length();
   cby = cay + 15;
 }
 void ScriptIMath::getRect(int offsetX, int offsetY) {
@@ -1016,6 +1030,7 @@ void ScriptIAPICall::getRect(int offsetX, int offsetY) {
 void ScriptIBlock::getRect(int offsetX, int offsetY) {
   //getRect();
   cax = cbx = offsetX;
+  cbx += 5;
   cay = cby = offsetY;
   auto it = _instructions.end();
 
@@ -1180,7 +1195,18 @@ void ScriptIAPICall::render(ScriptGUI* base, int depth) {
 
 }
 void ScriptIBlock::render(ScriptGUI* base, int depth) {
-  renderBg(base, depth);
+  if(!base->dragging) {
+    renderBg(base, depth);
+  } else {
+    setColor(0xff00ff00);
+    glBegin(GL_QUADS);
+    glVertex2d(cax, cay);
+    glVertex2d(cbx, cay);
+    glVertex2d(cbx, cby);
+    glVertex2d(cax, cby);
+    glEnd();
+  }
+
 
   for (auto&& it : _instructions) {
     it->render(base, depth + 1);
@@ -1261,40 +1287,186 @@ int ScriptIBlock::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& 
   return 0;
 }
 
-int ScriptInstruction::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptInstruction  ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
   return 0;
 }
-int ScriptIIfElse::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIIfElse      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
+  int res = 0;
+  if (_condition) {
+    res |= _condition->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_then) {
+    res |= _then->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_else) {
+    res |= _else->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  return res;
+}
+int ScriptILoop        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
+  int res = 0;
+  if (_condition) {
+    res |= _condition->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_code) {
+    res |= _code->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  return res;
+}
+int ScriptIAssign      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
+  int res = 0;
+  if (_to) {
+    res |= _to->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_val) {
+    res |= _val->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  return res;
+}
+int ScriptIConstant    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
   return 0;
 }
-int ScriptILoop::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIMath        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
+  int res = 0;
+  if (_arg1) {
+    res |= _arg1->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_arg2) {
+    res |= _arg2->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  return res;
+}
+int ScriptILogic       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
+  int res = 0;
+  if (_arg1) {
+    res |= _arg1->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_arg2) {
+    res |= _arg2->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  return res;
+}
+int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
   return 0;
 }
-int ScriptIAssign::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIIndex       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
   return 0;
 }
-int ScriptIConstant::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIFunctionCall::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
   return 0;
 }
-int ScriptIMath::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIAPICall     ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
   return 0;
 }
-int ScriptILogic::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return 0;
-}
-int ScriptIVariable::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return 0;
-}
-int ScriptIIndex::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return 0;
-}
-int ScriptIFunctionCall::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return 0;
-}
-int ScriptIAPICall::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return 0;
-}
-int ScriptIBlock::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  return 0;
+int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+  if (!isIn(mx, my)) {
+    return 0;
+  }
+  int res = 0;
+  auto it = _instructions.begin();
+  while(it != _instructions.end()) {
+    if((*it)->isIn(mx, my)) {
+      res |=(*it)->guiEvent(base, evt, mx, my, down);
+      if (res & 2) {
+        return res;
+      }
+      ++it;
+      if (!(res & 1) && evt._key._type == evt._key.type_mouse && evt._type == evt.evt_down && evt._key._keycode == 0 && base->editor && base->dragging == NULL) { //LDOWN
+        auto it2 = it;
+        --it2;
+        base->dragging = *it2;
+        _instructions.erase(it2);
+        base->getRect(base->cax, base->cay);
+        return 3;
+      }
+    } else {
+      ++it;
+    }
+  }
+
+  if (evt._key._type == evt._key.type_mouse && evt._type == evt.evt_up && evt._key._keycode == 0 && base->editor && base->dragging != NULL) { //LDOWN
+    auto it = _instructions.begin();
+    while(it != _instructions.end()) {
+      if(my >= (*it)->cby) {
+        _instructions.insert(it, base->dragging);
+        base->dragging = NULL;
+        base->getRect(base->cax, base->cay);
+        return 3;
+      }
+      ++it;
+    }
+    _instructions.insert(it, base->dragging);
+    base->dragging = NULL;
+    base->getRect(base->cax, base->cay);
+    return 3;
+  }
+
+  return res;
 }
 #endif

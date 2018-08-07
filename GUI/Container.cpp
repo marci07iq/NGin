@@ -16,10 +16,10 @@ int Container::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
 
   int bstate = 0;
   if(mid) {
-    ox -= mx - mxo;
-    oy -= my - myo;
+    mxo -= mx - ox;
+    myo -= my - oy;
     if (element != NULL) {
-      element->getRect(cbx - cax, cby - cay, cax -ox, cay - oy);
+      element->getRect(cbx - cax, cby - cay, cax -mxo, cay - myo);
     }
     bstate = 1;
   } else {
@@ -27,8 +27,6 @@ int Container::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
       bstate = element->mouseMoved(mx, my, ox, oy, down);
     }
   }
-  mxo = mx;
-  myo = my;
 
   return bstate;
 }
