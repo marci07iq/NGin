@@ -65,7 +65,7 @@ void Container::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
   cby = offsetY + location.getTop(winHeight);
 
   if (element != NULL) {
-    element->getRect(cbx - cax - ox, cby - cay - oy, cax, cay);
+    element->getRect(cbx - cax , cby - cay, cax - mxo, cay - myo);
   }
 }
 

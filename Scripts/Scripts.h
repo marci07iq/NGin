@@ -208,6 +208,8 @@ public:
     //throw 1;
   }
 #ifdef SCRIPT_GUI
+  bool insertingIn = false;
+
   virtual void getRect(int offsetX, int offsetY);
   virtual int mouseEnter(int state);
   virtual int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
@@ -241,6 +243,7 @@ public:
   ScriptInstruction* _condition;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  int cdy = 0;
   ~ScriptILoop();
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);

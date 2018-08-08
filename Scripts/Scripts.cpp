@@ -855,7 +855,7 @@ void ScriptGUI::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
   cbx = offsetX + location.getRight(winWidth);
   cby = offsetY + location.getTop(winHeight);
 
-  getRect(offsetX, offsetY);
+  getRect(cax, cby);
 }
 void ScriptGUI::getRect(int offsetX, int offsetY) {
   code->getRect(offsetX, offsetY);
@@ -868,20 +868,137 @@ int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
   return code->mouseMoved(mx, my, ox, oy, down) | (dragging != NULL);
 }
 int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+  if (mx < 100 && editor && dragging == NULL && evt._type == evt.evt_down && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
+    switch (my / 20) {
+      case 0:
+      {
+        ScriptIIfElse        * scriptIIfElse = new ScriptIIfElse();
+        scriptIIfElse->_condition = new ScriptIBlock();
+        scriptIIfElse->_then = new ScriptIBlock();
+        scriptIIfElse->_else = new ScriptIBlock();
+        dragging = scriptIIfElse;
+      }
+      break;
+      case 1:
+      {
+        ScriptILoop          * scriptILoop = new ScriptILoop();
+        scriptILoop->_condition = new ScriptIBlock();
+        scriptILoop->_code = new ScriptIBlock();
+        dragging = scriptILoop;
+      }
+      break;
+      case 2:
+      {
+        ScriptIAssign        * scriptIAssign = new ScriptIAssign();
+        scriptIAssign->_to = new ScriptIBlock();
+        scriptIAssign->_val = new ScriptIBlock();
+        dragging = scriptIAssign;
+      }
+      break;
+      case 3:
+      {
+        ScriptIConstant      * scriptIConstant = new ScriptIConstant();
+        scriptIConstant->_val = new ScriptData();
+        scriptIConstant->_val->_data = new ScriptDataNumber(0);
+        dragging = scriptIConstant;
+      }
+      break;
+      case 4:
+      {
+        ScriptIMath          * scriptIMath = new ScriptIMath();
+        scriptIMath->_arg1 = new ScriptIBlock();
+        scriptIMath->_arg2 = new ScriptIBlock();
+        scriptIMath->_oper = ScriptIMath::PLUS;
+        dragging = scriptIMath;
+      }
+      break;
+      case 5:
+      {
+        ScriptILogic         * scriptILogic = new ScriptILogic();
+        scriptILogic->_arg1 = new ScriptIBlock();
+        scriptILogic->_arg2 = new ScriptIBlock();
+        scriptILogic->_oper = ScriptILogic::NOT;
+        dragging = scriptILogic;
+        break;
+      }
+      case 6:
+      {
+        ScriptIVariable      * scriptIVariable = new ScriptIVariable();
+        dragging = scriptIVariable;
+      }
+      break;
+      case 7:
+      {
+        ScriptIIndex         * scriptIIndex = new ScriptIIndex();
+        scriptIIndex->_arg = new ScriptIBlock();
+        scriptIIndex->_ind = new ScriptIBlock();
+        dragging = scriptIIndex;
+      }
+      break;/*
+      case 8:
+      ScriptIFunctionCall  * scriptIFunctionCall = new ScriptIFunctionCall();
+      dragging = scriptIFunctionCall;
+      break;
+      case 9:
+      ScriptIAPICall       * scriptIAPICall = new ScriptIAPICall();
+      dragging = scriptIAPICall;
+      break;
+      case 10:
+      ScriptIBlock         * scriptIBlock = new ScriptIBlock();
+      dragging = scriptIBlock;
+      break;*/
+    }
+    if (dragging) {
+      return 3;
+    }
+  }
+  if (mx < 100 && editor && dragging != NULL && evt._type == evt.evt_up && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
+    if (my / 20 == 8) {
+      delete dragging;
+      dragging = false;
+      return 3;
+    }
+  }
   return code->guiEvent(this, evt, mx, my, down);
 }
 void ScriptGUI::render(set<key_location>& down) {
-  code->render(this, 1);
+  code->render(this, 0);
   if (dragging) {
     dragging->getRect(dragOffset.x, dragOffset.y);
-    dragging->render(this, 1);
+    dragging->render(this, 0);
+  }
+  if(editor) {
+    for(int i = 0; i <= 7; i++) {
+      setColor((i%2) ? 0xff808080: 0xff606060);
+      glBegin(GL_QUADS);
+      glVertex2d(0, i*20);
+      glVertex2d(100, i*20);
+      glVertex2d(100, i*20+20);
+      glVertex2d(0, i*20+20);
+      glEnd();
+    }
+    renderBitmapString(10,  10 -5, "If", 0xffffffff, false);
+    renderBitmapString(10,  30 -5, "Loop", 0xffffffff, false);
+    renderBitmapString(10,  50 -5, "Assign", 0xffffffff, false);
+    renderBitmapString(10,  70 -5, "Constant", 0xffffffff, false);
+    renderBitmapString(10,  90 -5, "Math", 0xffffffff, false);
+    renderBitmapString(10, 110 -5, "Logic", 0xffffffff, false);
+    renderBitmapString(10, 130 -5, "Var", 0xffffffff, false);
+    renderBitmapString(10, 150 -5, "Index", 0xffffffff, false);
+    setColor(0xffff0000);
+    glBegin(GL_QUADS);
+    glVertex2d(0, 160);
+    glVertex2d(100, 160);
+    glVertex2d(100, 180);
+    glVertex2d(0, 180);
+    glEnd();
+    renderBitmapString(10, 165, "Delete", 0xffffffff, false);
   }
 }
 
 bool ScriptGUIBase::isIn(int mx, int my) {
   return (cax <= mx && mx <= cbx) && (cay <= my && my <= cby);
 }
-
 void ScriptGUIBase::getRect(int lcax, int lcby) {
 }
 int ScriptGUIBase::mouseEnter(int state) {
@@ -896,60 +1013,75 @@ int ScriptGUIBase::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<
 void ScriptGUIBase::render(ScriptGUI* base, int depth) {
 }
 
-void ScriptInstruction::getRect(int offsetX, int offsetY) {
+void ScriptInstruction  ::getRect(int offsetX, int offsetY) {
 
 }
-void ScriptIIfElse::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
-  if (_else != NULL) {
-    _else->getRect(cax + 5, cby + 5);
-    cby = _else->cby + 15;
-    cey = cby;
-    cbx = max(cbx, _else->cbx + 5);
+void ScriptIIfElse      ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
+
+  cbx = cax + 5;
+  cay = cby - 15;
+
+  if (_condition != NULL) {
+    _condition->getRect(cax + 5, cay);
+    cay = _condition->cay - 5;
+    cbx = max(cbx, _condition->cbx + 5);
   }
+    cty = cay;
+    cay = cay - 15;
   if (_then != NULL) {
-    _then->getRect(cax + 5, cby + 5);
-    cby = _then->cby + 15;
-    cty = cby;
+    _then->getRect(cax + 5, cay);
+    cay = _then->cay - 5;
     cbx = max(cbx, _then->cbx + 5);
   }
-  if (_condition != NULL) {
-    _condition->getRect(cax + 5, cby + 5);
-    cby = _condition->cby + 20;
-    cbx = max(cbx, _condition->cbx + 5);
+    cey = cay;
+    cay = cay - 15;
+  if (_else != NULL) {
+    _else->getRect(cax + 5, cay);
+    cay = _else->cay - 5;
+    cbx = max(cbx, _else->cbx + 5);
   }
 }
-void ScriptILoop::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
-    if (_code != NULL) {
-    _code->getRect(cax + 5, cby + 5);
-    cby = _code->cby + 5;
-    cbx = max(cbx, _code->cbx + 5);
-  }
-  if (_condition != NULL) {
-    _condition->getRect(cax + 5, cby + 5);
-    cby = _condition->cby + 5;
-    cbx = max(cbx, _condition->cbx + 5);
-  }
+void ScriptILoop        ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
 
+  cbx = cax + 5;
+  cay = cby - 15;
+
+    if (_code != NULL) {
+      _code->getRect(cax + 5, cay);
+      cay = _code->cay - 5;
+      cbx = max(cbx, _code->cbx + 5);
+  }
+      cdy = cay;
+      cay = cay - 15;
+  if (_condition != NULL) {
+    _condition->getRect(cax + 5, cay);
+    cay = _condition->cay - 5;
+    cbx = max(cbx, _condition->cbx + 5);
+  }
 }
-void ScriptIAssign::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
+void ScriptIAssign      ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
+
+  cbx = cax + 5;
+  cay = cby - 5;
+
   if (_to != NULL) {
-    _to->getRect(cbx + 5, cay + 5);
-    cbx = _to->cbx + 20;
+    _to->getRect(cbx, cby - 5);
+    cbx = _to->cbx + 5;
+    cbx = cbx + 15;
     cex = cbx;
-    cby = max(cby, _to->cby + 5);
+    cay = min(cay, _to->cay - 5);
   }
   if (_val != NULL) {
-    _val->getRect(cbx + 5, cay + 5);
+    _val->getRect(cbx, cby - 5);
     cbx = _val->cbx + 5;
-    cby = max(cby, _val->cby + 5);
+    cay = min(cay, _val->cay - 5);
   }
-
 }
 /*void ScriptICopy::getRect(int offsetX, int offsetY) {
   cax = offsetX;
@@ -965,88 +1097,105 @@ void ScriptIAssign::getRect(int offsetX, int offsetY) {
     cby = max(cby, _to->cby + 5);
   }
 }*/
-void ScriptIConstant::getRect(int offsetX, int offsetY) {
+void ScriptIConstant    ::getRect(int offsetX, int offsetY) {
   cax = offsetX;
-  cay = offsetY;
-  cbx = cax + 10*_val->_data->getString().length();
-  cby = cay + 15;
+  cby = offsetY;
+  if(_val) {
+    cbx = cax + 10 * _val->_data->getString().length();
+  } else {
+    cbx = cax + 10;
+  }
+  cay = cby - 15;
 }
-void ScriptIMath::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
+void ScriptIMath        ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
+
+  cbx = cax + 5;
+  cay = cby - 5;
+
   if (_arg1 != NULL) {
-    _arg1->getRect(cbx + 5, cay + 5);
-    cbx = _arg1->cbx + 20;
+    _arg1->getRect(cbx, cby - 5);
+    cbx = _arg1->cbx + 5;
+    cbx = cbx + 15;
     cox = cbx;
-    cby = max(cby, _arg1->cby + 5);
+    cay = min(cay, _arg1->cay - 5);
   }
   if (_arg2 != NULL) {
-    _arg2->getRect(cbx + 5, cay + 5);
+    _arg2->getRect(cbx, cby - 5);
     cbx = _arg2->cbx + 5;
-    cby = max(cby, _arg2->cby + 5);
+    cay = min(cay, _arg2->cay - 5);
   }
 }
-void ScriptILogic::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
+void ScriptILogic       ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
+
+  cbx = cax + 5;
+  cay = cby - 5;
+
   if (_arg1 != NULL) {
-    _arg1->getRect(cbx + 5, cay + 5);
-    cbx = _arg1->cbx + 20;
-    cox = cbx;
-    cby = max(cby, _arg1->cby + 5);
+    _arg1->getRect(cbx, cby - 5);
+    cbx = _arg1->cbx + 5;
+    cay = min(cay, _arg1->cay - 5);
   }
+  cbx = cbx + 15;
+  cox = cbx;
   if (_arg2 != NULL) {
-    _arg2->getRect(cbx + 5, cay + 5);
+    _arg2->getRect(cbx, cby - 5);
     cbx = _arg2->cbx + 5;
-    cby = max(cby, _arg2->cby + 5);
+    cay = min(cay, _arg2->cay - 5);
   }
 }
-void ScriptIVariable::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
+void ScriptIVariable    ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
+
   cbx = cax + 100;
-  cby = cay + 15;
+  cay = cby - 15;
 }
-void ScriptIIndex::getRect(int offsetX, int offsetY) {
-  cax = cbx = offsetX;
-  cay = cby = offsetY;
+void ScriptIIndex       ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
+
+  cbx = cax + 5;
+  cay = cby - 5;
+
   if (_arg != NULL) {
-    _arg->getRect(cbx + 5, cay + 5);
+    _arg->getRect(cbx, cay);
     cbx = _arg->cbx + 5;
-    cby = max(cby, _arg->cby + 5);
+    cay = min(cay, _arg->cay - 5);
   }
   if (_ind != NULL) {
-    _ind->getRect(cbx + 5, cay + 5);
+    _ind->getRect(cbx, cay);
     cbx = _ind->cbx + 5;
-    cby = max(cby, _ind->cby + 5);
+    cay = min(cay, _ind->cay - 5);
   }
 }
 void ScriptIFunctionCall::getRect(int offsetX, int offsetY) {
   //getRect();
 }
-void ScriptIAPICall::getRect(int offsetX, int offsetY) {
+void ScriptIAPICall     ::getRect(int offsetX, int offsetY) {
   //getRect();
 }
-void ScriptIBlock::getRect(int offsetX, int offsetY) {
-  //getRect();
-  cax = cbx = offsetX;
-  cbx += 5;
-  cay = cby = offsetY;
-  auto it = _instructions.end();
+void ScriptIBlock       ::getRect(int offsetX, int offsetY) {
+  cax = offsetX;
+  cby = offsetY;
 
-  while(it != _instructions.begin()) {
-    --it;
-    (*it)->getRect(cax + 5, cby + 5);
-    cby = (*it)->cby;
+  cbx = cax + 5;
+  cay = cby - 5;
+
+  auto it = _instructions.begin();
+
+  while(it != _instructions.end()) {
+    (*it)->getRect(cax + 5, cay);
+    cay = (*it)->cay - 5;
     cbx = max(cbx, (*it)->cbx + 5);
+    ++it;
   }
-  cby = cby + 5;
 }
 
-void ScriptInstruction::render(ScriptGUI* base, int depth) {
-  throw 1;
-}
-void ScriptGUIBase::renderBg(ScriptGUI* base, int depth) {
+void ScriptGUIBase    ::renderBg(ScriptGUI* base, int depth) {
   if (depth % 2) {
     setColor(base->bgcolor_odd);
   }
@@ -1060,7 +1209,10 @@ void ScriptGUIBase::renderBg(ScriptGUI* base, int depth) {
   glVertex2d(cax, cby);
   glEnd();
 }
-void ScriptIIfElse::render(ScriptGUI* base, int depth) {
+void ScriptInstruction  ::render(ScriptGUI* base, int depth) {
+  throw 1;
+}
+void ScriptIIfElse      ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
   renderBitmapString(cax + 5, cby - 15 , "IF", base->textColor, false);
@@ -1070,25 +1222,27 @@ void ScriptIIfElse::render(ScriptGUI* base, int depth) {
   renderBitmapString(cax + 5, cey - 10, "ELSE", base->textColor, false);
   _else->render(base, depth + 1);
 }
-void ScriptILoop::render(ScriptGUI* base, int depth) {
+void ScriptILoop        ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
+  renderBitmapString(cax + 5, cby - 15, "WHILE", base->textColor, false);
   _condition->render(base, depth + 1);
+  renderBitmapString(cax + 5, cdy - 10, "DO", base->textColor, false);
   _code->render(base, depth + 1);
 }
-void ScriptIAssign::render(ScriptGUI* base, int depth) {
+void ScriptIAssign      ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
   _val->render(base, depth + 1);
   renderBitmapString(cex - 10, (cay+cby)/2, "=", base->textColor, true);
   _to->render(base, depth + 1);
 }
-void ScriptIConstant::render(ScriptGUI* base, int depth) {
+void ScriptIConstant    ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
   renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, _val->_data->getString(), base->textColor, true);
 }
-void ScriptIMath::render(ScriptGUI* base, int depth) {
+void ScriptIMath        ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
   string operb = "";
@@ -1161,28 +1315,56 @@ void ScriptIMath::render(ScriptGUI* base, int depth) {
       break;
   }
 
-  renderBitmapString(cax, (cay + cby) / 2, operb, base->textColor, false);
+  renderBitmapString(cax, (cay + cby) / 2, operb, base->textColor, true);
   _arg1->render(base, depth + 1);
-  if(_arg2 != NULL) {
+  if(_arg2 != NULL && _oper < 16) {
     renderBitmapString(cox - 10, (cay + cby) / 2, operm, base->textColor, true);
     _arg2->render(base, depth + 1);
   }
 }
-void ScriptILogic::render(ScriptGUI* base, int depth) {
+void ScriptILogic       ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
+  string operb = "";
+  string operm = "";
+  switch (_oper) {
+    case Operation::AND:
+      operm = "&";
+      break;
+    case Operation::NAND:
+      operm = "!&";
+      break;
+    case Operation::OR:
+      operm = "|";
+      break;
+    case Operation::NOR:
+      operm = "!|";
+      break;
+    case Operation::XOR:
+      operm = "^";
+      break;
+    case Operation::NXOR:
+      operm = "!^";
+      break;
+    case Operation::NOT:
+      operb = "!";
+      break;
+  }
+
+  renderBitmapString(cax, (cay + cby) / 2, operb, base->textColor, true);
   _arg1->render(base, depth + 1);
-  if (_arg2 != NULL) {
+  if (_arg2 != NULL && _oper < 16) {
+    renderBitmapString(cox - 10, (cay + cby) / 2, operm, base->textColor, true);
     _arg2->render(base, depth + 1);
   }
 }
-void ScriptIVariable::render(ScriptGUI* base, int depth) {
+void ScriptIVariable    ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
   renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, _arg, base->textColor, true);
 
 }
-void ScriptIIndex::render(ScriptGUI* base, int depth) {
+void ScriptIIndex       ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
   _arg->render(base, depth + 1);
@@ -1191,14 +1373,18 @@ void ScriptIIndex::render(ScriptGUI* base, int depth) {
 void ScriptIFunctionCall::render(ScriptGUI* base, int depth) {
 
 }
-void ScriptIAPICall::render(ScriptGUI* base, int depth) {
+void ScriptIAPICall     ::render(ScriptGUI* base, int depth) {
 
 }
-void ScriptIBlock::render(ScriptGUI* base, int depth) {
+void ScriptIBlock       ::render(ScriptGUI* base, int depth) {
   if(!base->dragging) {
     renderBg(base, depth);
   } else {
-    setColor(0xff00ff00);
+    if(insertingIn) {
+      setColor(0xff0000ff);
+    } else {
+      setColor(0xff00ff00);
+    }
     glBegin(GL_QUADS);
     glVertex2d(cax, cay);
     glVertex2d(cbx, cay);
@@ -1404,6 +1590,20 @@ int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   if (!isIn(mx, my)) {
     return 0;
   }
+  if (evt._type == evt.evt_pressed && evt._key._type == evt._key.type_key) {
+    if (evt._key._keycode == 8 && _arg.size()) {
+      _arg.pop_back();
+      return 3;
+    } else {
+      if (textValidator(_arg, _arg.size(), evt._key._keycode)) {
+        if(down.find(key_location(112, key::type_special, 0, 0)) != down.end()) { //LShift
+          evt._key._keycode = toupper(evt._key._keycode);
+        }
+        _arg.push_back(evt._key._keycode);
+        return 3;
+      }
+    }
+  }
   return 0;
 }
 int ScriptIIndex       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
@@ -1437,12 +1637,12 @@ int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
         return res;
       }
       ++it;
-      if (!(res & 1) && evt._key._type == evt._key.type_mouse && evt._type == evt.evt_down && evt._key._keycode == 0 && base->editor && base->dragging == NULL) { //LDOWN
+      if (evt._key._type == evt._key.type_mouse && evt._type == evt.evt_down && evt._key._keycode == 0 && base->editor && base->dragging == NULL) { //LDOWN
         auto it2 = it;
         --it2;
         base->dragging = *it2;
         _instructions.erase(it2);
-        base->getRect(base->cax, base->cay);
+        base->getRect(base->cax, base->cby);
         return 3;
       }
     } else {
@@ -1452,18 +1652,12 @@ int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
 
   if (evt._key._type == evt._key.type_mouse && evt._type == evt.evt_up && evt._key._keycode == 0 && base->editor && base->dragging != NULL) { //LDOWN
     auto it = _instructions.begin();
-    while(it != _instructions.end()) {
-      if(my >= (*it)->cby) {
-        _instructions.insert(it, base->dragging);
-        base->dragging = NULL;
-        base->getRect(base->cax, base->cay);
-        return 3;
-      }
+    while(it != _instructions.end() && my < (*it)->cby) {
       ++it;
     }
     _instructions.insert(it, base->dragging);
     base->dragging = NULL;
-    base->getRect(base->cax, base->cay);
+    base->getRect(base->cax, base->cby);
     return 3;
   }
 

@@ -5,8 +5,6 @@
 class Container : public GUIElement {
 public:
   GUIElement* element;
-  int ox;
-  int oy;
   int mxo;
   int myo;
   bool mid = false;
