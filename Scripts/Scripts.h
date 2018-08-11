@@ -6,103 +6,242 @@
 #include "../Maths/FlowSystem.h"
 #endif
 
+int jumpAfterClosing(const string& data, int open);
+
+char unescapeChar(const string& data, int& from);
+
+string escapeChar(char c);
+
+/// <summary>
+/// Escape sensitive charates in string
+/// Characters escaped: are: \" \'
+/// </summary>
+/// <param name="data">String to escape</param>
+/// <param name="from">First character index</param>
+/// <param name="to">Last character index (not included)</param>
+/// <returns>Escaped string</returns>
+string escape(const string& data, int from = 0, int to = -1);
+
+string unescape(const string& data, int from = 0, int to = -1);
+
+class ScriptRunner {
+  int energyLeft;
+  string error;
+};
+
+class ScriptDataBase;
+
+class ScriptDataBool;
+class ScriptDataChar;
+class ScriptDataInteger;
+class ScriptDataFloat;
+class ScriptDataString;
+class ScriptDataArray;
+class ScriptDataDict;
+
+class ScriptData {
+public:
+  ScriptData();
+  ScriptData(ScriptDataBase* val);
+  ScriptDataBase* _val;
+  size_t _instances;
+  void fromString(const string& s, int& from);
+  string toString();
+  ScriptData* CopyContent();
+  ScriptDataBool* asBool();
+  ScriptDataChar* asChar();
+  ScriptDataInteger* asInt();
+  ScriptDataFloat* asFloat();
+  ScriptDataString* asStr();
+  ScriptDataArray* asArray();
+  ScriptDataDict* asDict();
+
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
+
+  ~ScriptData();
+};
+
 class ScriptDataBase {
 public:
   enum VarType {
     TNULL = 0, //Nothing
-    TNUMERIC = 1,
-    TSTRING = 2,
-    TCHAR = 3,
-    TBOOLEAN = 4,
-    TARRAY = 5,
-    TVECTOR = 6
+    TBOOLEAN = 1,
+    TCHAR = 2,
+    TINTEGER = 3,
+    TFLOAT = 4,
+    TSTRING = 5,
+    TARRAY = 6,
+    TDICT = 7
   };
-  virtual VarType type() {
-    throw 1;
-    return TNULL;
-  }
-  virtual string getString() {
-    throw 1;
-    return "0";
-  }
+  virtual VarType type();
+  virtual ScriptDataBase* CopyContent();
+  virtual string toString();
+  virtual void fromString(const string& s, int& from);
+
+  ScriptData* _up;
+
+  virtual ScriptData* toBool();
+  virtual ScriptData* toChar();
+  virtual ScriptData* toInt();
+  virtual ScriptData* toFloat();
+  virtual ScriptData* toStr();
+  virtual ScriptData* toArray();
+  virtual ScriptData* toDict();
+
+  ScriptDataBase();
+  ~ScriptDataBase();
 };
 
-class ScriptDataNumber : public ScriptDataBase {
+class ScriptDataBool : public ScriptDataBase {
 public:
-  double _num;
-  ScriptDataNumber(double num) {
-    _num = num;
+  bool _bl;
+  ScriptDataBool();
+  ScriptDataBool(bool bl) {
+    _bl = bl;
   }
-  virtual VarType type() {
-    return TNUMERIC;
+  ScriptDataBool(string str) {
+    int start = 0;
+    fromString(str, start);
   }
-  string getString() {
-    return to_string(_num);
-  }
-};
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
 
-class ScriptDataString : public ScriptDataBase {
-public:
-  string _str;
-  ScriptDataString(string str) {
-    _str = str;
-  }
-  virtual VarType type() {
-    return TSTRING;
-  }
-  string getString() {
-    return _str;
-  }
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
 };
 class ScriptDataChar : public ScriptDataBase {
 public:
   char _chr;
-  ScriptDataChar(char chr) {
-    _chr = chr;
-  }
-  virtual VarType type() {
-    return TCHAR;
-  }
-  string getString() {
-    return "" + _chr;
-  }
-};
-class ScriptDataBool : public ScriptDataBase {
-public:
-  bool _bl;
-  ScriptDataBool(bool bl) {
-    _bl = bl;
-  }
-  virtual VarType type() {
-    return TBOOLEAN;
-  }
-  string getString() {
-    return (_bl)?"1":"0";
-  }
-};
+  ScriptDataChar();
+  ScriptDataChar(char chr);
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
 
-class ScriptDataVector : public ScriptDataBase {
-public:
-  fVec3 _vec;
-  ScriptDataVector(fVec3 vec) {
-    _vec = vec;
-  }
-  virtual VarType type() {
-    return TVECTOR;
-  }
-  string getString() {
-    return to_string(_vec.x) + ";" + to_string(_vec.y) + ";" + to_string(_vec.z);
-  }
-};
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
 
-class ScriptData {
+};
+class ScriptDataInteger : public ScriptDataBase {
+public:
+  uint64_t _num;
+  ScriptDataInteger();
+  ScriptDataInteger(int num) {
+    _num = num;
+  }
+  ScriptDataInteger(string str) {
+    int start = 0;
+    fromString(str, start);
+  }
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
+
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
+};
+class ScriptDataFloat : public ScriptDataBase {
+public:
+  double _num;
+  ScriptDataFloat();
+  ScriptDataFloat(double num) {
+    _num = num;
+  }
+  ScriptDataFloat(string str) {
+    int start = 0;
+    fromString(str, start);
+  }
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
+
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
+};
+class ScriptDataString : public ScriptDataBase {
+public:
+  string _str;
+  ScriptDataString();
+  ScriptDataString(string s) {
+    _str = s;
+  }
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
+
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
+};
+class ScriptDataArray : public ScriptDataBase {
+public:
+  vector<ScriptData*> _data;
+  ScriptDataArray();
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
+
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
+};
+class ScriptDataDict : public ScriptDataBase {
 public:
   map<string, ScriptData*> _elems;
-  ScriptDataBase* _data;
-  size_t _instances;
-  ScriptData();
-  void CopyContent(ScriptData* _from);
-  ~ScriptData();
+  ScriptDataDict();
+  VarType type();
+  ScriptDataBase* CopyContent();
+  string toString();
+  void fromString(const string& s, int& from);
+
+  ScriptData* toBool();
+  ScriptData* toChar();
+  ScriptData* toInt();
+  ScriptData* toFloat();
+  ScriptData* toStr();
+  ScriptData* toArray();
+  ScriptData* toDict();
 };
 
 /*namespace ScriptApiFunctions {
@@ -167,12 +306,16 @@ public:
 
   bool editor = true;
   ScriptInstruction* dragging = NULL;
-  iVec2 dragOffset;
+  
+  int cox, coy;
+  iVec2 dragOffset, dragPos;
+  bool mid = false;
+
 
   ScriptGUI(string name, LocationData llocation, colorargb lbgcolorodd, colorargb lactivecolor, colorargb ltextcolor, colorargb lbgcoloreven);
 
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
-  void getRect(int offsetX, int offsetY);
+  void getRect();
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
   int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
@@ -182,6 +325,8 @@ public:
 class ScriptGUIBase {
 public:
   int cax, cay, cbx, cby;
+
+  bool insertingIn = false;
 
   bool isIn(int mx, int my);
   virtual void getRect(int lcax, int lcay);
@@ -208,7 +353,6 @@ public:
     //throw 1;
   }
 #ifdef SCRIPT_GUI
-  bool insertingIn = false;
 
   virtual void getRect(int offsetX, int offsetY);
   virtual int mouseEnter(int state);
@@ -289,7 +433,8 @@ public:
 
 class ScriptIConstant : public ScriptInstruction {
 public:
-  ScriptData* _val;
+  //ScriptDataBase* _val;
+  string _val;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
   ~ScriptIConstant();
@@ -329,7 +474,7 @@ public:
     ACOS = 21,
     ATAN = 22
   };
-  Operation _oper;
+  int _oper;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
   ~ScriptIMath();
@@ -395,6 +540,7 @@ public:
   void load(xml_node<> *data);
   ~ScriptIIndex();
 #ifdef SCRIPT_GUI
+  int cix;
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);

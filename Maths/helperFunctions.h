@@ -522,7 +522,7 @@ enum {
   Trim_Space   = 0x08
 };
 
-bool trimChar(char& c, int flags);
+bool trimChar(const char& c, int flags);
 
 string trimStr(string& in, int flags = Trim_Control | Trim_NewLine | Trim_CarrRet | Trim_Space);
 

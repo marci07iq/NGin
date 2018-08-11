@@ -7,7 +7,7 @@
 ScriptData* ScriptApiFunctions::num_to_str(ScriptData& _args) {
   ScriptData* res = new ScriptData();
   res->CopyContent(&_args);
-  res->type = ScriptData::TSTRING;
+  res->type = ScriptDataBase::TSTRING;
   return res;
 }
 
@@ -18,7 +18,7 @@ ScriptData* ScriptApiFunctions::num_to_str(ScriptData& _args) {
 ScriptData* ScriptApiFunctions::str_to_num(ScriptData& _args) {
   ScriptData* res = new ScriptData();
   res->CopyContent(&_args);
-  res->type = ScriptData::TNUMERIC;
+  res->type = ScriptDataBase::TFLOAT;
   return res;
 }
 
@@ -28,9 +28,9 @@ ScriptData* ScriptApiFunctions::str_to_num(ScriptData& _args) {
 //Root: STRING result
 ScriptData* ScriptApiFunctions::str_concat(ScriptData& _args) {
   ScriptData* res = new ScriptData();
-  res->type = ScriptData::TSTRING;
+  res->type = ScriptDataBase::TSTRING;
   for (auto&& it : _args._elems) {
-    res->_data.fromType<string>(res->_data.toType<string>() + it.second->_data.toType<string>());
+    res->data.fromType<string>(res->data.toType<string>() + it.secondScriptDataFloat.toType<string>());
   }
   return res;
 }
@@ -41,8 +41,8 @@ ScriptData* ScriptApiFunctions::str_concat(ScriptData& _args) {
 //Root: NUMERIC result, string length
 ScriptData* ScriptApiFunctions::str_len(ScriptData& _args) {
   ScriptData* res = new ScriptData();
-  res->type = ScriptData::TNUMERIC;
-  res->_data.fromType<int>(_args._data.toType<string>().length());
+  res->type = ScriptDataBase::TFLOAT;
+  res->data.fromType<int>(_args._data.toType<string>().length());
   return res;
 }
 
@@ -53,8 +53,8 @@ ScriptData* ScriptApiFunctions::str_len(ScriptData& _args) {
 //str STRING
 ScriptData* ScriptApiFunctions::str_index(ScriptData& _args) {
   ScriptData* res = new ScriptData();
-  res->type = ScriptData::TNUMERIC;
-  res->_data.fromType<char>(_args._elems["str"]->_data.toType<string>()[_args._elems["i"]->_data.toType<int>()]);
+  res->type = ScriptDataBase::TFLOAT;
+  res->data.fromType<char>(_args._elems["str"]ScriptDataFloat.toType<string>()[_args._elems["i"]ScriptDataFloat.toType<int>()]);
   return res;
 }
 
@@ -65,84 +65,290 @@ ScriptData* ScriptApiFunctions::str_index(ScriptData& _args) {
 //r NUMERIC
 ScriptData* ScriptApiFunctions::num_rand(ScriptData& _args) {
   ScriptData* res = new ScriptData();
-  res->type = ScriptData::TNUMERIC;
-  double a = _args._elems["a"]->_data.toType<double>();
-  double b = _args._elems["b"]->_data.toType<double>();
-  res->_data.fromType<double>(a + (b - a)*ran1());
+  res->type = ScriptDataBase::TFLOAT;
+  double a = _args._elems["a"]ScriptDataFloat.toType<double>();
+  double b = _args._elems["b"]ScriptDataFloat.toType<double>();
+  res->data.fromType<double>(a + (b - a)*ran1());
   return res;
 }*/
 
-ScriptData::ScriptData() {
-  _instances = 1;
+int jumpAfterClosing(const string & data, int open, char end) {
+  while (open < data.length() && data[open] != end) {
+    if (data[open] == '\\') {
+      open += 2;
+    } else {
+      open = jumpAfterClosing(data, open);
+    }
+  }
+  return open;
 }
-/*ScriptData* ScriptData::copy() {
-  ScriptData* nval = new ScriptData();
-  nval->_instances = 1;
-  nval->type = type;
-  nval->_data._len = _data._len;
-  nval->_data._data = new unsigned char[_data._len];
-  for (int i = 0; i < _data._len; i++) {
-    nval->_data._data[i] = _data._data[i];
+
+
+int jumpAfterClosing(const string & data, int open) {
+  char end = '\0';
+  switch (data[open]) {
+    case '(':
+      end = ')';
+      break;
+    case '[':
+      end = ']';
+      break;
+    case '{':
+      end = '}';
+      break;
+    case '\"':
+      end = '\"';
+      break;
+    case '\'':
+      end = '\'';
+      break;
+    
   }
-  for (auto&& it : _elems) {
-    nval->_elems.insert({ it.first, it.second->copy()});
+  ++open;
+  if (end == '\0') {
+    return open;
   }
-  return nval;
-}*/
-void ScriptData::CopyContent(ScriptData* _from) {
-  if (_data != NULL) {
-    delete _data;
-    _data = NULL;
-  }
-  switch (_from->_data->type())
-  {
-  case ScriptDataBase::TNULL:
-    _data = NULL;
-    break;
-  case ScriptDataBase::TNUMERIC:
-    _data = new ScriptDataNumber(((ScriptDataNumber*)_from->_data)->_num);
-    break;
-  case ScriptDataBase::TSTRING:
-    _data = new ScriptDataString(((ScriptDataString*)_from->_data)->_str);
-    break;
-  case ScriptDataBase::TCHAR:
-    _data = new ScriptDataChar(((ScriptDataChar*)_from->_data)->_chr);
-    break;
-  case ScriptDataBase::TBOOLEAN:
-    _data = new ScriptDataBool(((ScriptDataBool*)_from->_data)->_bl);
-    break;
-  case ScriptDataBase::TARRAY:
-    _data = NULL;
-    break;
-  case ScriptDataBase::TVECTOR:
-    _data = new ScriptDataVector(((ScriptDataVector*)_from->_data)->_vec);
-    break;
-  default:
-    throw 1;
-    _data = NULL;
-    break;
-  }
-  while (_elems.size()) {
-    DeletePtr(_elems.begin()->second);
-    _elems.erase(_elems.begin());
-  }
-  for (auto&& it : _from->_elems) {
-    ScriptData* nval = new ScriptData();
-    nval->CopyContent(it.second);
-    _elems.insert({ it.first, nval });
-  }
+  return jumpAfterClosing(data, open, end);
 }
-ScriptData::~ScriptData() {
-  delete _data;
-  if (_instances != 0) {
-    LOG LERROR SCRIPTS "Script data instances " << _instances << " when deleted" END;
+
+char unescapeChar(const string & data, int & from) {
+  ++from;
+  if (data[from - 1] == '\\') {
+    ++from;
+
+    switch (data[from - 1]) {
+      case '\'':
+        return '\'';
+        break;
+      case '\"':
+        return ('\"');
+        break;
+      case '?':
+        return ('?');
+        break;
+      case '\\':
+        return ('\\');
+        break;
+      case 'a':
+        return ('\a');
+        break;
+      case 'b':
+        return ('\b');
+        break;
+      case 'f':
+        return ('\f');
+        break;
+      case 'n':
+        return ('\n');
+        break;
+      case 'r':
+        return ('\r');
+        break;
+      case 't':
+        return ('\t');
+        break;
+      case 'v':
+        return ('\v');
+        break;
+      default:
+        return data[from - 1];
+    }
   }
-  while (_elems.size()) {
-    DeletePtr(_elems.begin()->second);
-    _elems.erase(_elems.begin());
+  return data[from - 1];
+}
+string escapeChar(char c) {
+  switch (c) {
+    case '\'':
+      return "\\\'";
+      break;
+    case '\"':
+      return "\\\"";
+      break;
+    case '\?':
+      return "\\?";
+      break;
+    case '\\':
+      return "\\\\";
+      break;
+    case '\a':
+      return "\\a";
+      break;
+    case '\b':
+      return "\\b";
+      break;
+    case '\f':
+      return "\\f";
+      break;
+    case '\n':
+      return "\\n";
+      break;
+    case '\r':
+      return "\\r";
+      break;
+    case '\t':
+      return "\\t";
+      break;
+    case '\v':
+      return "\\v";
+      break;
+    default:
+      return string(1, c);
   }
 }
 
+/// <summary>
+/// Escape sensitive charates in string
+/// Characters escaped: are: \" \'
+/// </summary>
+/// <param name="data">String to escape</param>
+/// <param name="from">First character index</param>
+/// <param name="to">Last character index (not included)</param>
+/// <returns>Escaped string</returns>
+string escape(const string & data, int from, int to) {
+  if (to < 0) {
+    to = data.size() + 1 + to;
+  }
+  string res;
+  while (from < to) {
+    res += escapeChar(data[from]);
+    ++from;
+  }
+
+  return res;
+}
+string unescape(const string & data, int from, int to) {
+  if (to < 0) {
+    to = data.size() + 1 + to;
+  }
+
+  string res;
+  while (from < to) {
+    res += unescapeChar(data, from);
+  }
+  return res;
+}
+
+ScriptData::ScriptData() {
+  _instances = 1;
+  _val = NULL;
+}
+ScriptData::ScriptData(ScriptDataBase * val) {
+  _val = val;
+  _instances = 1;
+  val->_up = this;
+}
+void ScriptData::fromString(const string& s, int& from) {
+  while (trimChar(s[from], Trim_Space)) {
+    ++from;
+  }
+  ScriptDataBase* res = NULL;
+  switch (s[from]) {
+    case '\'':
+      res = new ScriptDataChar();
+      res->fromString(s, from);
+      break;
+    case '\"':
+      res = new ScriptDataString();
+      res->fromString(s, from);
+      break;
+    case '[':
+      res = new ScriptDataArray();
+      res->fromString(s, from);
+      break;
+    case '{':
+      res = new ScriptDataDict();
+      res->fromString(s, from);
+      break;
+    case 't':
+    case 'T':
+    case 'f':
+    case 'F':
+      res = new ScriptDataBool();
+      res->fromString(s, from);
+      break;
+    default:
+      int sfrom = from;
+
+      bool p = false;
+      while (sfrom < s.length() && (('0' <= s[sfrom] && s[sfrom] <= '9') || s[sfrom] == '-' || s[sfrom] == 'e' || s[sfrom] == '.')) {
+        if (s[sfrom] == '.') {
+          p = true;
+        }
+        ++sfrom;
+      }
+
+      if (p) {
+        res = new ScriptDataFloat();
+        res->fromString(s, from);
+      } else {
+        res = new ScriptDataInteger();
+        res->fromString(s, from);
+      }
+  }
+  if (res != NULL) {
+    if (_val) {
+      delete _val;
+    }
+    _val = res;
+    res->_up = this;
+  }
+}
+string ScriptData::toString() {
+  if (_val) {
+    return _val->toString();
+  }
+  return "";
+}
+ScriptData * ScriptData::CopyContent() {
+  return new ScriptData(_val->CopyContent());
+}
+ScriptDataBool * ScriptData::asBool() {
+  return (ScriptDataBool*)_val;
+}
+ScriptDataChar * ScriptData::asChar() {
+  return (ScriptDataChar*)_val;
+}
+ScriptDataInteger * ScriptData::asInt() {
+  return (ScriptDataInteger*)_val;
+}
+ScriptDataFloat * ScriptData::asFloat() {
+  return (ScriptDataFloat*)_val;
+}
+ScriptDataString * ScriptData::asStr() {
+  return (ScriptDataString*)_val;
+}
+ScriptDataArray * ScriptData::asArray() {
+  return (ScriptDataArray*)_val;
+}
+ScriptDataDict * ScriptData::asDict() {
+  return (ScriptDataDict*)_val;
+}
+ScriptData * ScriptData::toBool() {
+  return _val->toBool();
+}
+ScriptData * ScriptData::toChar() {
+  return _val->toChar();
+}
+ScriptData * ScriptData::toInt() {
+  return _val->toInt();
+}
+ScriptData * ScriptData::toFloat() {
+  return _val->toFloat();
+}
+ScriptData * ScriptData::toStr() {
+  return _val->toStr();
+}
+ScriptData * ScriptData::toArray() {
+  return _val->toArray();
+}
+ScriptData * ScriptData::toDict() {
+  return _val->toDict();
+}
+ScriptData::~ScriptData() {
+  if(_val != NULL) {
+    delete _val;
+  }
+}
 
 ScriptData* CopyPtr(ScriptData* _in) {
   if (_in != NULL) {
@@ -155,13 +361,527 @@ bool DeletePtr(ScriptData* _in) {
     _in->_instances -= 1;
     if (_in->_instances == 0) {
       delete _in;
+      _in = NULL;
       return true;
     }
   }
+  _in = NULL;
   return false;
 }
-map<string, APICall> apiMap;
 
+ScriptDataBase::ScriptDataBase() {
+}
+ScriptDataBase::VarType ScriptDataBase::type() {
+  throw 1;
+  return TNULL;
+}
+ScriptDataBase * ScriptDataBase::CopyContent() {
+  return NULL;
+}
+string ScriptDataBase::toString() {
+  throw 1;
+  return "null";
+}
+void ScriptDataBase::fromString(const string & s, int& from) { //Try to decode from string
+
+}
+ScriptData * ScriptDataBase::toBool() {
+  return NULL;
+}
+ScriptData * ScriptDataBase::toChar() {
+  return NULL;
+}
+ScriptData * ScriptDataBase::toInt() {
+  return NULL;
+}
+ScriptData * ScriptDataBase::toFloat() {
+  return NULL;
+}
+ScriptData * ScriptDataBase::toStr() {
+  return NULL;
+}
+ScriptData * ScriptDataBase::toArray() {
+  return NULL;
+}
+ScriptData * ScriptDataBase::toDict() {
+  return NULL;
+}
+ScriptDataBase::~ScriptDataBase() {
+
+}
+
+ScriptDataBool::ScriptDataBool() {
+  _bl = false;
+}
+ScriptDataBase::VarType ScriptDataBool::type() {
+  return TBOOLEAN;
+}
+ScriptDataBase * ScriptDataBool::CopyContent() {
+  ScriptDataBool* res = new ScriptDataBool();
+  res->_bl = _bl;
+  return res;
+}
+string ScriptDataBool::toString() {
+  return _bl ? "true" : "false";
+}
+void ScriptDataBool::fromString(const string & s, int& from) { //Try to decode from string
+  _bl = false;
+  if (s.substr(from, 4) == "true") {
+    _bl = true;
+    from += 4;
+    return;
+  }
+  if (s.substr(from, 4) == "True") {
+    _bl = true;
+    from += 4;
+    return;
+  }
+  if (s.substr(from, 5) == "false") {
+    _bl = true;
+    from += 5;
+    return;
+  }
+  if (s.substr(from, 5) == "False") {
+    _bl = true;
+    from += 5;
+    return;
+  }
+  _bl = false;
+  ++from;
+}
+ScriptData * ScriptDataBool::toBool() {
+  return CopyPtr(_up);
+}
+ScriptData * ScriptDataBool::toChar() {
+  return new ScriptData(new ScriptDataChar(_bl));
+}
+ScriptData * ScriptDataBool::toInt() {
+  return new ScriptData(new ScriptDataInteger(_bl));
+}
+ScriptData * ScriptDataBool::toFloat() {
+  return new ScriptData(new ScriptDataFloat(_bl));
+}
+ScriptData * ScriptDataBool::toStr() {
+  return new ScriptData(new ScriptDataString(toString()));
+}
+ScriptData * ScriptDataBool::toArray() {
+  return NULL;
+}
+ScriptData * ScriptDataBool::toDict() {
+  return NULL;
+}
+
+ScriptDataChar::ScriptDataChar() {
+}
+ScriptDataChar::ScriptDataChar(char chr) {
+  _chr = chr;
+}
+ScriptDataBase::VarType ScriptDataChar::type() {
+  return TCHAR;
+}
+ScriptDataBase * ScriptDataChar::CopyContent() {
+  ScriptDataChar* res = new ScriptDataChar();
+  res->_chr = _chr;
+  return res;
+}
+string ScriptDataChar::toString() {
+  return "\'" + escapeChar(_chr) + "\'";
+}
+void ScriptDataChar::fromString(const string & s, int& from) { //Try to decode from string
+  ++from;
+  _chr = unescapeChar(s, from);
+  while (s[from] != '\'') {
+    ++from;
+  }
+  ++from;
+}
+ScriptData * ScriptDataChar::toBool() {
+  return new ScriptData(new ScriptDataBool(_chr));
+}
+ScriptData * ScriptDataChar::toChar() {
+  return CopyPtr(_up);
+}
+ScriptData * ScriptDataChar::toInt() {
+  return new ScriptData(new ScriptDataInteger(_chr));
+}
+ScriptData * ScriptDataChar::toFloat() {
+  return new ScriptData(new ScriptDataFloat(_chr));
+}
+ScriptData * ScriptDataChar::toStr() {
+  return new ScriptData(new ScriptDataString(toString()));
+}
+ScriptData * ScriptDataChar::toArray() {
+  return NULL;
+}
+ScriptData * ScriptDataChar::toDict() {
+  return NULL;
+}
+
+ScriptDataInteger::ScriptDataInteger() {
+}
+ScriptDataBase::VarType ScriptDataInteger::type() {
+  return TINTEGER;
+}
+ScriptDataBase * ScriptDataInteger::CopyContent() {
+  ScriptDataInteger* res = new ScriptDataInteger();
+  res->_num = _num;
+  return res;
+}
+string ScriptDataInteger::toString() {
+  return to_string(_num);
+}
+void ScriptDataInteger::fromString(const string & s, int& from) { //Try to decode from string
+  _num = 0;
+  int sign = 1;
+  if (s[from] == '-') {
+    sign = -1;
+    ++from;
+  } else {
+    if (s[from] == '+') {
+      sign = 1;
+      ++from;
+    }
+  }
+  while ('0' <= s[from] && s[from] <= '9') {
+    _num = 10*_num + s[from] - '0';
+    ++from;
+  }
+  _num *= sign;
+
+    int _exp = 0;
+  if (s[from] == 'e') {
+    ++from;
+    while ('0' <= s[from] && s[from] <= '9') {
+      _exp = 10 * _exp + s[from] - '0';
+      ++from;
+    }
+  }
+  for (int i = 0; i < _exp; i++) {
+    _num *= 10;
+  }
+}
+ScriptData * ScriptDataInteger::toBool() {
+  return new ScriptData(new ScriptDataBool(_num));
+}
+ScriptData * ScriptDataInteger::toChar() {
+  return new ScriptData(new ScriptDataChar(_num));
+}
+ScriptData * ScriptDataInteger::toInt() {
+  return CopyPtr(_up);
+}
+ScriptData * ScriptDataInteger::toFloat() {
+  return new ScriptData(new ScriptDataFloat(_num));
+}
+ScriptData * ScriptDataInteger::toStr() {
+  return new ScriptData(new ScriptDataString(toString()));
+}
+ScriptData * ScriptDataInteger::toArray() {
+  return NULL;
+}
+ScriptData * ScriptDataInteger::toDict() {
+  return NULL;
+}
+
+ScriptDataFloat::ScriptDataFloat() {
+}
+ScriptDataBase::VarType ScriptDataFloat::type() {
+  return TFLOAT;
+}
+ScriptDataBase * ScriptDataFloat::CopyContent() {
+  ScriptDataFloat* res = new ScriptDataFloat();
+  res->_num = _num;
+  return res;
+}
+string ScriptDataFloat::toString() {
+  return to_string(_num);
+}
+void ScriptDataFloat::fromString(const string & s, int& from) { //Try to decode from string
+  _num = 0;
+  int sign = 1;
+  double multi = 1;
+  if (s[from] == '-') {
+    sign = -1;
+    ++from;
+  } else {
+    if (s[from] == '+') {
+      sign = 1;
+      ++from;
+    }
+  }
+  while ('0' <= s[from] && s[from] <= '9') {
+    _num = 10 * _num + s[from] - '0';
+    ++from;
+  }
+
+  if (s[from] == '.') {
+    ++from;
+    while ('0' <= s[from] && s[from] <= '9') {
+      _num = 10 * _num + s[from] - '0';
+      multi *= 10;
+      ++from;
+    }
+  }
+
+  _num = _num / multi;
+
+  _num *= sign;
+
+  if (s[from] == 'e') {
+    int _exp = 0;
+    int expsign = 1;
+    ++from;
+    
+    if (s[from] == '-') {
+      expsign = -1;
+      ++from;
+    } else {
+      if (s[from] == '+') {
+        expsign = 1;
+        ++from;
+      }
+    }
+    while ('0' <= s[from] && s[from] <= '9') {
+      _exp = 10 * _exp + s[from] - '0';
+      ++from;
+    }
+    _exp *= expsign;
+
+    _num *= pow(10, _exp);
+  }
+  
+}
+ScriptData * ScriptDataFloat::toBool() {
+  return new ScriptData(new ScriptDataBool(_num));
+}
+ScriptData * ScriptDataFloat::toChar() {
+  return new ScriptData(new ScriptDataChar(_num));
+}
+ScriptData * ScriptDataFloat::toInt() {
+  return new ScriptData(new ScriptDataInteger(_num));
+}
+ScriptData * ScriptDataFloat::toFloat() {
+  return CopyPtr(_up);
+}
+ScriptData * ScriptDataFloat::toStr() {
+  return new ScriptData(new ScriptDataString(toString()));
+}
+ScriptData * ScriptDataFloat::toArray() {
+  return NULL;
+}
+ScriptData * ScriptDataFloat::toDict() {
+  return NULL;
+}
+
+ScriptDataString::ScriptDataString() {
+}
+ScriptDataBase::VarType ScriptDataString::type() {
+  return TSTRING;
+}
+ScriptDataBase * ScriptDataString::CopyContent() {
+  ScriptDataString* res = new ScriptDataString();
+  res->_str = _str;
+  return res;
+}
+string ScriptDataString::toString() {
+  return "\"" + escape(_str) + "\"";
+}
+void ScriptDataString::fromString(const string & s, int& from) { //Try to decode from string
+  int close = jumpAfterClosing(s, from);
+  _str = unescape(s, from + 1, close);
+  from = close + 1;
+}
+ScriptData * ScriptDataString::toBool() {
+  return new ScriptData(new ScriptDataBool(_str));
+}
+ScriptData * ScriptDataString::toChar() {
+  return new ScriptData(new ScriptDataChar(_str[0]));
+}
+ScriptData * ScriptDataString::toInt() {
+  return new ScriptData(new ScriptDataInteger(_str));
+}
+ScriptData * ScriptDataString::toFloat() {
+  return new ScriptData(new ScriptDataFloat(_str));
+}
+ScriptData * ScriptDataString::toStr() {
+  return CopyPtr(_up);
+}
+ScriptData * ScriptDataString::toArray() {
+  ScriptDataArray* a = new ScriptDataArray();
+  for (auto&& it : _str) {
+    a->_data.push_back(new ScriptData(new ScriptDataChar(it)));
+  }
+  return new ScriptData(a);
+}
+ScriptData * ScriptDataString::toDict() {
+  ScriptDataDict* a = new ScriptDataDict();
+  int ai = 0;
+  for (auto&& it : _str) {
+    a->_elems[to_string(ai)] = new ScriptData(new ScriptDataChar(it));
+    ++ai;
+  }
+  return new ScriptData(a);
+
+}
+
+ScriptDataArray::ScriptDataArray() {
+}
+ScriptDataBase::VarType ScriptDataArray::type() {
+  return TARRAY;
+}
+ScriptDataBase * ScriptDataArray::CopyContent() {
+  ScriptDataArray* res = new ScriptDataArray();
+  for (auto&& it : _data) {
+    res->_data.push_back(new ScriptData(it->_val->CopyContent()));
+  }
+  return res;
+}
+string ScriptDataArray::toString() {
+  string res = "[";
+  string append = "";
+  for (auto&& it : _data) {
+    res += append + it->toString();
+    append = ",";
+  }
+  res.push_back(']');
+  return res;
+}
+void ScriptDataArray::fromString(const string & s, int& from) { //Try to decode from string
+  ++from;
+  while (trimChar(s[from], Trim_Space)) {
+    ++from;
+  }
+  while(s[from] != ']') {
+
+    ScriptData * data = new ScriptData();
+    data->fromString(s, from);
+    _data.push_back(data);
+    while (trimChar(s[from], Trim_Space)) {
+      ++from;
+    }
+    if (s[from] == ',') {
+      ++from;
+      while (trimChar(s[from], Trim_Space)) {
+        ++from;
+      }
+    }
+  }
+  ++from;
+}
+ScriptData * ScriptDataArray::toBool() {
+  return NULL;
+}
+ScriptData * ScriptDataArray::toChar() {
+  return NULL;
+}
+ScriptData * ScriptDataArray::toInt() {
+  return NULL;
+}
+ScriptData * ScriptDataArray::toFloat() {
+  return NULL;
+}
+ScriptData * ScriptDataArray::toStr() {
+  return new ScriptData(new ScriptDataString(toString()));
+}
+ScriptData * ScriptDataArray::toArray() {
+  return CopyPtr(_up);
+}
+ScriptData * ScriptDataArray::toDict() {
+  ScriptDataDict* a = new ScriptDataDict();
+  int ai = 0;
+  for (auto&& it : _data) {
+    a->_elems[to_string(ai)] = CopyPtr(it);
+    ++ai;
+  }
+  return new ScriptData(a);
+
+}
+
+ScriptDataDict::ScriptDataDict() {
+}
+ScriptDataBase::VarType ScriptDataDict::type() {
+  return TDICT;
+}
+ScriptDataBase * ScriptDataDict::CopyContent() {
+  ScriptDataDict* res = new ScriptDataDict();
+  for (auto&& it : _elems) {
+    res->_elems[it.first] = new ScriptData(it.second->_val->CopyContent());
+  }
+  return res;
+}
+string ScriptDataDict::toString() {
+  string res = "{";
+  string append = "";
+  for (auto&& it : _elems) {
+    res += append + "\"" + escape(it.first) + "\" : " + it.second->toString();
+    append = ",";
+  }
+  res.push_back('}');
+  return res;
+}
+void ScriptDataDict::fromString(const string & s, int& from) { //Try to decode from string
+  ++from;
+  while (trimChar(s[from], Trim_Space)) {
+    ++from;
+  }
+  while (s[from] != '}') {
+    int close = jumpAfterClosing(s, from);
+    string key = unescape(s, from + 1, close);
+    from = close + 1;
+
+    while (trimChar(s[from], Trim_Space)) {
+      ++from;
+    }
+
+    ++from;
+
+    while (trimChar(s[from], Trim_Space)) {
+      ++from;
+    }
+
+    ScriptData * data = new ScriptData();
+    data->fromString(s, from);
+    _elems.insert({key,data});
+    while (trimChar(s[from], Trim_Space)) {
+      ++from;
+    }
+    if (s[from] == ',') {
+      ++from;
+      while (trimChar(s[from], Trim_Space)) {
+        ++from;
+      }
+    }
+  }
+  ++from;
+}
+ScriptData * ScriptDataDict::toBool() {
+  return NULL;
+}
+ScriptData * ScriptDataDict::toChar() {
+  return NULL;
+}
+ScriptData * ScriptDataDict::toInt() {
+  return NULL;
+}
+ScriptData * ScriptDataDict::toFloat() {
+  return NULL;
+}
+ScriptData * ScriptDataDict::toStr() {
+  return new ScriptData(new ScriptDataString(toString()));
+}
+ScriptData * ScriptDataDict::toArray() {
+  ScriptDataArray* a = new ScriptDataArray();
+  int ai = 0;
+  for (auto&& it : _elems) {
+    a->_data.push_back(CopyPtr(it.second));
+    ++ai;
+  }
+  return new ScriptData(a);
+}
+ScriptData * ScriptDataDict::toDict() {
+  return CopyPtr(_up);
+}
+
+map<string, APICall> apiMap;
 
 ScriptData* ScriptInstruction::run(ScriptData& _args) {
   throw 1;
@@ -173,17 +893,16 @@ void ScriptInstruction::load(xml_node<> *data) {
 
 ScriptData* ScriptIIfElse::run(ScriptData& _args) {
   ScriptData* condition = _condition->run(_args);
-  if (condition->_data->type() == ScriptDataBase::TBOOLEAN) {
-    if (((ScriptDataBool*)condition->_data)->_bl) {
-      DeletePtr(condition);
-      return _then->run(_args);
-    }
-    else {
-      DeletePtr(condition);
-      return _else->run(_args);
-    }
+  ScriptData* conditionb = condition->toBool();
+  DeletePtr(condition);
+  if (conditionb->asBool()->_bl) {
+    DeletePtr(conditionb);
+    return _then->run(_args);
   }
-  throw 1;
+  else {
+    DeletePtr(conditionb);
+    return _else->run(_args);
+  }
   return NULL;
 }
 void ScriptIIfElse::load(xml_node<> *data) {
@@ -194,7 +913,7 @@ void ScriptIIfElse::load(xml_node<> *data) {
   }
   else {
     ScriptIConstant* _false = new ScriptIConstant();
-    _false->_val->_data = new ScriptDataBool(false);
+    _false->_val = "false";//new ScriptDataBool(false);
     condition->_instructions.push_back(_false);
   }
 
@@ -233,16 +952,20 @@ ScriptIIfElse::~ScriptIIfElse() {
 
 ScriptData* ScriptILoop::run(ScriptData& _args) {
   ScriptData* condition = _condition->run(_args);
-  while (condition->_data->type() == ScriptDataBase::TBOOLEAN && ((ScriptDataBool*)condition->_data)->_bl) {
+  ScriptData* conditionb = condition->toBool();
+  DeletePtr(condition);
+  while (conditionb->asBool()->_bl) {
     ScriptData* insres = _code->run(_args);
     if (insres != NULL) {
-      DeletePtr(condition);
+      DeletePtr(conditionb);
       return insres;
     }
-    DeletePtr(condition);
+    DeletePtr(conditionb);
     condition = _condition->run(_args);
+    conditionb = condition->toBool();
+    DeletePtr(condition);
   }
-  DeletePtr(condition);
+  DeletePtr(conditionb);
   return NULL;
 }
 void ScriptILoop::load(xml_node<> *data) {
@@ -253,7 +976,7 @@ void ScriptILoop::load(xml_node<> *data) {
   }
   else {
     ScriptIConstant* _false = new ScriptIConstant();
-    _false->_val->_data = new ScriptDataBool(false);
+    _false->_val = "false";//new ScriptDataBool(false);
     condition->_instructions.push_back(_false);
   }
 
@@ -281,7 +1004,8 @@ ScriptILoop::~ScriptILoop() {
 ScriptData* ScriptIAssign::run(ScriptData& _args) {
   ScriptData* val = _val->run(_args);
   ScriptData* to = _to->run(_args);
-  to->CopyContent(val);
+  to->_val = val->_val->CopyContent();
+  to->_val->_up = to;
   DeletePtr(to);
   DeletePtr(val);
 
@@ -332,114 +1056,109 @@ ScriptICopy::~ScriptICopy() {
 
 ScriptData* ScriptIConstant::run(ScriptData& _args) {
   ScriptData* res = new ScriptData();
-  res->CopyContent(_val);
+  int start = 0;
+  res->fromString(_val, start);
   return res;
 }
 void ScriptIConstant::load(xml_node<> *data) {
-  if (_val != NULL) {
+  /*if (_val != NULL) {
     delete _val;
   }
-  _val = new ScriptData();
-  string type = data->first_attribute("type")->value();
-  if (type == "num") {
-    _val->_data = new ScriptDataNumber(strTo<double>(data->value()));
-  }
-  if (type == "bool") {
-    _val->_data = new ScriptDataBool(strTo<bool>(data->value()));
-  }
-  if (type == "str") {
-    _val->_data = new ScriptDataString(strTo<string>(data->value()));
-  }
-  if (type == "char") {
-    _val->_data = new ScriptDataChar(strTo<char>(data->value()));
-  }
+  _val = new ScriptDataBase();
+  int start = 0;*/
+  /*string s = data->value();
+  _val->fromString(s, start);
+  #ifdef SCRIPT_GUI
+  _enteredVal = s;
+  #endif*/
+  _val = data->value();;
 }
 ScriptIConstant::~ScriptIConstant() {
-  DeletePtr(_val);
+  //delete _val;
 }
 
 ScriptData* ScriptIMath::run(ScriptData& _args) {
   ScriptData* res1 = _arg1->run(_args);
-  if (res1->_data->type() != ScriptDataBase::TNUMERIC) {
-    throw 1;
-    return NULL;
-  }
+  ScriptData* res1f = res1->toFloat();
+  DeletePtr(res1);
+
   ScriptData* res2 = NULL;
+  ScriptData* res2f = NULL;
   if (_oper < 16) {
     res2 = _arg2->run(_args);
-    if (res2->_data->type() != ScriptDataBase::TNUMERIC) {
-      throw 1;
-      return NULL;
-    }
+    res2f = res2->toFloat();
+    DeletePtr(res2);
   }
-  ScriptData* s = new ScriptData();
+  ScriptData* s = NULL;
   switch (_oper) {
   case PLUS:
-    s->_data = new ScriptDataNumber(((ScriptDataNumber*)(res1->_data))->_num + ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataFloat(res1f->asFloat()->_num + res2f->asFloat()->_num));
     break;
   case MINUS:
-    s->_data = new ScriptDataNumber(((ScriptDataNumber*)(res1->_data))->_num - ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataFloat(res1f->asFloat()->_num - res2f->asFloat()->_num));
     break;
   case MULTI:
-    s->_data = new ScriptDataNumber(((ScriptDataNumber*)(res1->_data))->_num * ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataFloat(res1f->asFloat()->_num * res2f->asFloat()->_num));
     break;
   case DIV:
-    s->_data = new ScriptDataNumber(((ScriptDataNumber*)(res1->_data))->_num / ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataFloat(res1f->asFloat()->_num / res2f->asFloat()->_num));
     break;
   case POW:
-    s->_data = new ScriptDataNumber(pow(((ScriptDataNumber*)(res1->_data))->_num , ((ScriptDataNumber*)(res2->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(pow(res1f->asFloat()->_num , res2f->asFloat()->_num)));
     break;
   case LOGAB:
-    s->_data = new ScriptDataNumber(log(((ScriptDataNumber*)(res1->_data))->_num) + log(((ScriptDataNumber*)(res2->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(log(res1f->asFloat()->_num) / log(res2f->asFloat()->_num)));
     break;
   case MOD:
-    s->_data = new ScriptDataNumber(modulo(((ScriptDataNumber*)(res1->_data))->_num, ((ScriptDataNumber*)(res2->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(fmodf(res1f->asFloat()->_num, res2f->asFloat()->_num)));
     break;
   case ATAN2:
-    s->_data = new ScriptDataNumber(atan2(((ScriptDataNumber*)(res1->_data))->_num, ((ScriptDataNumber*)(res2->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(atan2(res1f->asFloat()->_num, res2f->asFloat()->_num)));
     break;
   case L:
-    s->_data = new ScriptDataBool(((ScriptDataNumber*)(res1->_data))->_num < ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataBool(res1f->asFloat()->_num < res2f->asFloat()->_num));
     break;
   case LEQ:
-    s->_data = new ScriptDataBool(((ScriptDataNumber*)(res1->_data))->_num <= ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataBool(res1f->asFloat()->_num <= res2f->asFloat()->_num));
     break;
   case EQ:
-    s->_data = new ScriptDataBool(((ScriptDataNumber*)(res1->_data))->_num == ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataBool(res1f->asFloat()->_num == res2f->asFloat()->_num));
     break;
   case NEQ:
-    s->_data = new ScriptDataBool(((ScriptDataNumber*)(res1->_data))->_num != ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataBool(res1f->asFloat()->_num != res2f->asFloat()->_num));
     break;
   case GEQ:
-    s->_data = new ScriptDataBool(((ScriptDataNumber*)(res1->_data))->_num >= ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataBool(res1f->asFloat()->_num >= res2f->asFloat()->_num));
     break;
   case G:
-    s->_data = new ScriptDataBool(((ScriptDataNumber*)(res1->_data))->_num > ((ScriptDataNumber*)(res2->_data))->_num);
+    s = new ScriptData(new ScriptDataBool(res1f->asFloat()->_num > res2f->asFloat()->_num));
     break;
   case SQRT:
-    s->_data = new ScriptDataNumber(sqrt(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(sqrt(res1f->asFloat()->_num)));
     break;
   case SIN:
-    s->_data = new ScriptDataNumber(sin(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(sin(res1f->asFloat()->_num)));
     break;
   case COS:
-    s->_data = new ScriptDataNumber(cos(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(cos(res1f->asFloat()->_num)));
     break;
   case TAN:
-    s->_data = new ScriptDataNumber(tan(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(tan(res1f->asFloat()->_num)));
     break;
   case ASIN:
-    s->_data = new ScriptDataNumber(asin(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(asin(res1f->asFloat()->_num)));
     break;
   case ACOS:
-    s->_data = new ScriptDataNumber(acos(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(acos(res1f->asFloat()->_num)));
     break;
   case ATAN:
-    s->_data = new ScriptDataNumber(atan(((ScriptDataNumber*)(res1->_data))->_num));
+    s = new ScriptData(new ScriptDataFloat(atan(res1f->asFloat()->_num)));
     break;
   }
-  DeletePtr(res1);
-  DeletePtr(res2);
+  DeletePtr(res1f);
+  if(res2f != NULL) {
+    DeletePtr(res2f);
+  }
   return s;
 }
 void ScriptIMath::load(xml_node<> *data) {
@@ -540,50 +1259,50 @@ ScriptIMath::~ScriptIMath() {
 
 ScriptData* ScriptILogic::run(ScriptData& _args) {
   ScriptData* res1 = _arg1->run(_args);
-  if (res1->_data->type() != ScriptDataBase::TBOOLEAN) {
-    throw 1;
-    return NULL;
-  }
+  ScriptData* res1f = res1->toBool();
+  DeletePtr(res1);
+
   ScriptData* res2 = NULL;
+  ScriptData* res2f = NULL;
   if (_oper < 16) {
     res2 = _arg2->run(_args);
-    if (res2->_data->type() != ScriptDataBase::TBOOLEAN) {
-      throw 1;
-      return NULL;
-    }
+    res2f = res2->toBool();
+    DeletePtr(res2);
   }
-  ScriptData* s = new ScriptData();
+  ScriptData* s = NULL;
   switch (_oper) {
   case EQ:
-    s->_data = new ScriptDataBool(((ScriptDataBool*)(res1->_data))->_bl == ((ScriptDataBool*)(res2->_data))->_bl);
+    s = new ScriptData(new ScriptDataBool(res1f->asBool()->_bl == res2f->asBool()->_bl));
     break;
   case NEQ:
-    s->_data = new ScriptDataBool(((ScriptDataBool*)(res1->_data))->_bl != ((ScriptDataBool*)(res2->_data))->_bl);
+    s = new ScriptData(new ScriptDataBool(res1f->asBool()->_bl != res2f->asBool()->_bl));
     break;
   case AND:
-    s->_data = new ScriptDataBool(((ScriptDataBool*)(res1->_data))->_bl & ((ScriptDataBool*)(res2->_data))->_bl);
+    s = new ScriptData(new ScriptDataBool(res1f->asBool()->_bl && res2f->asBool()->_bl));
     break;
   case NAND:
-    s->_data = new ScriptDataBool(!(((ScriptDataBool*)(res1->_data))->_bl & ((ScriptDataBool*)(res2->_data))->_bl));
+    s = new ScriptData(new ScriptDataBool(!(res1f->asBool()->_bl && res2f->asBool()->_bl)));
     break;
   case OR:
-    s->_data = new ScriptDataBool(((ScriptDataBool*)(res1->_data))->_bl | ((ScriptDataBool*)(res2->_data))->_bl);
+    s = new ScriptData(new ScriptDataBool(res1f->asBool()->_bl || res2f->asBool()->_bl));
     break;
   case NOR:
-    s->_data = new ScriptDataBool(!(((ScriptDataBool*)(res1->_data))->_bl | ((ScriptDataBool*)(res2->_data))->_bl));
+    s = new ScriptData(new ScriptDataBool(!(res1f->asBool()->_bl || res2f->asBool()->_bl)));
     break;
   case XOR:
-    s->_data = new ScriptDataBool(((ScriptDataBool*)(res1->_data))->_bl ^ ((ScriptDataBool*)(res2->_data))->_bl);
+    s = new ScriptData(new ScriptDataBool(res1f->asBool()->_bl ^ res2f->asBool()->_bl));
     break;
   case NXOR:
-    s->_data = new ScriptDataBool(!(((ScriptDataBool*)(res1->_data))->_bl ^ ((ScriptDataBool*)(res2->_data))->_bl));
+    s = new ScriptData(new ScriptDataBool(!(res1f->asBool()->_bl ^ res2f->asBool()->_bl)));
     break;
   case NOT:
-    s->_data = new ScriptDataBool(!((ScriptDataBool*)(res1->_data))->_bl);
+    s = new ScriptData(new ScriptDataBool(!res1f->asBool()->_bl));
     break;
   }
-  DeletePtr(res1);
-  DeletePtr(res2);
+  DeletePtr(res1f);
+  if (res2f != NULL) {
+    DeletePtr(res2f);
+  }
   return s;
 }
 void ScriptILogic::load(xml_node<> *data) {
@@ -648,10 +1367,10 @@ ScriptILogic::~ScriptILogic() {
 
 ScriptData* ScriptIVariable::run(ScriptData& _args) {
   ScriptData* res;
-  if (_args._elems.count(_arg) == 0) {
-    _args._elems[_arg] = new ScriptData();
+  if (_args.asDict()->_elems.count(_arg) == 0) {
+    _args.asDict()->_elems[_arg] = new ScriptData();
   }
-  res = CopyPtr(_args._elems[_arg]);
+  res = CopyPtr(_args.asDict()->_elems[_arg]);
   return res;
 }
 void ScriptIVariable::load(xml_node<> *data) {
@@ -663,12 +1382,22 @@ ScriptIVariable::~ScriptIVariable() {
 ScriptData* ScriptIIndex::run(ScriptData& _args) {
   ScriptData* ind = _ind->run(_args);
   ScriptData* arg = _arg->run(_args);
-  string index = ind->_data->getString();
-  ScriptData* res;
-  if (arg->_elems.count(index) == 0) {
-    arg->_elems[index] = new ScriptData();
+  string index = ind->toString();
+  ScriptData* res = NULL;
+  if (arg->_val->type() == ScriptDataBase::TARRAY) {
+    ScriptData* indi = ind->toInt();
+    DeletePtr(ind);
+    int indexi = indi->asInt()->_num;
+    DeletePtr(indi);
+    res = CopyPtr(arg->asArray()->_data[indexi]);
   }
-  res = CopyPtr(arg->_elems[index]);
+  if (arg->_val->type() == ScriptDataBase::TDICT) {
+    ScriptData* inds = ind->toStr();
+    DeletePtr(ind);
+    string indexs = inds->asStr()->_str;
+    DeletePtr(inds);
+    res = CopyPtr(arg->asDict()->_elems[indexs]);
+  }
   DeletePtr(ind);
   DeletePtr(arg);
   return res;
@@ -702,11 +1431,11 @@ ScriptIIndex::~ScriptIIndex() {
 }
 
 ScriptData* ScriptIFunctionCall::run(ScriptData& _args) {
-  ScriptData _nargs;
+  ScriptData _nargs(new ScriptDataDict());
   for (auto&& it : _arguments) {
     ScriptData* _nval;
     _nval = it.second->run(_args);
-    _nargs._elems.insert({ it.first, _nval });
+    _nargs.asDict()->_elems.insert({ it.first, _nval });
   }
   ScriptData* res = _function->run(_nargs);
   return res;
@@ -747,13 +1476,14 @@ void ScriptIAPICall::load(xml_node<> *data) {
   }
 }
 ScriptData* ScriptIAPICall::run(ScriptData& _args) {
-  ScriptData _nargs;
+  ScriptData _nargs(new ScriptDataDict());
   for (auto&& it : _arguments) {
     ScriptData* _nval;
     _nval = it.second->run(_args);
-    _nargs._elems.insert({ it.first, _nval });
+    _nargs.asDict()->_elems.insert({ it.first, _nval });
   }
-  return _func(_nargs);
+  ScriptData* res = _func(_nargs);
+  return res;
 }
 
 ScriptData* ScriptIBlock::run(ScriptData& _args) {
@@ -855,21 +1585,42 @@ void ScriptGUI::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
   cbx = offsetX + location.getRight(winWidth);
   cby = offsetY + location.getTop(winHeight);
 
-  getRect(cax, cby);
+  getRect();
 }
-void ScriptGUI::getRect(int offsetX, int offsetY) {
-  code->getRect(offsetX, offsetY);
+void ScriptGUI::getRect() {
+  code->getRect(cax - cox, cby - coy);
 }
 int ScriptGUI::mouseEnter(int state) {
   return code->mouseEnter(state);
 }
 int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
-  dragOffset = {mx, my};
+  dragPos = {mx, my};
+
+  if (mid) {
+    cox -= mx - ox;
+    coy -= my - oy;
+    if (code != NULL) {
+      code->getRect(cax - cox, cby - coy);
+      return 1;
+    }
+  }
+
   return code->mouseMoved(mx, my, ox, oy, down) | (dragging != NULL);
 }
 int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  if (mx < 100 && editor && dragging == NULL && evt._type == evt.evt_down && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
-    switch (my / 20) {
+  if (evt._key._type == evt._key.type_mouse && evt._key._keycode == GLUT_RIGHT_BUTTON) {
+    if (evt._type == evt.evt_down) {
+      mid = true;
+      return 2;
+    }
+    if (evt._type == evt.evt_up) {
+      mid = false;
+      return 2;
+    }
+  }
+  
+  if (cax <= mx && mx < cax + 100 && editor && dragging == NULL && evt._type == evt.evt_down && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
+    switch ((my - cay) / 20) {
       case 0:
       {
         ScriptIIfElse        * scriptIIfElse = new ScriptIIfElse();
@@ -898,8 +1649,6 @@ int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       case 3:
       {
         ScriptIConstant      * scriptIConstant = new ScriptIConstant();
-        scriptIConstant->_val = new ScriptData();
-        scriptIConstant->_val->_data = new ScriptDataNumber(0);
         dragging = scriptIConstant;
       }
       break;
@@ -949,13 +1698,25 @@ int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       break;*/
     }
     if (dragging) {
+      dragging->getRect(mx, my);
+      dragOffset = {0, dragging->cby - dragging->cay};
       return 3;
     }
   }
-  if (mx < 100 && editor && dragging != NULL && evt._type == evt.evt_up && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
-    if (my / 20 == 8) {
+  if (cax <= mx && mx < cax + 100 && editor && dragging != NULL && evt._type == evt.evt_up && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
+    if ((my - cay) / 20 == 8) {
       delete dragging;
       dragging = false;
+      return 3;
+    }
+  }
+  if (cax <= mx && mx < cax + 100 && editor && dragging == NULL && evt._type == evt.evt_down && evt._key._type == evt._key.type_mouse && evt._key._keycode == 0) { //LDown
+    if ((my - cay) / 20 == 9) {
+      ScriptData* res = code->run(ScriptData(new ScriptDataDict()));
+      if(res != NULL) {
+        cout << res->toString();
+        DeletePtr(res);
+      }
       return 3;
     }
   }
@@ -964,35 +1725,43 @@ int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
 void ScriptGUI::render(set<key_location>& down) {
   code->render(this, 0);
   if (dragging) {
-    dragging->getRect(dragOffset.x, dragOffset.y);
+    dragging->getRect(dragPos.x + dragOffset.x, dragPos.y + dragOffset.y);
     dragging->render(this, 0);
   }
   if(editor) {
     for(int i = 0; i <= 7; i++) {
-      setColor((i%2) ? 0xff808080: 0xff606060);
+      setColor((i%2) ? 0xff006060: 0xff004040);
       glBegin(GL_QUADS);
-      glVertex2d(0, i*20);
-      glVertex2d(100, i*20);
-      glVertex2d(100, i*20+20);
-      glVertex2d(0, i*20+20);
+      glVertex2d(cax + 0  ,cay+ i*20);
+      glVertex2d(cax + 100,cay+ i*20);
+      glVertex2d(cax + 100,cay+ i*20+20);
+      glVertex2d(cax + 0  ,cay+ i*20+20);
       glEnd();
     }
-    renderBitmapString(10,  10 -5, "If", 0xffffffff, false);
-    renderBitmapString(10,  30 -5, "Loop", 0xffffffff, false);
-    renderBitmapString(10,  50 -5, "Assign", 0xffffffff, false);
-    renderBitmapString(10,  70 -5, "Constant", 0xffffffff, false);
-    renderBitmapString(10,  90 -5, "Math", 0xffffffff, false);
-    renderBitmapString(10, 110 -5, "Logic", 0xffffffff, false);
-    renderBitmapString(10, 130 -5, "Var", 0xffffffff, false);
-    renderBitmapString(10, 150 -5, "Index", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay +  10 -5, "If", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay +  30 -5, "Loop", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay +  50 -5, "Assign", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay +  70 -5, "Constant", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay +  90 -5, "Math", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay + 110 -5, "Logic", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay + 130 -5, "Var", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay + 150 -5, "Index", 0xffffffff, false);
     setColor(0xffff0000);
     glBegin(GL_QUADS);
-    glVertex2d(0, 160);
-    glVertex2d(100, 160);
-    glVertex2d(100, 180);
-    glVertex2d(0, 180);
+    glVertex2d(cax + 0  , cay+160);
+    glVertex2d(cax + 100, cay+160);
+    glVertex2d(cax + 100, cay+180);
+    glVertex2d(cax + 0  , cay+  180);
     glEnd();
     renderBitmapString(10, 165, "Delete", 0xffffffff, false);
+    setColor(0xff00ff00);
+    glBegin(GL_QUADS);
+    glVertex2d(cax + 0, cay + 180);
+    glVertex2d(cax + 100, cay + 180);
+    glVertex2d(cax + 100, cay + 200);
+    glVertex2d(cax + 0, cay + 200);
+    glEnd();
+    renderBitmapString(10, 185, "RUN", 0xffffffff, false);
   }
 }
 
@@ -1021,7 +1790,7 @@ void ScriptIIfElse      ::getRect(int offsetX, int offsetY) {
   cby = offsetY;
 
   cbx = cax + 5;
-  cay = cby - 15;
+  cay = cby - 20;
 
   if (_condition != NULL) {
     _condition->getRect(cax + 5, cay);
@@ -1048,19 +1817,19 @@ void ScriptILoop        ::getRect(int offsetX, int offsetY) {
   cby = offsetY;
 
   cbx = cax + 5;
-  cay = cby - 15;
+  cay = cby - 20;
 
-    if (_code != NULL) {
-      _code->getRect(cax + 5, cay);
-      cay = _code->cay - 5;
-      cbx = max(cbx, _code->cbx + 5);
+    if (_condition != NULL) {
+      _condition->getRect(cax + 5, cay);
+      cay = _condition->cay - 5;
+      cbx = max(cbx, _condition->cbx + 5);
   }
       cdy = cay;
       cay = cay - 15;
-  if (_condition != NULL) {
-    _condition->getRect(cax + 5, cay);
-    cay = _condition->cay - 5;
-    cbx = max(cbx, _condition->cbx + 5);
+  if (_code != NULL) {
+    _code->getRect(cax + 5, cay);
+    cay = _code->cay - 5;
+    cbx = max(cbx, _code->cbx + 5);
   }
 }
 void ScriptIAssign      ::getRect(int offsetX, int offsetY) {
@@ -1100,12 +1869,8 @@ void ScriptIAssign      ::getRect(int offsetX, int offsetY) {
 void ScriptIConstant    ::getRect(int offsetX, int offsetY) {
   cax = offsetX;
   cby = offsetY;
-  if(_val) {
-    cbx = cax + 10 * _val->_data->getString().length();
-  } else {
-    cbx = cax + 10;
-  }
   cay = cby - 15;
+  cbx = cax + 9 + 9 * _val.length();
 }
 void ScriptIMath        ::getRect(int offsetX, int offsetY) {
   cax = offsetX;
@@ -1134,25 +1899,29 @@ void ScriptILogic       ::getRect(int offsetX, int offsetY) {
   cbx = cax + 5;
   cay = cby - 5;
 
+  if(_oper >= 16) {
+    cbx = cbx + 10;
+  }
   if (_arg1 != NULL) {
     _arg1->getRect(cbx, cby - 5);
     cbx = _arg1->cbx + 5;
     cay = min(cay, _arg1->cay - 5);
   }
-  cbx = cbx + 15;
-  cox = cbx;
-  if (_arg2 != NULL) {
-    _arg2->getRect(cbx, cby - 5);
-    cbx = _arg2->cbx + 5;
-    cay = min(cay, _arg2->cay - 5);
+  if(_oper < 16) {
+    cbx = cbx + 15;
+    cox = cbx;
+    if (_arg2 != NULL) {
+      _arg2->getRect(cbx, cby - 5);
+      cbx = _arg2->cbx + 5;
+      cay = min(cay, _arg2->cay - 5);
+    }
   }
 }
 void ScriptIVariable    ::getRect(int offsetX, int offsetY) {
   cax = offsetX;
   cby = offsetY;
-
-  cbx = cax + 100;
   cay = cby - 15;
+  cbx = cax + 9 + 9 * _arg.length();
 }
 void ScriptIIndex       ::getRect(int offsetX, int offsetY) {
   cax = offsetX;
@@ -1162,15 +1931,18 @@ void ScriptIIndex       ::getRect(int offsetX, int offsetY) {
   cay = cby - 5;
 
   if (_arg != NULL) {
-    _arg->getRect(cbx, cay);
+    _arg->getRect(cbx, cby - 5);
     cbx = _arg->cbx + 5;
+    cix = cbx;
+    cbx = cbx + 10;
     cay = min(cay, _arg->cay - 5);
   }
   if (_ind != NULL) {
-    _ind->getRect(cbx, cay);
+    _ind->getRect(cbx, cby - 5);
     cbx = _ind->cbx + 5;
     cay = min(cay, _ind->cay - 5);
   }
+  cbx += 10;
 }
 void ScriptIFunctionCall::getRect(int offsetX, int offsetY) {
   //getRect();
@@ -1182,7 +1954,7 @@ void ScriptIBlock       ::getRect(int offsetX, int offsetY) {
   cax = offsetX;
   cby = offsetY;
 
-  cbx = cax + 5;
+  cbx = cax + 15;
   cay = cby - 5;
 
   auto it = _instructions.begin();
@@ -1193,6 +1965,7 @@ void ScriptIBlock       ::getRect(int offsetX, int offsetY) {
     cbx = max(cbx, (*it)->cbx + 5);
     ++it;
   }
+  cay = min(cay, cby - 15);
 }
 
 void ScriptGUIBase    ::renderBg(ScriptGUI* base, int depth) {
@@ -1240,7 +2013,7 @@ void ScriptIAssign      ::render(ScriptGUI* base, int depth) {
 void ScriptIConstant    ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
 
-  renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, _val->_data->getString(), base->textColor, true);
+  renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, _val, base->textColor, true);
 }
 void ScriptIMath        ::render(ScriptGUI* base, int depth) {
   renderBg(base, depth);
@@ -1284,7 +2057,7 @@ void ScriptIMath        ::render(ScriptGUI* base, int depth) {
       operm = "==";
       break;
     case Operation::NEQ:
-      operm = '!=';
+      operm = "!=";
       break;
     case Operation::GEQ:
       operm = ">=";
@@ -1351,7 +2124,7 @@ void ScriptILogic       ::render(ScriptGUI* base, int depth) {
       break;
   }
 
-  renderBitmapString(cax, (cay + cby) / 2, operb, base->textColor, true);
+  renderBitmapString(cax + 5, (cay + cby) / 2, operb, base->textColor, true);
   _arg1->render(base, depth + 1);
   if (_arg2 != NULL && _oper < 16) {
     renderBitmapString(cox - 10, (cay + cby) / 2, operm, base->textColor, true);
@@ -1369,6 +2142,22 @@ void ScriptIIndex       ::render(ScriptGUI* base, int depth) {
 
   _arg->render(base, depth + 1);
   _ind->render(base, depth + 1);
+
+  glLineWidth(1);
+  setColor(0xffffffff);
+
+  glBegin(GL_LINE_STRIP);
+  glVertex2d(cix + 5, cby - 5);
+  glVertex2d(cix, cby - 5);
+  glVertex2d(cix, cay + 5);
+  glVertex2d(cix + 5, cay + 5);
+  glEnd();
+  glBegin(GL_LINE_STRIP);
+  glVertex2d(cbx - 10, cby - 5);
+  glVertex2d(cbx - 5, cby - 5);
+  glVertex2d(cbx - 5, cay + 5);
+  glVertex2d(cbx - 10, cay + 5);
+  glEnd();
 }
 void ScriptIFunctionCall::render(ScriptGUI* base, int depth) {
 
@@ -1377,23 +2166,18 @@ void ScriptIAPICall     ::render(ScriptGUI* base, int depth) {
 
 }
 void ScriptIBlock       ::render(ScriptGUI* base, int depth) {
-  if(!base->dragging) {
-    renderBg(base, depth);
-  } else {
-    if(insertingIn) {
-      setColor(0xff0000ff);
-    } else {
-      setColor(0xff00ff00);
-    }
+  if (base->dragging) {
+    setColor(base->activeColor);
+ 
     glBegin(GL_QUADS);
     glVertex2d(cax, cay);
     glVertex2d(cbx, cay);
     glVertex2d(cbx, cby);
     glVertex2d(cax, cby);
     glEnd();
+  } else {
+    renderBg(base, depth);
   }
-
-
   for (auto&& it : _instructions) {
     it->render(base, depth + 1);
   }
@@ -1546,7 +2330,22 @@ int ScriptIConstant    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   if (!isIn(mx, my)) {
     return 0;
   }
-  return 0;
+  if (evt._type == evt.evt_pressed && evt._key._type == evt._key.type_key) {
+    if (evt._key._keycode == 8 && _val.size()) {
+      _val.pop_back();
+      base->getRect();
+      return 3;
+    } else {
+      if (textValidator(_val, _val.size(), evt._key._keycode)) {
+        if (down.find(key_location(112, key::type_special, 0, 0)) != down.end()) { //LShift
+          evt._key._keycode = toupper(evt._key._keycode);
+        }
+        _val.push_back(evt._key._keycode);
+        base->getRect();
+        return 3;
+      }
+    }
+  }
 }
 int ScriptIMath        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
   if (!isIn(mx, my)) {
@@ -1563,6 +2362,28 @@ int ScriptIMath        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
     res |= _arg2->guiEvent(base, evt, mx, my, down);
     if (res & 2) {
       return res;
+    }
+  }
+  if (evt._type == evt.evt_pressed && evt._key._type == evt._key.type_key) {
+    if(evt._key._keycode == '+') {
+      ++_oper;
+      if (_oper == 15) {
+        _oper = 16;
+      }
+      if (_oper == 23) {
+        _oper = 1;
+      }
+      return 3;
+    }
+    if (evt._key._keycode == '-') {
+      --_oper;
+      if (_oper == 15) {
+        _oper = 14;
+      }
+      if (_oper == 0) {
+        _oper = 22;
+      }
+      return 3;
     }
   }
   return res;
@@ -1593,6 +2414,7 @@ int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   if (evt._type == evt.evt_pressed && evt._key._type == evt._key.type_key) {
     if (evt._key._keycode == 8 && _arg.size()) {
       _arg.pop_back();
+      base->getRect();
       return 3;
     } else {
       if (textValidator(_arg, _arg.size(), evt._key._keycode)) {
@@ -1600,6 +2422,7 @@ int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
           evt._key._keycode = toupper(evt._key._keycode);
         }
         _arg.push_back(evt._key._keycode);
+        base->getRect();
         return 3;
       }
     }
@@ -1610,7 +2433,20 @@ int ScriptIIndex       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   if (!isIn(mx, my)) {
     return 0;
   }
-  return 0;
+  int res = 0;
+  if (_arg) {
+    res |= _arg->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  if (_ind) {
+    res |= _ind->guiEvent(base, evt, mx, my, down);
+    if (res & 2) {
+      return res;
+    }
+  }
+  return res;
 }
 int ScriptIFunctionCall::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
   if (!isIn(mx, my)) {
@@ -1626,12 +2462,15 @@ int ScriptIAPICall     ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
 }
 int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
   if (!isIn(mx, my)) {
+    insertingIn = false;
     return 0;
   }
+  insertingIn = true;
   int res = 0;
   auto it = _instructions.begin();
   while(it != _instructions.end()) {
     if((*it)->isIn(mx, my)) {
+      insertingIn = false;
       res |=(*it)->guiEvent(base, evt, mx, my, down);
       if (res & 2) {
         return res;
@@ -1641,8 +2480,9 @@ int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
         auto it2 = it;
         --it2;
         base->dragging = *it2;
+        base->dragOffset = { 0, base->dragging->cby - base->dragging->cay };
         _instructions.erase(it2);
-        base->getRect(base->cax, base->cby);
+        base->getRect();
         return 3;
       }
     } else {
@@ -1657,7 +2497,7 @@ int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
     }
     _instructions.insert(it, base->dragging);
     base->dragging = NULL;
-    base->getRect(base->cax, base->cby);
+    base->getRect();
     return 3;
   }
 

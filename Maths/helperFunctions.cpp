@@ -248,7 +248,7 @@ string randomHexString(size_t length) {
   return s;
 }
 
-bool trimChar(char& c, int flags) {
+bool trimChar(const char& c, int flags) {
   if (c == '\n' && (flags & Trim_NewLine)) {
     return true;
   }
