@@ -1,5 +1,6 @@
 #pragma once
 
+#include "helperFunctions.h"
 #include "Point.h"
 
 template<typename T> class Polynomial;
@@ -8,9 +9,6 @@ typedef Polynomial<int> PolynomialI;
 typedef Polynomial<float> PolynomialF;
 typedef Polynomial<long double> PolynomialD;
 //typedef Polynomial<Fraction> PolynomialR;
-
-
-typedef vec3<PolynomialF>    fpVec3;
 
 template<typename T>
 class Polynomial{
@@ -748,7 +746,8 @@ template<typename T> Equation<T> operator/(Equation<T>& lhs, T rhs) {
   return res;
 }
 
+template<typename T>
 class Eqnsys {
 public:
-  map<char, Equation<longDouble> > eqns;
+  map<char, Equation<T> > eqns;
 };

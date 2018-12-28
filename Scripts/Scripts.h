@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef SCRIPT_GUI
-#include "../GUI/Graphics.h"
-#else
-#include "../Maths/FlowSystem.h"
-#endif
+#include "../Maths/helperFunctions.h"
 
 int jumpAfterClosing(const string& data, int open);
 
@@ -349,6 +345,7 @@ public:
   }
   virtual ScriptData* run(ScriptData& _args);
   virtual void load(xml_node<> *data);
+  virtual void save(xml_node<> *data, xml_document<> &doc);
   virtual ~ScriptInstruction() {
     //throw 1;
   }
@@ -369,6 +366,7 @@ public:
   ScriptInstruction* _condition;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIIfElse();
 #ifdef SCRIPT_GUI
   int cty;//Then, else text coord
@@ -387,6 +385,7 @@ public:
   ScriptInstruction* _condition;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   int cdy = 0;
   ~ScriptILoop();
 #ifdef SCRIPT_GUI
@@ -405,6 +404,7 @@ public:
   ScriptData* run(ScriptData& _args);
   int cex; //Equation
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIAssign();
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
@@ -437,6 +437,7 @@ public:
   string _val;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIConstant();
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
@@ -477,6 +478,7 @@ public:
   int _oper;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIMath();
 #ifdef SCRIPT_GUI
   int cox; //Operator sign (for binary)
@@ -506,6 +508,7 @@ public:
   Operation _oper;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptILogic();
 #ifdef SCRIPT_GUI
   int cox; //Operator sign (for binary)
@@ -522,6 +525,7 @@ public:
   string _arg;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIVariable();
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
@@ -538,6 +542,7 @@ public:
   ScriptInstruction* _ind;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIIndex();
 #ifdef SCRIPT_GUI
   int cix;
@@ -555,6 +560,7 @@ public:
   ScriptInstruction* _function;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIFunctionCall();
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
@@ -571,6 +577,7 @@ public:
   list<pair<string, ScriptInstruction*>> _arguments;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
@@ -585,6 +592,7 @@ public:
   list<ScriptInstruction*> _instructions;
   ScriptData* run(ScriptData& _args);
   void load(xml_node<> *data);
+  void save(xml_node<> *data, xml_document<> &doc);
   ~ScriptIBlock();
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);

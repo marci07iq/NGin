@@ -48,6 +48,16 @@ int Panel::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   return bstate;
 }
 void Panel::render(set<key_location>& down) {
+  if (bgColor > 0xffffff) { //Has alpha
+    glBegin(GL_QUADS);
+    setColor(bgColor);
+    glVertex2d(cax, cay);
+    glVertex2d(cbx, cay);
+    glVertex2d(cbx, cby);
+    glVertex2d(cax, cby);
+    glEnd();
+  }
+  
   auto it = elements.begin();
 
   while (it != elements.end()) {

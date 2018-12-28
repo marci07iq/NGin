@@ -2,7 +2,7 @@
 
 //Core include file of NGin.
 
-#include "Scripts/Scripts.h"
+//#include "Scripts/Scripts.h"
 
 /*
 

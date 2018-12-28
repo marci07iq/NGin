@@ -10,8 +10,10 @@ MouseEntryManager Graphics::defaultMouseEntryManager= Graphics::defaultMouseEntr
 MouseMoveManager Graphics::defaultMouseMoveManager= Graphics::defaultMouseMoveManagerL;
 MouseClickManager Graphics::defaultMouseClickManager= Graphics::defaultMouseClickManagerL;
 MouseWheelManager Graphics::defaultMouseWheelManager= Graphics::defaultMouseWheelManagerL;
+WindowCloseManager Graphics::defaultWindowCloseManager = Graphics::defaultWindowCloseManagerL;
 
-Graphics::WinHwnd Graphics::CreateMainWindow(string caption, WindowManagers managers, int width, int height, bool setsize, int x, int y, bool setposition) {
+
+Graphics::WinHwnd Graphics::CreateMainWindow(string caption, WindowManagers managers, int width, int height, bool setsize, int x, int y, bool setposition, int additionalFlags) {
   if(setsize) {
     glutInitWindowSize(width, height);
   }
@@ -19,7 +21,7 @@ Graphics::WinHwnd Graphics::CreateMainWindow(string caption, WindowManagers mana
     glutInitWindowPosition(x, y);
   }
 
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
+  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE | additionalFlags);
 
   glutCreateWindow(caption.c_str());
 
@@ -46,6 +48,7 @@ Graphics::WinHwnd Graphics::SetUpWindow(int id, int parent, LocationData pos, Wi
     glutPassiveMotionFunc(manager.mouseMoveManager);
     glutMouseFunc(manager.mouseClickManager);
     glutMouseWheelFunc(manager.mouseWheelManager);
+    glutCloseFunc(manager.windowCloseManager);
 
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
@@ -68,11 +71,9 @@ Graphics::WinHwnd Graphics::SetUpWindow(int id, int parent, LocationData pos, Wi
 }
 
 int Graphics::DestroyWindow(WinHwnd id) {
-  delete id->myPanel;
+  defaultWindowCloseManagerNL();
 
-  windows.erase(id->id);
-
-   glutDestroyWindow(id->id);
+  glutDestroyWindow(id->id);
 
   delete id;
   return 0;
@@ -282,6 +283,23 @@ void Graphics::defaultMouseWheelManagerNL(int state, int delta, int x, int y) {
   }
 }
 
+void Graphics::defaultWindowCloseManagerL() {
+  netlock.lock();
+
+  defaultWindowCloseManagerNL();
+
+  netlock.unlock();
+}
+void Graphics::defaultWindowCloseManagerNL() {
+  WinHwnd id = GetWinHwnd(glutGetWindow());
+
+  elementCloseManager(id);
+
+  delete id->myPanel;
+
+  windows.erase(id->id);
+}
+
 WindowManagers Graphics::defaultWindowManagers =
 WindowManagers {
   Graphics::defaultRenderManager,
@@ -294,6 +312,7 @@ WindowManagers {
   Graphics::defaultMouseMoveManager,
   Graphics::defaultMouseClickManager,
   Graphics::defaultMouseWheelManager,
+  Graphics::defaultWindowCloseManager,
 };
 map<int, Graphics::GWindow*> Graphics::windows;
 map<string, void(*)()> Graphics::funcs;
@@ -324,6 +343,10 @@ void Graphics::elementResizeManager(PanelHwnd id, int width, int height) {
 
 void Graphics::elementRenderManager(WinHwnd id) {
   id->myPanel->render(keysdown);
+}
+
+void Graphics::elementCloseManager(WinHwnd id) {
+  Graphics::deleteElements(id);
 }
 
 Graphics::ButtonHwnd Graphics::createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, key trigger, ClickCallback clickCallback) {
@@ -398,7 +421,7 @@ Graphics::TextInputHwnd Graphics::createTextInput(xml_node<> *me) {
     reinterpret_cast<TextValidatorFunc>(funcs[me->first_attribute("validatorfunc")->value()]));
 }
 
-Graphics::ControlHwnd Graphics::createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key selected, int id, ControlInputFunc inputCallback) {
+Graphics::ControlHwnd Graphics::createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key_config selected, int id, ControlInputFunc inputCallback) {
   return new ControlSetting(lname, location, bg, active, textColor, selected, id, inputCallback);
 }
 Graphics::ControlHwnd Graphics::createControl(xml_node<> *me) {
@@ -408,7 +431,7 @@ Graphics::ControlHwnd Graphics::createControl(xml_node<> *me) {
     getColor(me, "control", "bgcolor"),
     getColor(me, "control", "activecolor"),
     getColor(me, "control", "textcolor"),
-    key(me->value()),
+    keybinds[strTo<int>(me->first_attribute("id")->value())],
     strTo<int>(me->first_attribute("id")->value()),
     reinterpret_cast<ControlInputFunc>(funcs[me->first_attribute("inputfunc")->value()]));
 }

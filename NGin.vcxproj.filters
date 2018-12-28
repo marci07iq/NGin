@@ -123,12 +123,12 @@
     <ClCompile Include="GUI\ClientCore.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Network\Compress.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Maths\BigFloat.h">
-      <Filter>Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="Maths\constants.h">
       <Filter>Maths</Filter>
     </ClInclude>
     <ClInclude Include="Maths\FlowSystem.h">
@@ -236,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="GUI\ClientCore.h">
       <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Compress.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

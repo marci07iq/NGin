@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GUIElement.h"
-#include "LabelBind.h"
+//#include "LabelBind.h"
 
 class TableRow : public GUIElement {
 public:

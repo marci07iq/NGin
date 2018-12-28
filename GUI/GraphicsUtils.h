@@ -2,6 +2,7 @@
 
 #include "../GL/freeglut.h"
 #include "ClientCore.h"
+#include "../Maths/Point.h"
 #include "stb_image.h"
 
 #ifdef _WIN64
@@ -22,75 +23,10 @@ void loadColors(string filename = "html/colors.cfg");
 
 class Canvas;
 
-class key {
-public:
-  enum type {
-    type_key = 0,
-    type_special = 1,
-    type_mouse = 2,
-    type_wheel = 3
-  };
-  int _type;
-  int _keycode;
-  bool isKey();
-  void fromKey(unsigned char key);
-  void fromSpecial(int key);
-  void fromMouse(int button);
-  void fromWheel(int delta);
-  string toKeyName();
-  string toSpecialName();
-  string toMouseName();
-  string toWheelName();
-  string toName();
-  key(int keycode, int type);
-  key(string keycode);
-  key();
-};
-
-class key_location : public key {
-public:
-  int _mx;
-  int _my;
-  void setLocation(int mx, int my);
-  key_location(int keycode, int type, int mx, int my);
-  key_location(key k) {
-    _keycode = k._keycode;
-    _type = k._type;
-  }
-  key_location();
-};
-
-
-bool operator==(const key& lhs, const key& rhs);
-
-bool operator<(const key& lhs, const key& rhs);
-
-bool operator<=(const key& lhs, const key& rhs);
-
-bool operator>(const key& lhs, const key& rhs);
-
-bool operator>=(const key& lhs, const key& rhs);
-
-class gui_event {
-public:
-  key_location _key;
-  enum type {
-    evt_none = 0,
-    evt_down = 1,
-    evt_pressed = 2,
-    evt_up = 3
-  };
-  type _type;
-  string toName();
-  gui_event(key_location key, type type);
-};
-
-key loadKey(xml_attribute<>* me);
-
 typedef void(*ClickCallback)(string);
 typedef void(*CheckCallback)(bool);
 typedef void(*TextInputFunc)(string);
-typedef void(*ControlInputFunc)(key, int);
+typedef void(*ControlInputFunc)(key_config, int);
 typedef void(*SliderInputFunc)(float);
 typedef bool(*TextValidatorFunc)(string, int, unsigned char);
 
@@ -103,6 +39,7 @@ typedef void(*MouseClickManager)(int idk, int key, int x, int y);
 typedef void(*MouseWheelManager)(int idk, int key, int x, int y);
 typedef void(*MouseEntryManager)(int state);
 typedef void(*MouseMoveManager)(int x, int y);
+typedef void(*WindowCloseManager)();
 
 typedef int(*IRenderManager)(int ax, int ay, int bx, int by, set<key_location>& down);
 typedef int(*IResizeManager)(int x, int y);
@@ -134,6 +71,7 @@ struct WindowManagers {
   MouseMoveManager mouseMoveManager;
   MouseClickManager mouseClickManager;
   MouseWheelManager mouseWheelManager;
+  WindowCloseManager windowCloseManager;
 };
 
 struct IWindowManagers {

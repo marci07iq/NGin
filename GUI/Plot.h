@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GUIElement.h"
+#include "../Maths/Keyframe.h"
 
 class NoTypeIter {
 public:

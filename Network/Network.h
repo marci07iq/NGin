@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Compress.h"
+#include "NetworkData.h"
 
 //#ifdef WIN32
 #include <winsock2.h>

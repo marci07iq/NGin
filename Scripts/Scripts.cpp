@@ -890,6 +890,9 @@ ScriptData* ScriptInstruction::run(ScriptData& _args) {
 void ScriptInstruction::load(xml_node<> *data) {
   throw 1;
 }
+void ScriptInstruction::save(xml_node<> *data, xml_document<> &doc) {
+  throw 1;
+}
 
 ScriptData* ScriptIIfElse::run(ScriptData& _args) {
   ScriptData* condition = _condition->run(_args);
@@ -944,6 +947,21 @@ void ScriptIIfElse::load(xml_node<> *data) {
   }
   _else = elsen;
 }
+void ScriptIIfElse::save(xml_node<> *data, xml_document<> &doc) {
+  xml_node<>*  me = doc.allocate_node(node_element, "ifelse");
+
+  xml_node<>*  cond = doc.allocate_node(node_element, "cond");
+  _condition->save(cond, doc);
+  me->append_node(cond);
+  xml_node<>*  then = doc.allocate_node(node_element, "then");
+  _then->save(cond, doc);
+  me->append_node(then);
+  xml_node<>*  elss = doc.allocate_node(node_element, "else");
+  _else->save(cond, doc);
+  me->append_node(elss);
+
+  data->append_node(me);
+}
 ScriptIIfElse::~ScriptIIfElse() {
   delete _then;
   delete _else;
@@ -996,6 +1014,18 @@ void ScriptILoop::load(xml_node<> *data) {
   }
   _code = then;
 }
+void ScriptILoop::save(xml_node<> *data, xml_document<> &doc) {
+  xml_node<>*  me = doc.allocate_node(node_element, "loop");
+
+  xml_node<>*  cond = doc.allocate_node(node_element, "cond");
+  _condition->save(cond, doc);
+  me->append_node(cond);
+  xml_node<>*  then = doc.allocate_node(node_element, "then");
+  _code->save(then, doc);
+  me->append_node(then);
+
+  data->append_node(me);
+}
 ScriptILoop::~ScriptILoop() {
   delete _code;
   delete _condition;
@@ -1004,6 +1034,9 @@ ScriptILoop::~ScriptILoop() {
 ScriptData* ScriptIAssign::run(ScriptData& _args) {
   ScriptData* val = _val->run(_args);
   ScriptData* to = _to->run(_args);
+  if (to->_val) {
+    delete to->_val;
+  }
   to->_val = val->_val->CopyContent();
   to->_val->_up = to;
   DeletePtr(to);
@@ -1033,6 +1066,18 @@ void ScriptIAssign::load(xml_node<> *data) {
     delete _val;
   }
   _val = val;
+}
+void ScriptIAssign::save(xml_node<> *data, xml_document<> &doc) {
+  xml_node<>*  me = doc.allocate_node(node_element, "assign");
+
+  xml_node<>*  to = doc.allocate_node(node_element, "to");
+  _to->save(to, doc);
+  me->append_node(to);
+  xml_node<>*  val = doc.allocate_node(node_element, "val");
+  _val->save(val, doc);
+  me->append_node(val);
+
+  data->append_node(me);
 }
 ScriptIAssign::~ScriptIAssign() {
   delete _val;
@@ -1072,6 +1117,11 @@ void ScriptIConstant::load(xml_node<> *data) {
   _enteredVal = s;
   #endif*/
   _val = data->value();;
+}
+void ScriptIConstant::save(xml_node<> *data, xml_document<> &doc) {
+  xml_node<>*  me = doc.allocate_node(node_element, "math", _val.c_str());
+
+  data->append_node(me);
 }
 ScriptIConstant::~ScriptIConstant() {
   //delete _val;
@@ -1252,6 +1302,20 @@ void ScriptIMath::load(xml_node<> *data) {
   }
   _arg2 = rhs;
 }
+void ScriptIMath::save(xml_node<> *data, xml_document<> &doc) {
+  xml_node<>*  me = doc.allocate_node(node_element, "math");
+
+  xml_attribute<> *oper = doc.allocate_attribute("oper", "google.com");
+
+  xml_node<>*  lhs = doc.allocate_node(node_element, "lhs");
+  _arg1->save(lhs, doc);
+  me->append_node(lhs);
+  xml_node<>*  rhs = doc.allocate_node(node_element, "rhs");
+  _arg2->save(rhs, doc);
+  me->append_node(rhs);
+
+  data->append_node(me);
+}
 ScriptIMath::~ScriptIMath() {
   delete _arg1;
   delete _arg2;
@@ -1360,6 +1424,18 @@ void ScriptILogic::load(xml_node<> *data) {
   }
   _arg2 = rhs;
 }
+void ScriptILogic::save(xml_node<> *data, xml_document<> &doc) {
+  xml_node<>*  me = doc.allocate_node(node_element, "logic");
+
+  xml_node<>*  lhs = doc.allocate_node(node_element, "lhs");
+  _arg1->save(lhs, doc);
+  me->append_node(lhs);
+  xml_node<>*  rhs = doc.allocate_node(node_element, "rhs");
+  _arg2->save(rhs, doc);
+  me->append_node(rhs);
+
+  data->append_node(me);
+}
 ScriptILogic::~ScriptILogic() {
   delete _arg1;
   delete _arg2;
@@ -1376,6 +1452,9 @@ ScriptData* ScriptIVariable::run(ScriptData& _args) {
 void ScriptIVariable::load(xml_node<> *data) {
   _arg = data->first_attribute("var")->value();
 }
+void ScriptIVariable::save(xml_node<> *data, xml_document<> &doc) {
+  throw 1;
+}
 ScriptIVariable::~ScriptIVariable() {
 }
 
@@ -1389,7 +1468,9 @@ ScriptData* ScriptIIndex::run(ScriptData& _args) {
     DeletePtr(ind);
     int indexi = indi->asInt()->_num;
     DeletePtr(indi);
-    res = CopyPtr(arg->asArray()->_data[indexi]);
+    if(arg->asArray()->_data.size()) {
+      res = CopyPtr(arg->asArray()->_data[indexi]);
+    }
   }
   if (arg->_val->type() == ScriptDataBase::TDICT) {
     ScriptData* inds = ind->toStr();
@@ -1397,6 +1478,9 @@ ScriptData* ScriptIIndex::run(ScriptData& _args) {
     string indexs = inds->asStr()->_str;
     DeletePtr(inds);
     res = CopyPtr(arg->asDict()->_elems[indexs]);
+    if (res == NULL) {
+      res = new ScriptData();
+    }
   }
   DeletePtr(ind);
   DeletePtr(arg);
@@ -1424,6 +1508,9 @@ void ScriptIIndex::load(xml_node<> *data) {
     delete _ind;
   }
   _ind = ind;
+}
+void ScriptIIndex::save(xml_node<> *data, xml_document<> &doc) {
+  throw 1;
 }
 ScriptIIndex::~ScriptIIndex() {
   delete _arg;
@@ -1458,6 +1545,9 @@ void ScriptIFunctionCall::load(xml_node<> *data) {
     _arguments.push_back({pElem->first_attribute("name")->value(), b});
   }
 }
+void ScriptIFunctionCall::save(xml_node<> *data, xml_document<> &doc) {
+  throw 1;
+}
 ScriptIFunctionCall::~ScriptIFunctionCall() {
   delete _function;
   while (_arguments.size()) {
@@ -1474,6 +1564,9 @@ void ScriptIAPICall::load(xml_node<> *data) {
     b->load(pElem);
     _arguments.push_back({ pElem->first_attribute("name")->value(), b });
   }
+}
+void ScriptIAPICall::save(xml_node<> *data, xml_document<> &doc) {
+  throw 1;
 }
 ScriptData* ScriptIAPICall::run(ScriptData& _args) {
   ScriptData _nargs(new ScriptDataDict());
@@ -1564,6 +1657,9 @@ void ScriptIBlock::load(xml_node<> *data) {
       _instructions.push_back(nins);
     }
   }
+}
+void ScriptIBlock::save(xml_node<> *data, xml_document<> &doc) {
+  throw 1;
 }
 ScriptIBlock::~ScriptIBlock() {
   while (_instructions.size()) {
@@ -1714,7 +1810,7 @@ int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
     if ((my - cay) / 20 == 9) {
       ScriptData* res = code->run(ScriptData(new ScriptDataDict()));
       if(res != NULL) {
-        cout << res->toString();
+        cout << res->toString() << endl;
         DeletePtr(res);
       }
       return 3;
@@ -1723,7 +1819,12 @@ int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
   return code->guiEvent(this, evt, mx, my, down);
 }
 void ScriptGUI::render(set<key_location>& down) {
+  glScissor(cax, cay, cbx - cax, cby - cay);
+  glEnable(GL_SCISSOR_TEST);
   code->render(this, 0);
+  glDisable(GL_SCISSOR_TEST);
+  Graphics::resetViewport();
+
   if (dragging) {
     dragging->getRect(dragPos.x + dragOffset.x, dragPos.y + dragOffset.y);
     dragging->render(this, 0);
@@ -1753,7 +1854,7 @@ void ScriptGUI::render(set<key_location>& down) {
     glVertex2d(cax + 100, cay+180);
     glVertex2d(cax + 0  , cay+  180);
     glEnd();
-    renderBitmapString(10, 165, "Delete", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay + 165, "Delete", 0xffffffff, false);
     setColor(0xff00ff00);
     glBegin(GL_QUADS);
     glVertex2d(cax + 0, cay + 180);
@@ -1761,7 +1862,7 @@ void ScriptGUI::render(set<key_location>& down) {
     glVertex2d(cax + 100, cay + 200);
     glVertex2d(cax + 0, cay + 200);
     glEnd();
-    renderBitmapString(10, 185, "RUN", 0xffffffff, false);
+    renderBitmapString(cax + 10, cay + 185, "RUN", 0xffffffff, false);
   }
 }
 

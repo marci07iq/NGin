@@ -4,10 +4,10 @@
 
 class ControlSetting : public GUIElement {
 public:
-  key selected;
+  key_config selected;
   int id;
   ControlInputFunc input;
-  ControlSetting(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, key lselected, int lid, ControlInputFunc linput) :
+  ControlSetting(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, key_config lselected, int lid, ControlInputFunc linput) :
     GUIElement(lname, llocation, lbg, lactive, ltextColor) {
     selected = lselected;
     input = linput;

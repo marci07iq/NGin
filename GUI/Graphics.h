@@ -56,6 +56,10 @@ namespace Graphics {
   void defaultMouseWheelManagerNL(int keys, int delta, int x, int y);
   extern MouseWheelManager defaultMouseWheelManager;
 
+  void defaultWindowCloseManagerL();
+  void defaultWindowCloseManagerNL();
+  extern WindowCloseManager defaultWindowCloseManager;
+
 
   class GWindow {
   public:
@@ -92,7 +96,7 @@ namespace Graphics {
   extern map<string, void(*)()> funcs;
   extern set<key_location> keysdown;
 
-  WinHwnd CreateMainWindow(string caption = "", WindowManagers managers = defaultWindowManagers, int width = 100, int height = 100, bool setSize = false, int x = 0, int y = 0, bool setPosition = false);
+  WinHwnd CreateMainWindow(string caption = "", WindowManagers managers = defaultWindowManagers, int width = 100, int height = 100, bool setSize = false, int x = 0, int y = 0, bool setPosition = false, int additionalFlags = 0);
 
   WinHwnd SetUpWindow(int id, int parent, LocationData pos, WindowManagers manager);
 
@@ -111,6 +115,9 @@ namespace Graphics {
   void elementResizeManager(PanelHwnd id, int width, int height);
 
   void elementRenderManager(WinHwnd id);
+
+  void elementCloseManager(WinHwnd id);
+
 
   template <typename T> void setName(string name, T func) {
     funcs[name] = reinterpret_cast<void(*)()>(func);
@@ -131,7 +138,7 @@ namespace Graphics {
   TextInputHwnd createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator = *textValidator);
   TextInputHwnd createTextInput(xml_node<> *me);
 
-  ControlHwnd createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key selected, int id, ControlInputFunc inputCallback);
+  ControlHwnd createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key_config selected, int id, ControlInputFunc inputCallback);
   ControlHwnd createControl(xml_node<> *me);
 
   CanvasHwnd createCanvas(string lname, LocationData location, IWindowManagers managers);

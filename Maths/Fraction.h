@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../Network/Network.h"
+#include "BigNumberLibrary\Cbignum.h"
+#include "../Network/NetworkData.h"
 
 cBigNumber gcd(cBigNumber x, cBigNumber y);
 

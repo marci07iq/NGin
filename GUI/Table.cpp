@@ -1,6 +1,16 @@
 #include "Table.h"
 
 void TableRow::render(set<key_location>& down) {
+  if (bgColor > 0xffffff) { //Has alpha
+    glBegin(GL_QUADS);
+    setColor(bgColor);
+    glVertex2d(cax, cay);
+    glVertex2d(cbx, cay);
+    glVertex2d(cbx, cby);
+    glVertex2d(cax, cby);
+    glEnd();
+  }
+
   auto it = data.begin();
 
   while (it != data.end()) {
@@ -135,6 +145,17 @@ void Table::render(set<key_location>& down) {
   glEnable(GL_SCISSOR_TEST);
   glScissor(cax, cay, cbx - cax, cby - cay);
 
+  if (bgColor > 0xffffff) { //Has alpha
+    glBegin(GL_QUADS);
+    setColor(bgColor);
+    glVertex2d(cax, cay);
+    glVertex2d(cbx, cay);
+    glVertex2d(cbx, cby);
+    glVertex2d(cax, cby);
+    glEnd();
+  }
+
+
   auto it = data.begin();
 
   while (it != data.end()) {
@@ -214,6 +235,9 @@ void Table::getRect() {
       sba = sbc - 5;
       sbb = sbc + 5;
     }
+
+    sba = max(sba, cay + 5);
+    sbb = min(sbb, cby - 5);
   }
 }
 

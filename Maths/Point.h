@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BinTree.h"
+#include "Types.h"
 
 template<typename T> class vec3;
 //typedef vec2<float>           fVec3;
@@ -38,43 +38,43 @@ public:
   template<typename U> vec3(vec3<U> c)
     : x(T(c.x)), y(T(c.y)), z(T(c.z)) {};
 
-  vec3<T> & operator+=(vec3<T> rhs) {
+  vec3<T> & operator+=(const vec3<T> rhs) {
     x += rhs.x; y += rhs.y; z += rhs.z;
     return *this;
   }
-  vec3<T> & operator-=(vec3<T> rhs) {
+  vec3<T> & operator-=(const vec3<T> rhs) {
     x -= rhs.x; y -= rhs.y; z -= rhs.z;
     return *this;
   }
-  vec3<T> & operator*=(vec3<T> rhs) {
+  vec3<T> & operator*=(const vec3<T> rhs) {
     x *= rhs.x; y *= rhs.y; z *= rhs.z;
     return *this;
   }
-  vec3<T> & operator*=(T rhs) {
+  vec3<T> & operator*=(const T rhs) {
     x *= rhs; y *= rhs; z *= rhs;
     return *this;
   }
-  vec3<T> & operator/=(vec3<T> rhs) {
+  vec3<T> & operator/=(const vec3<T> rhs) {
     x /= rhs.x; y /= rhs.y; z /= rhs.z;
     return *this;
   }
-  vec3<T> & operator/=(T rhs) {
+  vec3<T> & operator/=(const T rhs) {
     x /= rhs; y /= rhs; z /= rhs;
     return *this;
   }
-  vec3<T> & operator%=(vec3<T> rhs) {
+  vec3<T> & operator%=(const vec3<T> rhs) {
     x %= rhs.x; y %= rhs.y; z %= rhs.z;
     return *this;
   }
-  vec3<T> & operator&=(vec3<T> rhs) {
+  vec3<T> & operator&=(const vec3<T> rhs) {
     x &= rhs.x; y &= rhs.y; z &= rhs.z;
     return *this;
   }
-  vec3<T> & operator|=(vec3<T> rhs) {
+  vec3<T> & operator|=(const vec3<T> rhs) {
     x |= rhs.x; y |= rhs.y; z |= rhs.z;
     return *this;
   }
-  vec3<T> & operator^=(vec3<T> rhs) {
+  vec3<T> & operator^=(const vec3<T> rhs) {
     x ^= rhs.x; y ^= rhs.y; z ^= rhs.z;
     return *this;
   }
@@ -87,16 +87,16 @@ public:
     return *this;
   }*/
 
-  vec3<T> operator+ (vec3<T> rhs) const { return vec3<T>(*this) += rhs; }
-  vec3<T> operator- (vec3<T> rhs) const { return vec3<T>(*this) -= rhs; }
-  vec3<T> operator* (vec3<T> rhs) const { return vec3<T>(*this) *= rhs; }
-  vec3<T> operator* (T rhs) const { return vec3<T>(*this) *= rhs; }
-  vec3<T> operator/ (vec3<T> rhs) const { return vec3<T>(*this) /= rhs; }
-  vec3<T> operator/ (T rhs) const { return vec3<T>(*this) /= rhs; }
-  vec3<T> operator% (vec3<T> rhs) const { return vec3<T>(*this) %= rhs; }
-  vec3<T> operator& (vec3<T> rhs) const { return vec3<T>(*this) &= rhs; }
-  vec3<T> operator| (vec3<T> rhs) const { return vec3<T>(*this) |= rhs; }
-  vec3<T> operator^ (vec3<T> rhs) const { return vec3<T>(*this) ^= rhs; }
+  vec3<T> operator+ (const vec3<T> rhs) const { return vec3<T>(*this) += rhs; }
+  vec3<T> operator- (const vec3<T> rhs) const { return vec3<T>(*this) -= rhs; }
+  vec3<T> operator* (const vec3<T> rhs) const { return vec3<T>(*this) *= rhs; }
+  vec3<T> operator* (const T rhs) const { return vec3<T>(*this) *= rhs; }
+  vec3<T> operator/ (const vec3<T> rhs) const { return vec3<T>(*this) /= rhs; }
+  vec3<T> operator/ (const T rhs) const { return vec3<T>(*this) /= rhs; }
+  vec3<T> operator% (const vec3<T> rhs) const { return vec3<T>(*this) %= rhs; }
+  vec3<T> operator& (const vec3<T> rhs) const { return vec3<T>(*this) &= rhs; }
+  vec3<T> operator| (const vec3<T> rhs) const { return vec3<T>(*this) |= rhs; }
+  vec3<T> operator^ (const vec3<T> rhs) const { return vec3<T>(*this) ^= rhs; }
   /*vec3<T> operator<<(vec3<T> rhs) const { return vec3<T>(*this) <<= rhs; }
   vec3<T> operator >> (vec3<T> rhs) const { return vec3<T>(*this) >>= rhs; }*/
 
@@ -214,7 +214,25 @@ public:
     y = strTo<T>(me->first_node("y")->value());
     z = strTo<T>(me->first_node("z")->value());
   }
+
+  T maxV() {
+    T res = x;
+    res = (res < y) ? y : res;
+    res = (res < z) ? z : res;
+    return res;
+  }
+  T minV() {
+    T res = x;
+    res = (res > y) ? y : res;
+    res = (res > z) ? z : res;
+    return res;
+  }
 };
+
+template<typename T>
+vec3<T> sqrtVec(vec3<T> what) {
+  return{ sqrt(what.x), sqrt(what.y), sqrt(what.z) };
+}
 
 template<typename T>
 vec3<T> rotateVecZ(vec3<T> what, float with) {
