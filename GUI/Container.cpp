@@ -32,7 +32,7 @@ int Container::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
 }
 int Container::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   int bstate = 0;
-  if (evt._key._type == evt._key.type_mouse && evt._key._keycode == GLUT_RIGHT_BUTTON) {
+  if (evt._key._type == evt._key.type_mouse && evt._key._keycode == GLFW_MOUSE_BUTTON_RIGHT) {
     if (evt._type == evt.evt_down) {
       mid = true;
     }
@@ -49,12 +49,7 @@ int Container::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
 }
 void Container::render(set<key_location>& down) {
   if(element != NULL) {
-    if (element->toDelete) {
-      delete element;
-      element = NULL;
-    } else {
       element->render(down);
-    }
   }
 }
 
@@ -79,6 +74,15 @@ GUIElement* Container::getElementById(string id) {
       GUIElement* e = element->getElementById(id);
     }
     return res;
+  }
+}
+
+void Container::deleteElement(GUIElement * elem) {
+  if (element != elem) {
+    throw 1;
+  } else {
+    delete elem;
+    element = NULL;
   }
 }
 

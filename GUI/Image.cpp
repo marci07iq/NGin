@@ -31,16 +31,16 @@ void Image::render(set<key_location>& down) {
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBegin(GL_QUADS);
+  Gll::gllBegin(Gll::GLL_QUADS);
   glTexCoord2f(0, 1);
-  glVertex2d(rax, ray);
+  Gll::gllVertex(rax, ray);
   glTexCoord2f(1, 1);
-  glVertex2d(rbx, ray);
+  Gll::gllVertex(rbx, ray);
   glTexCoord2f(1, 0);
-  glVertex2d(rbx, rby);
+  Gll::gllVertex(rbx, rby);
   glTexCoord2f(0, 0);
-  glVertex2d(rax, rby);
-  glEnd();
+  Gll::gllVertex(rax, rby);
+  Gll::gllEnd();
   glDisable(GL_BLEND);
   glDisable(GL_TEXTURE_2D);
 }

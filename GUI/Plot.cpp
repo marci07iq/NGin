@@ -21,18 +21,18 @@ int Plot::mouseMoved(int mx, int my, int mox, int moy, set<key_location>& down) 
 
 int Plot::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == key::type_wheel) { //Zoom
-    if (!isDown(down, key(key::type_special, GLUT_KEY_SHIFT_L))) {
+    if (!isDown(down, key(key::type_special, GLFW_KEY_LEFT_SHIFT))) {
       ox += ((cbx + cax) / 2.0 - mx)*(pow(1.1, -evt._key._keycode) - 1)*sx;
       sx *= pow(1.1, -evt._key._keycode);
     }
 
-    if (!isDown(down, key(key::type_special, GLUT_KEY_CTRL_L))) {
+    if (!isDown(down, key(key::type_special, GLFW_KEY_LEFT_CONTROL))) {
       oy += ((cby + cay) / 2.0 - my)*(pow(1.1, -evt._key._keycode) - 1)*sy;
       sy *= pow(1.1, -evt._key._keycode);
     }
     return 1;
   }
-  if (checkKey(KeyPlotReset, down, evt._key) && evt._type == evt.evt_pressed) { //Reset
+  if (checkKey(KeyPlotReset, down, evt._key, true) && evt._type == evt.evt_pressed) { //Reset
     /*double nsx, nsy;
     nsx = nsy = max(sx, sy);
     ox += ((cbx + cax) / 2.0 - mx)*(nsx - sx);
@@ -98,7 +98,7 @@ void Plot::render(set<key_location>& down) {
       glVertex2f(get(ox, sx, d, cbx - cax) - 0.5, cby - cay);
     }
   }
-  glEnd();
+  Gll::gllEnd();
 
   glBegin(GL_LINES);
   setColor(textColor);
@@ -108,7 +108,7 @@ void Plot::render(set<key_location>& down) {
       glVertex2f(cbx - cax, get(oy, sy, d, cby - cay) - 0.5);
     }
   }
-  glEnd();
+  Gll::gllEnd();
 
   //Frame
 
@@ -120,7 +120,7 @@ void Plot::render(set<key_location>& down) {
   glVertex2f(cax + xedge, cby);
   glVertex2f(cax + xedge, cay + yedge);
   glVertex2f(cbx, cay + yedge);
-  glEnd();
+  Gll::gllEnd();
 
   //Data
 
@@ -137,7 +137,7 @@ void Plot::render(set<key_location>& down) {
         glBegin(GL_LINES);
         glVertex2f(get(ox, sx, it->getX(), cbx - cax), get(oy, sy, it->getY(it->getX()), cby - cay));
         glVertex2f(get(ox, sx, nittime, cbx - cax)+1, get(oy, sy, it->getY(nittime), cby - cay));
-        glEnd();
+        Gll::gllEnd();
       
       } while (it->next());
       delete it;
@@ -179,13 +179,13 @@ void Plot::render(set<key_location>& down) {
     glLineWidth(2.0f);
 
     glBegin(GL_LINES);
-    glVertex2d(offset + 10, 10);
-    glVertex2d(offset + 30, 10);
+    Gll::gllVertex(offset + 10, 10);
+    Gll::gllVertex(offset + 30, 10);
     if (!dit->enabled) {
-      glVertex2d(offset + 15, 5);
-      glVertex2d(offset + 25, 15);
+      Gll::gllVertex(offset + 15, 5);
+      Gll::gllVertex(offset + 25, 15);
     }
-    glEnd();
+    Gll::gllEnd();
     renderBitmapString(offset + 40, 5, dit->name, dit->color, 0);
     n++;
   }
@@ -219,7 +219,7 @@ void Plot::reloadAxes() {
           if (dby > day) {
             swap(day, dby);
           }
-          glEnd();
+          Gll::gllEnd();
         }
         else {
           dax = min(it->getX(), dax);

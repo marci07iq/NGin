@@ -5,7 +5,7 @@ void Slider::setVal(float nval) {
     val = nval + quanta / 2.0f - fmod(nval + quanta / 2.0f, quanta);
   }
   val = min(max(val, minv), maxv);
-  clickCallback(val);
+  clickCallback(this, val);
   cursor = -1;
 }
 void Slider::mouseAt(int x, int y) {
@@ -62,11 +62,11 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   }
   if(textActive) {
     if (evt._key._type == key::type_special && evt._type == gui_event::evt_pressed) {
-      if (evt._key._keycode == GLUT_KEY_LEFT) {
+      if (evt._key._keycode == GLFW_KEY_LEFT) {
         cursor = max(0, cursor - 1);
         return 1;
       }
-      if (evt._key._keycode == GLUT_KEY_RIGHT) {
+      if (evt._key._keycode == GLFW_KEY_RIGHT) {
         cursor = min(int(text.size()), cursor + 1);
         return 1;
       }
@@ -87,7 +87,7 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
         setVal(strTo<float>(text));
         return 3;
       }
-      if (floatValidator(text, cursor, evt._key._keycode)) {
+      if (floatValidator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
         cursor++;
         return 1;
@@ -100,32 +100,32 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
 
 void Slider::render(set<key_location>& down) {
 
-  glBegin(GL_QUADS);
+  Gll::gllBegin(Gll::GLL_QUADS);
   if (active) {
     setColor(activeColor);
   }
   else {
     setColor(bgColor);
   }
-  glVertex2d(cax, cay);
-  glVertex2d(cbx, cay);
-  glVertex2d(cbx, cby);
-  glVertex2d(cax, cby);
-  glEnd();
+  Gll::gllVertex(cax, cay);
+  Gll::gllVertex(cbx, cay);
+  Gll::gllVertex(cbx, cby);
+  Gll::gllVertex(cax, cby);
+  Gll::gllEnd();
 
   //inner bar
-  glBegin(GL_QUADS);
+  Gll::gllBegin(Gll::GLL_QUADS);
   if (active) {
     setColor(pulledcolor);
   }
   else {
     setColor(activeColor);
   }
-  glVertex2d(cax, cay);
-  glVertex2d(cax + (cbx-cax)*float(val-minv)/float(maxv-minv), cay);
-  glVertex2d(cax + (cbx - cax)*float(val - minv) / float(maxv - minv), cby);
-  glVertex2d(cax, cby);
-  glEnd();
+  Gll::gllVertex(cax, cay);
+  Gll::gllVertex(cax + (cbx-cax)*float(val-minv)/float(maxv-minv), cay);
+  Gll::gllVertex(cax + (cbx - cax)*float(val - minv) / float(maxv - minv), cby);
+  Gll::gllVertex(cax, cby);
+  Gll::gllEnd();
 
   if(textActive) {
     renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, text, textColor, true, cursor);

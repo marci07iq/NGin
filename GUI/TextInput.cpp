@@ -12,7 +12,7 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       }
       if (!active) {
         cursor = -1;
-        input(text);
+        input(this, text);
       }
     }
     return oactive xor active;
@@ -20,11 +20,11 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
 
   if (active) {
     if(evt._key._type == key::type_special && evt._type == gui_event::evt_pressed) {
-      if (evt._key._keycode == GLUT_KEY_LEFT) {
+      if (evt._key._keycode == GLFW_KEY_LEFT) {
         cursor = max(0, cursor - 1);
         return 1;
       }
-      if (evt._key._keycode == GLUT_KEY_RIGHT) {
+      if (evt._key._keycode == GLFW_KEY_RIGHT) {
         cursor = min(int(text.size()), cursor + 1);
         return 1;
       }
@@ -32,22 +32,22 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
     if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
       if (evt._key._keycode == '\b' && text.length() && cursor > 0) {
         text.erase(cursor - 1, 1);
-        input(text);
+        input(this, text);
         cursor--;
         return 1;
       }
       if (evt._key._keycode == 127 && text.length() && cursor < text.size()) {
         text.erase(cursor, 1);
-        input(text);
+        input(this, text);
         return 1;
       }
       if (evt._key._keycode == '\n' || evt._key._keycode == '\r') {
-        input(text);
+        input(this, text);
         return 3;
       }
-      if (validator(text, cursor, evt._key._keycode)) {
+      if (validator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
-        input(text);
+        input(this, text);
         cursor++;
         return 1;
       }
@@ -58,18 +58,18 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
 }
 
 void TextInput::render(set<key_location>& down) {
-  glBegin(GL_QUADS);
+  Gll::gllBegin(Gll::GLL_QUADS);
   if (active) {
     setColor(activeColor);
   }
   else {
     setColor(bgColor);
   }
-  glVertex2d(cax, cay);
-  glVertex2d(cbx, cay);
-  glVertex2d(cbx, cby);
-  glVertex2d(cax, cby);
-  glEnd();
+  Gll::gllVertex(cax, cay);
+  Gll::gllVertex(cbx, cay);
+  Gll::gllVertex(cbx, cby);
+  Gll::gllVertex(cax, cby);
+  Gll::gllEnd();
 
   renderBitmapString((cax+cbx) / 2.0f, (cay + cby) / 2.0f, text, textColor, true, cursor);
   //shapesPrintf(0, 0, text.c_str());

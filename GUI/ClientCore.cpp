@@ -1,4 +1,4 @@
-#include "GraphicsUtils.h"
+#include "Graphics.h"
 
 map<int, key_config> keybinds; //key, display name
 
@@ -51,123 +51,125 @@ const string key::toKeyName() {
     case 27:
       return "ESC";
       break;
-  }
-}
-const string key::toSpecialName() {
-  switch (_keycode) {
-    //Function keys
-    case GLUT_KEY_SHIFT_L:
+
+      //Function keys
+    case GLFW_KEY_LEFT_SHIFT:
       return "LSHIFT";
       break;
-    case GLUT_KEY_SHIFT_R:
+    case GLFW_KEY_RIGHT_SHIFT:
       return "RSHIFT";
       break;
-    case GLUT_KEY_ALT_L:
+    case GLFW_KEY_LEFT_ALT:
       return "LALT";
       break;
-    case GLUT_KEY_ALT_R:
+    case GLFW_KEY_RIGHT_ALT:
       return "RALT";
       break;
-    case GLUT_KEY_CTRL_L:
+    case GLFW_KEY_LEFT_CONTROL:
       return "LCTRL";
       break;
-    case GLUT_KEY_CTRL_R:
+    case GLFW_KEY_RIGHT_CONTROL:
       return "RCTRL";
       break;
 
       //Toggle keys
-    case GLUT_KEY_NUM_LOCK:
+    case GLFW_KEY_NUM_LOCK:
       return "NUMLOCK";
       break;
 
-    case GLUT_KEY_BEGIN:
-      return "BEGIN";
-      break;
-    case GLUT_KEY_HOME:
+    case GLFW_KEY_HOME:
       return "HOME";
       break;
-    case GLUT_KEY_END:
+    case GLFW_KEY_END:
       return "END";
       break;
-    case GLUT_KEY_INSERT:
+    case GLFW_KEY_INSERT:
       return "INSERT";
       break;
-    case GLUT_KEY_DELETE:
+    case GLFW_KEY_DELETE:
       return "DELETE";
       break;
 
-    case GLUT_KEY_PAGE_DOWN:
+    case GLFW_KEY_PAGE_DOWN:
       return "PGDOWN";
       break;
-    case GLUT_KEY_PAGE_UP:
+    case GLFW_KEY_PAGE_UP:
       return "PGUP";
       break;
       ///Repeat
 
       //Arrow
-    case GLUT_KEY_LEFT:
+    case GLFW_KEY_LEFT:
       return "LEFT";
       break;
-    case GLUT_KEY_RIGHT:
+    case GLFW_KEY_RIGHT:
       return "RIGHT";
       break;
-    case GLUT_KEY_UP:
+    case GLFW_KEY_UP:
       return "UP";
       break;
-    case GLUT_KEY_DOWN:
+    case GLFW_KEY_DOWN:
       return "DOWN";
       break;
 
       //F
-    case GLUT_KEY_F1:
+    case GLFW_KEY_F1:
       return "F1";
       break;
-    case GLUT_KEY_F2:
+    case GLFW_KEY_F2:
       return "F2";
       break;
-    case GLUT_KEY_F3:
+    case GLFW_KEY_F3:
       return "F3";
       break;
-    case GLUT_KEY_F4:
+    case GLFW_KEY_F4:
       return "F4";
       break;
-    case GLUT_KEY_F5:
+    case GLFW_KEY_F5:
       return "F5";
       break;
-    case GLUT_KEY_F6:
+    case GLFW_KEY_F6:
       return "F6";
       break;
-    case GLUT_KEY_F7:
+    case GLFW_KEY_F7:
       return "F7";
       break;
-    case GLUT_KEY_F8:
+    case GLFW_KEY_F8:
       return "F8";
       break;
-    case GLUT_KEY_F9:
+    case GLFW_KEY_F9:
       return "F9";
       break;
-    case GLUT_KEY_F10:
+    case GLFW_KEY_F10:
       return "F10";
       break;
-    case GLUT_KEY_F11:
+    case GLFW_KEY_F11:
       return "F11";
       break;
-    case GLUT_KEY_F12:
+    case GLFW_KEY_F12:
       return "F12";
       break;
+  }
+}
+const string key::toSpecialName() {
+  switch (_keycode) {
+    
   }
   return "ERROR" + to_string(_keycode);
 }
 const string key::toMouseName() {
   switch (_keycode) {
-    case 0:
+    case GLFW_MOUSE_BUTTON_LEFT:
       return "LBUTTON";
       break;
-    case 1:
+    case GLFW_MOUSE_BUTTON_MIDDLE:
       return "MBUTTON";
       break;
-    case 2:
+    case GLFW_MOUSE_BUTTON_RIGHT:
       return "RBUTTON";
+      break;
+    default:
+      return "?BUTTON" + _keycode;
       break;
   }
 }
@@ -271,29 +273,38 @@ string key_config::toName() {
   return res;
 }
 
-void key_config::addKey(key k) {
-  if (k._type == k.type_key || k._type == k.type_special) {
-    /*if (k._type == k.type_special && (
-      k._keycode == GLUT_KEY_SHIFT_L || k._keycode == GLUT_KEY_SHIFT_R ||
-      k._keycode == GLUT_KEY_ALT_L || k._keycode == GLUT_KEY_ALT_R ||
-      k._keycode == GLUT_KEY_CTRL_L || k._keycode == GLUT_KEY_CTRL_R)) {
-      _parts.push_front(k);
-    } else {
-      _parts.clear();*/
+void key_config::addKey(key k, gui_event::type type) {
+  if (type == gui_event::evt_up) {
+    resetOnNext = true;
+  }
+  if (type == gui_event::evt_down) {
+    if (resetOnNext) {
+      resetOnNext = false;
+      _parts.clear();
+      trigger = key();
+    }
+    if(
+      k._keycode == GLFW_KEY_LEFT_SHIFT || k._keycode == GLFW_KEY_RIGHT_SHIFT ||
+      k._keycode == GLFW_KEY_LEFT_ALT || k._keycode ==   GLFW_KEY_RIGHT_ALT ||
+      k._keycode == GLFW_KEY_LEFT_CONTROL || k._keycode ==  GLFW_KEY_RIGHT_CONTROL
+      ) {
       _parts.push_back(k);
-    //}
-
+    } else {
+      _parts.push_back(k);
+      trigger = k;
+      resetOnNext = true;
+    }
   }
 }
 
-bool key_config::check(set<key_location>& down, key spec, bool need) {
-  bool good = _parts.size();
+bool key_config::check(set<key_location>& down, key k, bool need) {
   bool hasSpec = false;
+  if (k == trigger && down.size() == _parts.size()) {
+    hasSpec = true;
+  }
+  bool good = _parts.size();
   for (auto&& it : _parts) {
     good &= down.count(it);
-    if (it == spec) {
-      hasSpec = true;
-    }
   }
   return good && (!need || hasSpec);
 }
@@ -332,7 +343,8 @@ key loadKey(xml_attribute<>* me) {
 }
 
 
-void keybindReply(key_config nkey, int id) {
+void keybindReply(Graphics::ElemHwnd e, key_config nkey) {
+  int id = ((Graphics::ControlHwnd)e)->id;
   if (keybinds.count(id)) {
     keybinds[id] = nkey;
   }
@@ -357,7 +369,7 @@ void loadKeybinds(string filename) {
 
     for (int i = 0; i < n; i++) {
       binds >> valt >> valv;
-      keybinds[id].addKey(key(valv, valt));
+      keybinds[id].addKey(key(valv, valt), gui_event::evt_down);
     }
   }
 
@@ -373,7 +385,7 @@ void saveKeybinds(string filename) {
     string name = it.second.display;
     replaceChar(name, ' ', '_');
 
-    binds << id << " " << name;
+    binds << id << " " << name << " " << it.second._parts.size();
     for (auto&& itk : it.second._parts) {
       binds << " " << itk._type << " " << itk._keycode;
     }
@@ -385,8 +397,8 @@ void saveKeybinds(string filename) {
   binds.close();
 }
 
-bool checkKey(int id, set<key_location>& down, key spec, bool need) {
-  return keybinds[id].check(down, spec, need);
+bool checkKey(int id, set<key_location>& down, key k, bool need) {
+  return keybinds[id].check(down, k, need);
 }
 
 bool checkKey(key id, set<key_location>& down) {

@@ -1,12 +1,4 @@
 Debug/
-SpaceCube/Debug/
-Server/Debug/
-
 Release/
-SpaceCube/Release/
-Server/Release
-
-*.map
-*.ent
-
+GUI/GLL_Res/ascii.png
 .vs/

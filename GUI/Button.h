@@ -4,14 +4,14 @@
 
 class Button : public GUIElement{
 public:
-  key triggerkey;
+  int triggerId;
   string text;
   ClickCallback clickCallback;
-  Button(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, key ltriggerkey, ClickCallback lclickCallback) :
+  Button(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback) :
   GUIElement(lname, llocation, lbg, lactive, ltextColor) {
     text = ltext;
     clickCallback = lclickCallback;
-    triggerkey = ltriggerkey;
+    triggerId = ltriggerId;
   }
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);

@@ -1832,12 +1832,12 @@ void ScriptGUI::render(set<key_location>& down) {
   if(editor) {
     for(int i = 0; i <= 7; i++) {
       setColor((i%2) ? 0xff006060: 0xff004040);
-      glBegin(GL_QUADS);
-      glVertex2d(cax + 0  ,cay+ i*20);
-      glVertex2d(cax + 100,cay+ i*20);
-      glVertex2d(cax + 100,cay+ i*20+20);
-      glVertex2d(cax + 0  ,cay+ i*20+20);
-      glEnd();
+      Gll::gllBegin(Gll::GLL_QUADS);
+      Gll::gllVertex(cax + 0  ,cay+ i*20);
+      Gll::gllVertex(cax + 100,cay+ i*20);
+      Gll::gllVertex(cax + 100,cay+ i*20+20);
+      Gll::gllVertex(cax + 0  ,cay+ i*20+20);
+      Gll::gllEnd();
     }
     renderBitmapString(cax + 10, cay +  10 -5, "If", 0xffffffff, false);
     renderBitmapString(cax + 10, cay +  30 -5, "Loop", 0xffffffff, false);
@@ -1848,20 +1848,20 @@ void ScriptGUI::render(set<key_location>& down) {
     renderBitmapString(cax + 10, cay + 130 -5, "Var", 0xffffffff, false);
     renderBitmapString(cax + 10, cay + 150 -5, "Index", 0xffffffff, false);
     setColor(0xffff0000);
-    glBegin(GL_QUADS);
-    glVertex2d(cax + 0  , cay+160);
-    glVertex2d(cax + 100, cay+160);
-    glVertex2d(cax + 100, cay+180);
-    glVertex2d(cax + 0  , cay+  180);
-    glEnd();
+    Gll::gllBegin(Gll::GLL_QUADS);
+    Gll::gllVertex(cax + 0  , cay+160);
+    Gll::gllVertex(cax + 100, cay+160);
+    Gll::gllVertex(cax + 100, cay+180);
+    Gll::gllVertex(cax + 0  , cay+  180);
+    Gll::gllEnd();
     renderBitmapString(cax + 10, cay + 165, "Delete", 0xffffffff, false);
     setColor(0xff00ff00);
-    glBegin(GL_QUADS);
-    glVertex2d(cax + 0, cay + 180);
-    glVertex2d(cax + 100, cay + 180);
-    glVertex2d(cax + 100, cay + 200);
-    glVertex2d(cax + 0, cay + 200);
-    glEnd();
+    Gll::gllBegin(Gll::GLL_QUADS);
+    Gll::gllVertex(cax + 0, cay + 180);
+    Gll::gllVertex(cax + 100, cay + 180);
+    Gll::gllVertex(cax + 100, cay + 200);
+    Gll::gllVertex(cax + 0, cay + 200);
+    Gll::gllEnd();
     renderBitmapString(cax + 10, cay + 185, "RUN", 0xffffffff, false);
   }
 }
@@ -2076,12 +2076,12 @@ void ScriptGUIBase    ::renderBg(ScriptGUI* base, int depth) {
   else {
     setColor(base->bgcolor_even);
   }
-  glBegin(GL_QUADS);
-  glVertex2d(cax, cay);
-  glVertex2d(cbx, cay);
-  glVertex2d(cbx, cby);
-  glVertex2d(cax, cby);
-  glEnd();
+  Gll::gllBegin(Gll::GLL_QUADS);
+  Gll::gllVertex(cax, cay);
+  Gll::gllVertex(cbx, cay);
+  Gll::gllVertex(cbx, cby);
+  Gll::gllVertex(cax, cby);
+  Gll::gllEnd();
 }
 void ScriptInstruction  ::render(ScriptGUI* base, int depth) {
   throw 1;
@@ -2248,17 +2248,17 @@ void ScriptIIndex       ::render(ScriptGUI* base, int depth) {
   setColor(0xffffffff);
 
   glBegin(GL_LINE_STRIP);
-  glVertex2d(cix + 5, cby - 5);
-  glVertex2d(cix, cby - 5);
-  glVertex2d(cix, cay + 5);
-  glVertex2d(cix + 5, cay + 5);
-  glEnd();
+  Gll::gllVertex(cix + 5, cby - 5);
+  Gll::gllVertex(cix, cby - 5);
+  Gll::gllVertex(cix, cay + 5);
+  Gll::gllVertex(cix + 5, cay + 5);
+  Gll::gllEnd();
   glBegin(GL_LINE_STRIP);
-  glVertex2d(cbx - 10, cby - 5);
-  glVertex2d(cbx - 5, cby - 5);
-  glVertex2d(cbx - 5, cay + 5);
-  glVertex2d(cbx - 10, cay + 5);
-  glEnd();
+  Gll::gllVertex(cbx - 10, cby - 5);
+  Gll::gllVertex(cbx - 5, cby - 5);
+  Gll::gllVertex(cbx - 5, cay + 5);
+  Gll::gllVertex(cbx - 10, cay + 5);
+  Gll::gllEnd();
 }
 void ScriptIFunctionCall::render(ScriptGUI* base, int depth) {
 
@@ -2270,12 +2270,12 @@ void ScriptIBlock       ::render(ScriptGUI* base, int depth) {
   if (base->dragging) {
     setColor(base->activeColor);
  
-    glBegin(GL_QUADS);
-    glVertex2d(cax, cay);
-    glVertex2d(cbx, cay);
-    glVertex2d(cbx, cby);
-    glVertex2d(cax, cby);
-    glEnd();
+    Gll::gllBegin(Gll::GLL_QUADS);
+    Gll::gllVertex(cax, cay);
+    Gll::gllVertex(cbx, cay);
+    Gll::gllVertex(cbx, cby);
+    Gll::gllVertex(cax, cby);
+    Gll::gllEnd();
   } else {
     renderBg(base, depth);
   }

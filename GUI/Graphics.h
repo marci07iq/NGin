@@ -16,15 +16,35 @@
 #include "Popup.h"
 
 namespace Graphics {
+  typedef GLFWwindow* RawWinHwnd; //type passed to underlying graphics lib
+
+
+  class GWindow {
+  public:
+    //LocationData location;
+    int oldMouseX, oldMouseY;
+    int width, height;
+    void rescanSize();
+    RawWinHwnd rawHwnd;
+    WindowManagers windowManagers;
+    Panel* myPanel;
+    bool autoRedraw = false;
+    //void getWin(float pax, float pay, float pbx, float pby);
+    ~GWindow();
+  };
+
   void defaultRenderManagerL();
   void defaultRenderManagerNL();
   extern RenderManager defaultRenderManager;
 
+  void rawResizeManager(GLFWwindow* window, int width, int height);
   void defaultResizeManagerL(int x, int y);
   void defaultResizeManagerNL(int x, int y);
   extern ResizeManager defaultResizeManager;
 
-  void defaultKeyManagerL(unsigned char key, int x, int y);
+  void rawKeyManager(GLFWwindow* window, int key, int scancode, int action, int mods); //Handle unmodified hardware key events
+  void rawCharManager(GLFWwindow* window, unsigned int codepoint); //Unicode compatible character handling (only hardware keys are saved in down)
+  /*void defaultKeyManagerL(unsigned char key, int x, int y);
   void defaultKeyManagerNL(unsigned char key, int x, int y);
   extern KeyManager defaultKeyManager;
 
@@ -38,40 +58,36 @@ namespace Graphics {
 
   void defaultSpecialKeyUpManagerL(int key, int x, int y);
   void defaultSpecialKeyUpManagerNL(int key, int x, int y);
-  extern SpecialKeyManager defaultSpecialKeyUpManager;
+  extern SpecialKeyManager defaultSpecialKeyUpManager;*/
 
+  void rawMouseEntryManager(GLFWwindow* window, int entered);
   void defaultMouseEntryManagerL(int state);
   void defaultMouseEntryManagerNL(int state);
   extern MouseEntryManager defaultMouseEntryManager;
 
+  void rawMouseMoveManager(GLFWwindow* window, double xpos, double ypos);
   void defaultMouseMoveManagerL(int x, int y);
   void defaultMouseMoveManagerNL(int x, int y);
   extern MouseMoveManager defaultMouseMoveManager;
 
+  void rawMouseClickCallback(GLFWwindow* window, int button, int action, int mods);
   void defaultMouseClickManagerL(int button, int state, int x, int y);
   void defaultMouseClickManagerNL(int button, int state, int x, int y);
   extern MouseClickManager defaultMouseClickManager;
 
+  void rawMouseWheelManager(GLFWwindow* window, double xoffset, double yoffset);
   void defaultMouseWheelManagerL(int keys, int delta, int x, int y);
   void defaultMouseWheelManagerNL(int keys, int delta, int x, int y);
   extern MouseWheelManager defaultMouseWheelManager;
 
+  void rawWindowCloseManager(GLFWwindow* window);
   void defaultWindowCloseManagerL();
   void defaultWindowCloseManagerNL();
   extern WindowCloseManager defaultWindowCloseManager;
 
-
-  class GWindow {
-  public:
-    LocationData location;
-    float ax, ay, bx, by;
-    int ox, oy;
-    int id;
-    WindowManagers windowManagers;
-    int parent;
-    Panel* myPanel;
-    void getWin(float pax, float pay, float pbx, float pby);
-  };
+  int defaultGUIEventManagerL(gui_event evt, int x, int y, set<key_location>& down);
+  int defaultGUIEventManagerNL(gui_event evt, int x, int y, set<key_location>& down);
+  extern GUIEventManager defaultGUIEventManager;
 
   typedef GUIElement* ElemHwnd;
   typedef Panel* PanelHwnd;
@@ -89,41 +105,73 @@ namespace Graphics {
   typedef TableRow* TablerowHwnd;
   typedef Image* ImageHwnd;
   typedef GWindow* WinHwnd;
+  
+  extern WinHwnd current; //Set when any window specific callback is called.
+  extern int oldMouseX, oldMouseY;
 
   extern WindowManagers defaultWindowManagers;
-  extern map<int, WinHwnd> windows;
+  extern map<RawWinHwnd, WinHwnd> windows;
 
   extern map<string, void(*)()> funcs;
   extern set<key_location> keysdown;
 
-  WinHwnd CreateMainWindow(string caption = "", WindowManagers managers = defaultWindowManagers, int width = 100, int height = 100, bool setSize = false, int x = 0, int y = 0, bool setPosition = false, int additionalFlags = 0);
+  extern bool redrawFrame;
+  extern list<WinHwnd> wdeleteQueue;
+  extern list<pair<ElemHwnd, ElemHwnd>> edeleteQueue;
 
-  WinHwnd SetUpWindow(int id, int parent, LocationData pos, WindowManagers manager);
+  void initGraphics();
+
+  void requestRedraw();
+
+  void cleanQueues();
+
+  void mainLoop(bool needsWindows = true);
+
+  void shutdownGraphics();
+
+  void forceShutdown();
+
+  typedef void(*WinCreateManager)(Graphics::WinHwnd);
+  struct winCreationData {
+    string caption = "";
+    WindowManagers managers = defaultWindowManagers;
+    int width = 100;
+    int height = 100;
+    bool setSize = false;
+    int x = 0;
+    int y = 0;
+    bool setPosition = false;
+    WinCreateManager onCreated = NULL; //called after createWindow and registring
+    WinCreateManager onSetup = NULL; //called after event handlers, color, etc set.
+  };
+  extern list<winCreationData> wcreateQueue;
+  void CreateMainWindow(string caption = "", WindowManagers managers = defaultWindowManagers, int width = 100, int height = 100, bool setSize = false, int x = 0, int y = 0, bool setPosition = false, int additionalFlags = 0, WinCreateManager onCreated = NULL, WinCreateManager onSetup = NULL);
+  
+  WinHwnd rawCreateMainWindow(winCreationData from); //Do not directy call from callback
+  void rawSetUpWindow(RawWinHwnd id, WindowManagers manager); //Do not directy call from callback
 
   int DestroyWindow(WinHwnd id);
 
-  WinHwnd GetWinHwnd(int id);
+  WinHwnd GetWinHwnd(RawWinHwnd id);
 
-  int elementMouseEnterManager(WinHwnd id, int mstate);
+  int elementMouseEnterManager(int mstate);
+  int elementMouseMoveManager(int x, int y);
 
-  int elementMouseMoveManager(WinHwnd id, int x, int y);
+  int elementGUIEventManager(gui_event evt, int mx, int my, set<key_location>& down);
 
-  int elementGUIEventManager(WinHwnd id, gui_event evt, int mx, int my, set<key_location>& down);
-
-  void elementResizeManager(WinHwnd id, int width, int height);
-
+  void elementResizeManager(int width, int height);
   void elementResizeManager(PanelHwnd id, int width, int height);
 
-  void elementRenderManager(WinHwnd id);
+  void elementRenderManager();
 
-  void elementCloseManager(WinHwnd id);
+  void elementCloseManager();
 
 
   template <typename T> void setName(string name, T func) {
     funcs[name] = reinterpret_cast<void(*)()>(func);
   }
 
-  ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, key trigger, ClickCallback clickCallback);
+  ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback);
   ButtonHwnd createButton(xml_node<> *me);
 
   CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback);
@@ -170,7 +218,7 @@ namespace Graphics {
 
   ElemHwnd createElement(xml_node<> *me);
 
-  void deleteElement(ElemHwnd elemId);
+  void deleteElement(ElemHwnd elemId, ElemHwnd elemFrom);
 
   void deleteElements(PanelHwnd id);
   void deleteElements(TableHwnd id);

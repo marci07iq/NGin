@@ -7,7 +7,6 @@ GUIElement::GUIElement(string lname, LocationData llocation, colorargb lbg, colo
   activeColor = lactive;
   textColor = ltextColor;
   active = false;
-  toDelete = false;
 }
 
 void GUIElement::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
@@ -73,6 +72,9 @@ int GUIElement::activateElement(GUIElement* id) {
   bool oactive = active;
   active = (this == id);
   return oactive ^ active;
+}
+
+void GUIElement::deleteElement(GUIElement * elem) {
 }
 
 GUIElement::~GUIElement() {

@@ -18,6 +18,7 @@ public:
   void getRect();
 
   int activateElement(GUIElement* id);
+  void deleteElement(GUIElement* elem);
 
   GUIElement* getElementById(string id);
   /*bool keyPressed(unsigned char key, int mx, int my);

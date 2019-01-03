@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Maths/helperFunctions.h"
-#include "GraphicsUtils.h"
+//#include "GraphicsUtils.h"
 
 class key {
 public:
@@ -38,16 +38,13 @@ public:
     _keycode = k._keycode;
     _type = k._type;
   }
+  key_location(const key_location& other) {
+    _mx = other._mx;
+    _my = other._my;
+    _keycode = other._keycode;
+    _type = other._type;
+  }
   key_location();
-};
-
-class key_config {
-public:
-  list<key> _parts;
-  string display;
-  string toName();
-  void addKey(key k);
-  bool check(set<key_location>& down, key spec = key(), bool need = false);
 };
 
 bool operator==(const key& lhs, const key& rhs);
@@ -74,17 +71,34 @@ public:
   gui_event(key_location key, type type);
 };
 
+class key_config {
+public:
+  list<key> _parts;
+  key trigger;
+  string display;
+  bool resetOnNext;
+  string toName();
+  void addKey(key k, gui_event::type type);
+  bool check(set<key_location>& down, key special = key(), bool need = false);
+};
+
+
 key loadKey(xml_attribute<>* me);
 
 
 extern map<int, key_config> keybinds; //key, display name
 
-void keybindReply(key_config nkey, int id);
+class GUIElement;
+namespace Graphics {
+  typedef GUIElement* ElemHwnd;
+}
+
+void keybindReply(Graphics::ElemHwnd e, key_config nkey);
 
 void loadKeybinds(string filename = "html/keybinds.cfg");
 void saveKeybinds(string filename = "html/keybinds.cfg");
 
-bool checkKey(int id, set<key_location>& down, key spec = key(), bool need = false);
+bool checkKey(int id, set<key_location>& down, key special = key(), bool need = false);
 bool checkKey(key id, set<key_location>& down);
 
 

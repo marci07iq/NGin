@@ -19,6 +19,7 @@ public:
   GUIElement* getElementById(string id);
 
   int activateElement(GUIElement* id);
+  void deleteElement(GUIElement* elem);
 
   ~TableRow();
 };
@@ -43,6 +44,7 @@ public:
   GUIElement* getElementById(string id);
 
   int activateElement(GUIElement* id);
+  void deleteElement(GUIElement* elem);
 
   ~Table();
 };

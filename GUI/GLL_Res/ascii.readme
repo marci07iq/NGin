@@ -1,0 +1,10 @@
+Place a font file "ascii.png" in this folder.
+
+It must contain a 16x16 grid of images in black-and-white
+Only red channle used, as alpha channle for drawing (black = transparent)
+Arrange by ASCII codes left to right, top to bottom.
+
+Tools like http://www.lmnopc.com/bitmapfontbuilder/ may help.
+This is purely a suggestion, I accept no liablity for that website, and it's contents.
+
+All fonts will be rendered monospace.

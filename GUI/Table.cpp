@@ -2,32 +2,26 @@
 
 void TableRow::render(set<key_location>& down) {
   if (bgColor > 0xffffff) { //Has alpha
-    glBegin(GL_QUADS);
+    Gll::gllBegin(Gll::GLL_QUADS);
     setColor(bgColor);
-    glVertex2d(cax, cay);
-    glVertex2d(cbx, cay);
-    glVertex2d(cbx, cby);
-    glVertex2d(cax, cby);
-    glEnd();
+    Gll::gllVertex(cax, cay);
+    Gll::gllVertex(cbx, cay);
+    Gll::gllVertex(cbx, cby);
+    Gll::gllVertex(cax, cby);
+    Gll::gllEnd();
   }
 
   auto it = data.begin();
 
   while (it != data.end()) {
-    if ((*it)->toDelete) {
-      delete *it;
-      auto it2 = it;
-      ++it;
-      data.erase(it2);
-    }
-    else {
+
       //glPushMatrix();
       //glViewport(cax, cay, cbx - cax, cby - cay);
       //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
       (*it)->render(down);
       //glPopMatrix();
       ++it;
-    }
+
 
   }
 }
@@ -60,9 +54,9 @@ int TableRow::mouseEnter(int state) {
 
   while (it != data.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
+
       bstate |= (*it)->mouseEnter(state);
-    }
+
   }
   return bstate;
 }
@@ -73,11 +67,15 @@ int TableRow::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down
 
   while (it != data.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
       state |= (*it)->mouseMoved(mx, my, ox, oy, down);
-    }
+    
   }
   return state;
+}
+
+void TableRow::deleteElement(GUIElement * elem) {
+  data.remove((TableRow*)elem);
+  delete elem;
 }
 
 int TableRow::activateElement(GUIElement* id) {
@@ -87,9 +85,8 @@ int TableRow::activateElement(GUIElement* id) {
 
   while (it != data.begin()) {
     --it;
-    if (!(*it)->toDelete) {
       bstate |= (*it)->activateElement(id);
-    }
+    
   }
   return bstate;
 }
@@ -101,9 +98,8 @@ int TableRow::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
 
   while (it != data.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
       state |= (*it)->guiEvent(evt, mx, my, down);
-    }
+    
   }
   return state;
 }
@@ -127,13 +123,11 @@ GUIElement* TableRow::getElementById(string id) {
     auto it = data.begin();
 
     while (it != data.end() && res == NULL) {
-      if (!(*it)->toDelete) {
         GUIElement* e = (*it)->getElementById(id);
 
         if (e != NULL) {
           res = e;
         }
-      }
 
       ++it;
     }
@@ -146,26 +140,20 @@ void Table::render(set<key_location>& down) {
   glScissor(cax, cay, cbx - cax, cby - cay);
 
   if (bgColor > 0xffffff) { //Has alpha
-    glBegin(GL_QUADS);
+    Gll::gllBegin(Gll::GLL_QUADS);
     setColor(bgColor);
-    glVertex2d(cax, cay);
-    glVertex2d(cbx, cay);
-    glVertex2d(cbx, cby);
-    glVertex2d(cax, cby);
-    glEnd();
+    Gll::gllVertex(cax, cay);
+    Gll::gllVertex(cbx, cay);
+    Gll::gllVertex(cbx, cby);
+    Gll::gllVertex(cax, cby);
+    Gll::gllEnd();
   }
 
 
   auto it = data.begin();
 
   while (it != data.end()) {
-    if ((*it)->toDelete) {
-      delete *it;
-      auto it2 = it;
-      ++it;
-      data.erase(it2);
-    }
-    else {
+
       //glPushMatrix();
       //glViewport(cax, cay, cbx - cax, cby - cay);
       //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
@@ -174,15 +162,14 @@ void Table::render(set<key_location>& down) {
       ++it;
     }
 
-  }
 
-  glBegin(GL_QUADS);
+  Gll::gllBegin(Gll::GLL_QUADS);
   setColor(activeColor);
-  glVertex2d(cbx - 15, sba);
-  glVertex2d(cbx - 5, sba);
-  glVertex2d(cbx - 5, sbb);
-  glVertex2d(cbx - 15, sbb);
-  glEnd();
+  Gll::gllVertex(cbx - 15, sba);
+  Gll::gllVertex(cbx - 5, sba);
+  Gll::gllVertex(cbx - 5, sbb);
+  Gll::gllVertex(cbx - 15, sbb);
+  Gll::gllEnd();
 
   Graphics::resetViewport();
 }
@@ -248,9 +235,7 @@ int Table::mouseEnter(int state) {
 
   while (it != data.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
       bstate |= (*it)->mouseEnter(state);
-    }
   }
   return bstate;
 }
@@ -262,9 +247,7 @@ int Table::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
 
   while (it != data.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
       state |= (*it)->mouseMoved(mx, my, ox, oy, down);
-    }
   }
   return state;
 }
@@ -284,9 +267,7 @@ int Table::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
 
     while (it != data.begin() && !(state & 2)) {
       --it;
-      if (!(*it)->toDelete) {
         state |= (*it)->guiEvent(evt, mx, my, down);
-      }
     }
     return state;
   }
@@ -299,9 +280,7 @@ int Table::activateElement(GUIElement* id) {
 
   while (it != data.begin()) {
     --it;
-    if (!(*it)->toDelete) {
-      bstate |= (*it)->activateElement(id);
-    }
+    bstate |= (*it)->activateElement(id);
   }
   return bstate;
 }
@@ -316,18 +295,21 @@ GUIElement* Table::getElementById(string id) {
     auto it = data.begin();
 
     while (it != data.end() && res == NULL) {
-      if (!(*it)->toDelete) {
         GUIElement* e = (*it)->getElementById(id);
 
         if (e != NULL) {
           res = e;
         }
-      }
 
       ++it;
     }
     return res;
   }
+}
+
+void Table::deleteElement(GUIElement * elem) {
+  data.remove((TableRow*)elem);
+  delete elem;
 }
 
 Table::~Table() {

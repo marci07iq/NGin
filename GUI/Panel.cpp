@@ -11,9 +11,7 @@ int Panel::mouseEnter(int state) {
 
   while (it != elements.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
-      bstate |= (*it)->mouseEnter(state);
-    }
+    bstate |= (*it)->mouseEnter(state);
   }
   return bstate;
 }
@@ -26,9 +24,7 @@ int Panel::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
 
   while (it != elements.begin() && !(state & 2)) {
     --it;
-    if (!(*it)->toDelete) {
-      state |= (*it)->mouseMoved(mx, my, ox, oy, down);
-    }
+    state |= (*it)->mouseMoved(mx, my, ox, oy, down);
   }
   return state;
 }
@@ -41,40 +37,30 @@ int Panel::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
 
   while (it != elements.begin() && !(bstate & 2)) {
     --it;
-    if (!(*it)->toDelete) {
-      bstate |= (*it)->guiEvent(evt, mx, my, down);
-    }
+    bstate |= (*it)->guiEvent(evt, mx, my, down);
   }
   return bstate;
 }
 void Panel::render(set<key_location>& down) {
   if (bgColor > 0xffffff) { //Has alpha
-    glBegin(GL_QUADS);
+    Gll::gllBegin(Gll::GLL_QUADS);
     setColor(bgColor);
-    glVertex2d(cax, cay);
-    glVertex2d(cbx, cay);
-    glVertex2d(cbx, cby);
-    glVertex2d(cax, cby);
-    glEnd();
+    Gll::gllVertex(cax, cay);
+    Gll::gllVertex(cbx, cay);
+    Gll::gllVertex(cbx, cby);
+    Gll::gllVertex(cax, cby);
+    Gll::gllEnd();
   }
   
   auto it = elements.begin();
 
   while (it != elements.end()) {
-    if ((*it)->toDelete) {
-      delete *it;
-      auto it2 = it;
-      ++it;
-      elements.erase(it2);
-    } else {
-      //glPushMatrix();
-      //glViewport(cax, cay, cbx - cax, cby - cay);
-      //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
-      (*it)->render(down);
-      //glPopMatrix();
-      ++it;
-    }
-    
+    //glPushMatrix();
+    //glViewport(cax, cay, cbx - cax, cby - cay);
+    //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
+    (*it)->render(down);
+    //glPopMatrix();
+    ++it;
   }
 }
 
@@ -106,12 +92,10 @@ GUIElement* Panel::getElementById(string id) {
     auto it = elements.begin();
 
     while (it != elements.end() && res == NULL) {
-      if (!(*it)->toDelete) {
-        GUIElement* e = (*it)->getElementById(id);
+      GUIElement* e = (*it)->getElementById(id);
 
-        if (e != NULL) {
-          res = e;
-        }
+      if (e != NULL) {
+        res = e;
       }
 
       ++it;
@@ -127,11 +111,15 @@ int Panel::activateElement(GUIElement* id) {
 
   while (it != elements.begin()) {
     --it;
-    if (!(*it)->toDelete) {
-      bstate |= (*it)->activateElement(id);
-    }
+    bstate |= (*it)->activateElement(id);
+
   }
   return bstate;
+}
+
+void Panel::deleteElement(GUIElement * elem) {
+  elements.remove(elem);
+  delete elem;
 }
 
 Panel::~Panel() {

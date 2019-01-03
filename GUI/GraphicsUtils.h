@@ -1,17 +1,6 @@
 #pragma once
 
-#include "../GL/freeglut.h"
-#include "ClientCore.h"
-#include "../Maths/Point.h"
-#include "stb_image.h"
-
-#ifdef _WIN64
-#pragma comment(lib, "glew64.lib")
-#else
-#ifdef WIN32
-#pragma comment(lib, "glew32.lib")
-#endif
-#endif
+#include "Shader.h"
 
 extern map<string, map<string, colorargb>> colors;
 
@@ -21,20 +10,30 @@ colorargb getColor(xml_node<>* me, string elem, string key);
 
 void loadColors(string filename = "html/colors.cfg");
 
-class Canvas;
+class key_config;
+class key_location;
+class gui_event;
 
-typedef void(*ClickCallback)(string);
-typedef void(*CheckCallback)(bool);
-typedef void(*TextInputFunc)(string);
-typedef void(*ControlInputFunc)(key_config, int);
-typedef void(*SliderInputFunc)(float);
-typedef bool(*TextValidatorFunc)(string, int, unsigned char);
+class Canvas;
+class GUIElement;
+namespace Graphics {
+  class GWindow;
+  typedef GUIElement* ElemHwnd;
+  typedef GLFWwindow* RawWinHwnd;
+}
+
+typedef void(*ClickCallback)(Graphics::ElemHwnd);
+typedef void(*CheckCallback)(Graphics::ElemHwnd, bool);
+typedef void(*TextInputFunc)(Graphics::ElemHwnd, string);
+typedef void(*ControlInputFunc)(Graphics::ElemHwnd, key_config);
+typedef void(*SliderInputFunc)(Graphics::ElemHwnd, float);
+typedef bool(*TextValidatorFunc)(Graphics::ElemHwnd, string, int, unsigned char);
 
 typedef void(*RenderManager)();
 typedef void(*ResizeManager)(int x, int y);
-//typedef void(*GUIEventManager)(gui_event evt, int x, int y, set<key_location>& down);
-typedef void(*KeyManager)(unsigned char key, int x, int y);
-typedef void(*SpecialKeyManager)(int key, int x, int y);
+typedef int(*GUIEventManager)(gui_event evt, int x, int y, set<key_location>& down);
+/*typedef void(*KeyManager)(unsigned char key, int x, int y);
+typedef void(*SpecialKeyManager)(int key, int x, int y);*/
 typedef void(*MouseClickManager)(int idk, int key, int x, int y);
 typedef void(*MouseWheelManager)(int idk, int key, int x, int y);
 typedef void(*MouseEntryManager)(int state);
@@ -63,10 +62,11 @@ struct OpenGLData {
 struct WindowManagers {
   RenderManager renderManager;
   ResizeManager resizeManager;
-  KeyManager keyManager;
+  GUIEventManager guiEventManager;
+  /*KeyManager keyManager;
   SpecialKeyManager specialKeyManager;
   KeyManager keyUpManager;
-  SpecialKeyManager specialUpKeyManager;
+  SpecialKeyManager specialUpKeyManager;*/
   MouseEntryManager mouseEntryManager;
   MouseMoveManager mouseMoveManager;
   MouseClickManager mouseClickManager;
@@ -165,7 +165,7 @@ LinearScale loadLinear(xml_node<>* me);
 /// <returns>Loaded location data</returns>
 LocationData loadLocation(xml_node<>* me);
 
-static void shapesPrintf(int row, int col, const char *fmt, ...);
+//static void shapesPrintf(int row, int col, const char *fmt, ...);
 
 void setColor(colorargb v);
 
@@ -173,6 +173,42 @@ void renderBitmapString(float x, float y, string text, colorargb color, bool cen
 
 GLuint png_texture_load(string filename, int& w, int& h);
 
-bool numericalValidator(string s, int cursor, unsigned char c);
-bool floatValidator(string s, int cursor, unsigned char c);
-bool textValidator(string s, int cursor, unsigned char c);
+bool numericalValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+bool floatValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+bool textValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+
+namespace Gll {
+  enum gllModes {
+    GLL_POLY,
+    GLL_QUADS
+    //GLL_LINES,
+    //GLL_LINE_STRIP
+  };
+
+  extern gllModes _mode;
+  extern vector<fVec2> _pts;
+  extern colorargb _col;
+
+  extern Shader gllBaseS;
+  extern Shader gllTextS;
+
+  extern GLuint gllFontMap;
+  extern iVec2 gllFontCharSize;
+  extern iVec2 gllFontCharCount;
+
+  extern Graphics::RawWinHwnd initOn;
+
+  void gllInit(string base);
+
+  void gllBegin(gllModes m);
+
+  void gllVertex(fVec2 pt);
+
+  void gllVertex(double x, double y);
+
+  void gllColor(colorargb col);
+
+  void gllText(string s, int x, int y, int xAlign = -1, int yAlign = -1, float scale = 1); //-1: left, 0:center, 1:right
+
+  void gllEnd();
+}
