@@ -1,6 +1,9 @@
 #include "Table.h"
 
 void TableRow::render(set<key_location>& down) {
+  glEnable(GL_SCISSOR_TEST);
+  glScissor(cax, cay, cbx - cax, cby - cay);
+
   if (bgColor > 0xffffff) { //Has alpha
     Gll::gllBegin(Gll::GLL_QUADS);
     setColor(bgColor);
@@ -11,19 +14,24 @@ void TableRow::render(set<key_location>& down) {
     Gll::gllEnd();
   }
 
+
   auto it = data.begin();
 
   while (it != data.end()) {
-
-      //glPushMatrix();
-      //glViewport(cax, cay, cbx - cax, cby - cay);
-      //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
-      (*it)->render(down);
-      //glPopMatrix();
-      ++it;
-
-
+    (*it)->render(down);
+    ++it;
   }
+
+
+  Gll::gllBegin(Gll::GLL_QUADS);
+  setColor(activeColor);
+  Gll::gllVertex(sab, cay + 5);
+  Gll::gllVertex(sab, cay + 15);
+  Gll::gllVertex(sbb, cay + 15);
+  Gll::gllVertex(sbb, cay + 5);
+  Gll::gllEnd();
+
+  Graphics::resetViewport();
 }
 
 void TableRow::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
@@ -36,14 +44,32 @@ void TableRow::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
 }
 
 void TableRow::getRect() {
-  int chx = cax;
+  if (data.size()) {
+    width = 0;
 
-  auto it = data.begin();
+    for (auto&& it : data) {
+      width += it->getWidth(cbx - cax);
+    }
+    int minscroll = cbx - cax - width; //lower most
+    if (scroll < minscroll) {
+      scroll = minscroll;
+    }
+    int maxscroll = 0; //upper most
+    if (scroll > maxscroll) {
+      scroll = maxscroll;
+    }
 
-  while (it != data.end()) {
-    (*it)->getRect(cbx - cax, cby - cay, chx, cay);
-    //chx = (*it)->cbx;
-    ++it;
+    int chx = scroll;
+
+    for (auto&& it : data) {
+      it->getRect(cbx - cax, cby - cay - 20, chx, cay + 20);
+      chx = it->cbx;
+    }
+
+    pair<float, float> scrollBarPos = scrollBar(width, -scroll, cax, cbx, 10, 5);
+
+    sab = scrollBarPos.first;
+    sbb = scrollBarPos.second;
   }
 }
 
@@ -92,16 +118,24 @@ int TableRow::activateElement(GUIElement* id) {
 }
 
 int TableRow::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  auto it = data.end();
+  if (evt._key._type == key::type_wheel) {
+    if (isIn(mx, my)) {
+      scroll += 30 * evt._key._keycode;
+      getRect();
+      return 3;
+    }
+    return 0;
+  } else {
+    auto it = data.end();
 
-  int state = 0;
+    int state = 0;
 
-  while (it != data.begin() && !(state & 2)) {
-    --it;
+    while (it != data.begin() && !(state & 2)) {
+      --it;
       state |= (*it)->guiEvent(evt, mx, my, down);
-    
+    }
+    return state;
   }
-  return state;
 }
 
 TableRow::~TableRow() {
@@ -153,14 +187,9 @@ void Table::render(set<key_location>& down) {
   auto it = data.begin();
 
   while (it != data.end()) {
-
-      //glPushMatrix();
-      //glViewport(cax, cay, cbx - cax, cby - cay);
-      //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
-      (*it)->render(down);
-      //glPopMatrix();
-      ++it;
-    }
+    (*it)->render(down);
+    ++it;
+  }
 
 
   Gll::gllBegin(Gll::GLL_QUADS);
@@ -185,7 +214,6 @@ void Table::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
 
 void Table::getRect() {
   if(data.size()) {
-    
 
     height = 0;
 
@@ -208,23 +236,10 @@ void Table::getRect() {
       chy = it->cay;
     }
 
-    if(maxscroll != minscroll) {
-      sbb = cby - 5 + ((cby - cay - 10) * scroll)/(height);
-      sba = cby - 5 + ((cby - cay - 10) * (cay - cby + scroll)) / height;
-    }
-    else {
-      sba = (cay + cby) / 2;
-      sbb = (cay + cby) / 2;
-    }
+    pair<float, float> scrollBarPos = scrollBar(height, scroll- minscroll, cay, cby, 10, 5);
 
-    if (sbb - sba < 10) {
-      int sbc = (sba + sbb) / 2;
-      sba = sbc - 5;
-      sbb = sbc + 5;
-    }
-
-    sba = max(sba, cay + 5);
-    sbb = min(sbb, cby - 5);
+    sba = scrollBarPos.first;
+    sbb = scrollBarPos.second;
   }
 }
 
@@ -257,7 +272,7 @@ int Table::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
     if (isIn(mx, my)) {
       scroll += 30 * evt._key._keycode;
       getRect();
-      return 1;
+      return 3;
     }
     return 0;
   } else {

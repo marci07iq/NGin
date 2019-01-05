@@ -113,6 +113,14 @@ int hexToInt(string str) {
   return hexToInt(str, 0);
 }
 
+bool endsWith(string const & fullString, string const & ending) {
+  if (fullString.length() >= ending.length()) {
+    return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+  } else {
+    return false;
+  }
+}
+
 void serialize(string& s, unsigned char** data, int& dataLen) {
   *data = new unsigned char[s.size()];
   for (int i = 0; i < s.size(); i++) {

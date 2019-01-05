@@ -171,8 +171,6 @@ void setColor(colorargb v);
 
 void renderBitmapString(float x, float y, string text, colorargb color, bool center, int cursor = -1);
 
-GLuint png_texture_load(string filename, int& w, int& h);
-
 bool numericalValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
 bool floatValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
 bool textValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
@@ -192,7 +190,7 @@ namespace Gll {
   extern Shader gllBaseS;
   extern Shader gllTextS;
 
-  extern GLuint gllFontMap;
+  extern Texture gllFontMap;
   extern iVec2 gllFontCharSize;
   extern iVec2 gllFontCharCount;
 
@@ -212,3 +210,5 @@ namespace Gll {
 
   void gllEnd();
 }
+
+pair<float, float> scrollBar(float contentHeight, float offset, float poslow, float poshigh, float minSize, float margin);

@@ -1,21 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-//#define GLFW_DLL
-#define GLFW_INCLUDE_GLU
-#include "../GL_Lib/GLFW/glfw3.h"
-
-#include "ClientCore.h"
-#include "../Maths/Point.h"
-#include "stb_image.h"
-
-#ifdef _WIN64
-#pragma comment(lib, "glew64.lib")
-#else
-#ifdef WIN32
-#pragma comment(lib, "glew32.lib")
-#endif
-#endif
+#include "Texture.h"
 
 
 class Shader {

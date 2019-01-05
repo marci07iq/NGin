@@ -422,34 +422,6 @@ void renderBitmapString(float x, float y, string text, colorargb color, bool cen
   //glutBitmapString(GLUT_BITMAP_9_BY_15, reinterpret_cast<const unsigned char*>(text.c_str()));
 }
 
-GLuint png_texture_load(string filename, int& w, int& h) {
-  int comp;
-  unsigned char* image = stbi_load(trimStr(filename).c_str(), &w, &h, &comp, STBI_rgb_alpha);
-
-  if (image == nullptr)
-    throw(std::string("Failed to load texture"));
-
-  GLuint m_texture = 0;
-
-  glGenTextures(1, &m_texture);
-
-  glBindTexture(GL_TEXTURE_2D, m_texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  if (comp == 3)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-  else if (comp == 4)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-
-  //glBindTexture(GL_TEXTURE_2D, 0);
-
-  stbi_image_free(image);
-
-  return m_texture;
-}
-
 bool numericalValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
   size_t Fminus = s.find('-');
   return ('0' <= c && c <= '9' && (Fminus == string::npos || Fminus < cursor)) || (cursor == 0 && c == '-');
@@ -465,6 +437,24 @@ bool textValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c) 
   return (32 <= c && c < 127);
 }
 
+pair<float, float> scrollBar(float contentHeight, float offset, float poslow, float poshigh, float minSize, float margin) {
+  float poslow2 = poslow + margin;
+  float poshigh2 = poshigh - margin;
+
+  float viewportHeight = poshigh - poslow;
+
+  float sliderSize = min(max(viewportHeight*viewportHeight / contentHeight, minSize), poshigh2 - poslow2);
+
+  poslow2 += sliderSize / 2;
+  poshigh2 -= sliderSize / 2;
+
+  float iviewportHeight = poshigh2 - poslow2;
+
+  float sliderMid = poslow2 + offset * iviewportHeight / (contentHeight - viewportHeight);
+
+  return{ sliderMid - sliderSize / 2, sliderMid + sliderSize / 2 };
+}
+
 Gll::gllModes Gll::_mode;
 vector<fVec2> Gll::_pts;
 colorargb Gll::_col;
@@ -474,18 +464,17 @@ Graphics::RawWinHwnd Gll::initOn = NULL;
 Shader Gll::gllBaseS;
 Shader Gll::gllTextS;
 
-GLuint Gll::gllFontMap;
+Texture Gll::gllFontMap;
 iVec2 Gll::gllFontCharSize;
 iVec2 Gll::gllFontCharCount;
 
 void Gll::gllInit(string base) {
   gllBaseS.create(base + "LegDraw");
   gllTextS.create(base + "Text");
-  iVec2 fontFileSize;
-  gllFontMap = png_texture_load((base + "ascii.png").c_str(), fontFileSize.x, fontFileSize.y);
+  gllFontMap.load(base + "ascii.png");
   initOn = (Graphics::current) ? Graphics::current->rawHwnd : NULL;
   gllFontCharCount = {16,16};
-  gllFontCharSize = fontFileSize / gllFontCharCount;
+  gllFontCharSize = gllFontMap.size / gllFontCharCount;
 }
 
 void Gll::gllBegin(gllModes m) {
@@ -564,8 +553,8 @@ void Gll::gllEnd() {
       ((_col >> 16) & 0xff) / 255.0,
       ((_col >> 8) & 0xff) / 255.0,
       ((_col >> 0) & 0xff) / 255.0,
-      //((_col >> 24) & 0xff) / 255.0);
-      1);
+      ((_col >> 24) & 0xff) / 255.0);
+      //1);
   } else {
     cout << "color not found!" << endl;
   }
@@ -683,8 +672,8 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
 
   loc = glGetUniformLocation(gllTextS._pID, "font");
   if (loc != -1) {
-    glBindTexture(GL_TEXTURE_2D, gllFontMap);
-    //glBindSampler(0, gllFontMap);
+   
+    gllFontMap.bind(loc, 0);
 
   } else {
     cout << "font not found!" << endl;

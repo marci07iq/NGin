@@ -208,12 +208,12 @@ namespace Graphics {
   TableHwnd createTable(string lname, LocationData location, colorargb bg, colorargb active);
   TableHwnd createTable( xml_node<> *me);
 
-  TablerowHwnd createTableRow(string lname, LocationData location, colorargb bg);
+  TablerowHwnd createTableRow(string lname, LocationData location, colorargb bg, colorargb active);
   TablerowHwnd createTableRow(xml_node<> *me);
 
   ElemHwnd addElement(WinHwnd id, ElemHwnd elem);
   ElemHwnd addElement(PanelHwnd id, ElemHwnd elem);
-  ElemHwnd addElement(TableHwnd id, TablerowHwnd elem);
+  ElemHwnd addElement(TableHwnd id, ElemHwnd elem);
   ElemHwnd addElement(TablerowHwnd id, ElemHwnd elem);
 
   ElemHwnd createElement(xml_node<> *me);

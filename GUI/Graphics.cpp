@@ -576,7 +576,7 @@ void Graphics::setElements(TableHwnd id, xml_node<> *data) {
   for (xml_node<> *pElem = data->first_node(); pElem; pElem = pElem->next_sibling()) {
     string name = pElem->name();
     if (name == "tr") {
-      addElement(id, createTableRow(pElem));
+      addElement(id, createElement(pElem));
     }
   }
 }
@@ -620,6 +620,9 @@ Graphics::ElemHwnd Graphics::createElement(xml_node<> *me) {
   }
   else if (name == "table") {
     return createTable(me);
+  }
+  else if (name == "tr") {
+    return createTableRow(me);
   }
   else if (name == "image") {
     return createImage(me);
@@ -754,14 +757,15 @@ Graphics::TableHwnd Graphics::createTable(xml_node<> *me) {
   return p;
 }
 
-Graphics::TablerowHwnd Graphics::createTableRow(string lname, LocationData location, colorargb bg) {
-  return new TableRow(lname, location, bg);
+Graphics::TablerowHwnd Graphics::createTableRow(string lname, LocationData location, colorargb bg, colorargb active) {
+  return new TableRow(lname, location, bg, active);
 }
 Graphics::TablerowHwnd Graphics::createTableRow(xml_node<> *me) {
   TablerowHwnd p = createTableRow(
     me->first_attribute("id")->value(),
     loadLocation(me->first_node("location")),
-    getColor(me, "tablerow", "bgcolor"));
+    getColor(me, "tablerow", "bgcolor"),
+    getColor(me, "tablerow", "activecolor"));
 
   setElements(p, me);
 
@@ -825,12 +829,18 @@ Graphics::ElemHwnd Graphics::addElement(PanelHwnd id, ElemHwnd elem) {
   requestRedraw();
   return elem;
 }
-Graphics::ElemHwnd Graphics::addElement(TableHwnd id, TablerowHwnd elem) {
+Graphics::ElemHwnd Graphics::addElement(TableHwnd id, ElemHwnd elem) {
+  if (elem == NULL) {
+    return NULL;
+  }
   id->data.push_back(elem);
   id->getRect();
   return elem;
 }
 Graphics::ElemHwnd Graphics::addElement(TablerowHwnd id, ElemHwnd elem) {
+  if (elem == NULL) {
+    return NULL;
+  }
   id->data.push_back(elem);
   id->getRect();
   return elem;

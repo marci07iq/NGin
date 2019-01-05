@@ -35,14 +35,15 @@ const string key::toKeyName() {
     case ' ':
       return "SPACE";
       break;
-    case 9:
+    case GLFW_KEY_TAB:
       return "TAB";
       break;
-    case 8:
+    case GLFW_KEY_BACKSPACE:
       return "BACKSPACE";
       break;
     case '\n':
     case '\r':
+    case GLFW_KEY_ENTER:
       return "ENTER";
       break;
     case 127:
@@ -76,6 +77,20 @@ const string key::toKeyName() {
     case GLFW_KEY_NUM_LOCK:
       return "NUMLOCK";
       break;
+    case GLFW_KEY_CAPS_LOCK:
+      return "CAPSLOCK";
+      break;
+    case GLFW_KEY_SCROLL_LOCK:
+      return "SCRLOCK";
+      break;
+
+    //Special block
+    case GLFW_KEY_PRINT_SCREEN:
+      return "PRT SCR";
+      break;
+    case GLFW_KEY_PAUSE:
+      return "PAUSE";
+      break;
 
     case GLFW_KEY_HOME:
       return "HOME";
@@ -96,7 +111,6 @@ const string key::toKeyName() {
     case GLFW_KEY_PAGE_UP:
       return "PGUP";
       break;
-      ///Repeat
 
       //Arrow
     case GLFW_KEY_LEFT:
@@ -149,7 +163,61 @@ const string key::toKeyName() {
     case GLFW_KEY_F12:
       return "F12";
       break;
+
+      //Numpad
+    case GLFW_KEY_KP_0:
+      return "NUM0";
+      break;
+    case GLFW_KEY_KP_1:
+      return "NUM1";
+      break;
+    case GLFW_KEY_KP_2:
+      return "NUM2";
+      break;
+    case GLFW_KEY_KP_3:
+      return "NUM3";
+      break;
+    case GLFW_KEY_KP_4:
+      return "NUM4";
+      break;
+    case GLFW_KEY_KP_5:
+      return "NUM5";
+      break;
+    case GLFW_KEY_KP_6:
+      return "NUM6";
+      break;
+    case GLFW_KEY_KP_7:
+      return "NUM7";
+      break;
+    case GLFW_KEY_KP_8:
+      return "NUM8";
+      break;
+    case GLFW_KEY_KP_9:
+      return "NUM9";
+      break;
+    case GLFW_KEY_KP_ADD:
+      return "NUM ADD";
+      break;
+    case GLFW_KEY_KP_SUBTRACT:
+      return "NUM SUB";
+      break;
+    case GLFW_KEY_KP_MULTIPLY:
+      return "NUM MULT";
+      break;
+    case GLFW_KEY_KP_DIVIDE:
+      return "NUM DIV";
+      break;
+    case GLFW_KEY_KP_DECIMAL:
+      return "NUM DEC";
+      break;
+    case GLFW_KEY_KP_ENTER:
+      return "NUM ENT";
+      break;
+    case GLFW_KEY_KP_EQUAL:
+      return "NUM EQ";
+      break;
   }
+  return "ERROR" + to_string(_keycode);
 }
 const string key::toSpecialName() {
   switch (_keycode) {

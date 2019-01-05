@@ -27,6 +27,7 @@
 #include <set>
 #include <shared_mutex>
 #include <sstream>
+#include <stack>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -302,6 +303,8 @@ T strTo(std::string str)
 int hexToInt(string& str, int s);
 
 int hexToInt(string str);
+
+bool endsWith(string const &fullString, string const &ending);
 
 template <typename T>
 vector<T> solveQuadratic(T &a, T &b, T &c)
