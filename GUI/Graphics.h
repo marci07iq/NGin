@@ -172,10 +172,10 @@ namespace Graphics {
     funcs[name] = reinterpret_cast<void(*)()>(func);
   }
 
-  ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback);
+  ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data);
   ButtonHwnd createButton(xml_node<> *me);
 
-  IconButtonHwnd createIconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, string icon, string ilfFilepath);
+  IconButtonHwnd createIconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, void* data, string icon, string ilfFilepath);
   IconButtonHwnd createIconButton(xml_node<> *me);
 
   CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback);

@@ -22,7 +22,7 @@ namespace Graphics {
   typedef GLFWwindow* RawWinHwnd;
 }
 
-typedef void(*ClickCallback)(Graphics::ElemHwnd);
+typedef void(*ClickCallback)(Graphics::ElemHwnd, void*);
 typedef void(*CheckCallback)(Graphics::ElemHwnd, bool);
 typedef void(*TextInputFunc)(Graphics::ElemHwnd, string);
 typedef void(*ControlInputFunc)(Graphics::ElemHwnd, key_config);

@@ -633,8 +633,8 @@ Graphics::ElemHwnd Graphics::createElement(xml_node<> *me) {
   }
 }
 
-Graphics::ButtonHwnd Graphics::createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback) {
-  return new Button(lname, location, bg, active, textColor, text, trigger, clickCallback);
+Graphics::ButtonHwnd Graphics::createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data) {
+  return new Button(lname, location, bg, active, textColor, text, trigger, clickCallback, data);
 }
 Graphics::ButtonHwnd Graphics::createButton(xml_node<> *me) {
   return createButton(
@@ -645,11 +645,12 @@ Graphics::ButtonHwnd Graphics::createButton(xml_node<> *me) {
     getColor(me, "button", "textcolor"),
     me->value(),
     me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
+    NULL,
     reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]));
 }
 
-Graphics::IconButtonHwnd Graphics::createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, string icon, string ilfFilepath) {
-  return new IconButton(lname, location, bg, active, textColor, text, trigger, clickCallback, icon, ilfFilepath);
+Graphics::IconButtonHwnd Graphics::createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data, string icon, string ilfFilepath) {
+  return new IconButton(lname, location, bg, active, textColor, text, trigger, clickCallback, data, icon, ilfFilepath);
 }
 Graphics::IconButtonHwnd Graphics::createIconButton(xml_node<> *me) {
   return createIconButton(
@@ -661,6 +662,7 @@ Graphics::IconButtonHwnd Graphics::createIconButton(xml_node<> *me) {
     me->value(),
     me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
     reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]),
+    NULL,
     me->first_attribute("icon")->value(),
     me->first_attribute("ilf") ? me->first_attribute("ilf")->value() : "");
 }
