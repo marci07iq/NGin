@@ -24,7 +24,7 @@ void GUIElement::getRect() {
 
 bool GUIElement::isIn(int mx, int my) {
   //getRect(winWidth, winHeight);
-  if ((cax  <= mx) && (mx <= cbx ) && (cay <= my) && (my <= cby)) {
+  if ((cax  <= mx) && (mx < cbx ) && (cay <= my) && (my < cby)) {
     return true;
   }
   return false;

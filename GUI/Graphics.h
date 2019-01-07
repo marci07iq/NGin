@@ -93,6 +93,7 @@ namespace Graphics {
   typedef Panel* PanelHwnd;
   typedef Container* ContainerHwnd;
   typedef Button* ButtonHwnd;
+  typedef IconButton* IconButtonHwnd;
   typedef TextInput* TextInputHwnd;
   typedef Label* LabelHwnd;
   typedef LabelBind* LabelBindHwnd;
@@ -173,6 +174,9 @@ namespace Graphics {
 
   ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback);
   ButtonHwnd createButton(xml_node<> *me);
+
+  IconButtonHwnd createIconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, string icon, string ilfFilepath);
+  IconButtonHwnd createIconButton(xml_node<> *me);
 
   CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback);
   CheckboxHwnd createCheckbox(xml_node<> *me);

@@ -46,3 +46,29 @@ void Button::render(set<key_location>& down) {
 Button::~Button() {
 
 }
+
+void IconButton::render(set<key_location>& down) {
+
+  if (active) {
+    setColor(activeColor);
+  } else {
+    setColor(bgColor);
+  }
+  Gll::gllBegin(Gll::GLL_QUADS);
+  
+  Gll::gllVertex(cax, cay);
+  Gll::gllVertex(cbx, cay);
+  Gll::gllVertex(cbx, cby);
+  Gll::gllVertex(cax, cby);
+  Gll::gllEnd();
+
+  setColor(textColor);
+
+
+  if(ic == NULL) {
+    renderBitmapString((cax + cbx) / 2.0f, (cay + cby) / 2.0f, text, textColor, true);
+  } else {
+    Gll::gllIcon(ic, cax, cay, cbx, cby);
+  }
+  //shapesPrintf(0, 0, text.c_str());
+}

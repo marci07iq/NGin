@@ -209,6 +209,8 @@ namespace Gll {
   void gllText(string s, int x, int y, int xAlign = -1, int yAlign = -1, float scale = 1); //-1: left, 0:center, 1:right
 
   void gllEnd();
+
+  void gllIcon(Icon* ic, int cax, int cay, int cbx, int cby);
 }
 
 pair<float, float> scrollBar(float contentHeight, float offset, float poslow, float poshigh, float minSize, float margin);

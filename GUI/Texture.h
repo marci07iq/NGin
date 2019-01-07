@@ -21,34 +21,65 @@
 GLuint png_texture_load(string filename, int& w, int& h);
 
 
-class Texture {
+class RawTexture {
 public:
   GLuint id;
   iVec2 size;
 
+  //Block copy. Use Texture for copyable version.
+  RawTexture(const RawTexture&) = delete;
+  void operator=(const RawTexture&) = delete;
+
+  RawTexture();
+  void load(string filename);
+
+  void bind(GLuint uniformId, int unit = 0);
+
+  ~RawTexture();
+};
+
+class Texture {
+public:
+  shared_ptr<RawTexture> _raw;
   Texture() {
-
+    _raw = NULL;
   }
-  void load(string filename) {
-    if (endsWith(filename, "png")) {
-      id = png_texture_load(filename, size.x, size.y);
-    } else {
-      cout << "Unsupported file format" << endl;
-    }
+  Texture(string filename) {
+    _raw = make_shared<RawTexture>();
+    _raw->load(filename);
   }
-
   void bind(GLuint uniformId, int unit = 0) {
-    //glBindTexture(GL_TEXTURE_2D, id);
-
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, id);
-    glUniform1i(uniformId, unit);
-
-  }
-
-  ~Texture() {
-    if(id != 0) {
-      glDeleteTextures(1, &id);
-    }
+    _raw->bind(uniformId, unit);
   }
 };
+
+class IconLocationFile;
+
+class Icon {
+public:
+  string _name;
+  IconLocationFile* _from;
+
+  fVec2 _tl;
+  fVec2 _br;
+  //iVec2 _pxSize;
+
+  Icon(string name, IconLocationFile* from, fVec2 tl, fVec2 br);
+};
+
+extern map<string, IconLocationFile*> ilfFiles;
+extern map<string, Icon*> icons;
+
+class IconLocationFile {
+public:
+  string _ilf_name;
+  Texture _dataSrc;
+
+  map<string, Icon*> _icons;
+
+  void load(string ilf_filename);
+
+  IconLocationFile(string ilf_filename);
+};
+
+Icon* getIcon(string iconName, string ilfPath = "");

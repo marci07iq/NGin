@@ -574,10 +574,7 @@ void Graphics::setElements(PanelHwnd id, string filename) {
 
 void Graphics::setElements(TableHwnd id, xml_node<> *data) {
   for (xml_node<> *pElem = data->first_node(); pElem; pElem = pElem->next_sibling()) {
-    string name = pElem->name();
-    if (name == "tr") {
-      addElement(id, createElement(pElem));
-    }
+    addElement(id, createElement(pElem));
   }
 }
 void Graphics::setElements(TablerowHwnd id, xml_node<> *data) {
@@ -593,6 +590,9 @@ Graphics::ElemHwnd Graphics::createElement(xml_node<> *me) {
   }
   if (name == "button") {
     return createButton(me);
+  }
+  if (name == "ibutton") {
+    return createIconButton(me);
   }
   else if (name == "checkbox") {
     return createCheckbox(me);
@@ -646,6 +646,23 @@ Graphics::ButtonHwnd Graphics::createButton(xml_node<> *me) {
     me->value(),
     me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
     reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]));
+}
+
+Graphics::IconButtonHwnd Graphics::createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, string icon, string ilfFilepath) {
+  return new IconButton(lname, location, bg, active, textColor, text, trigger, clickCallback, icon, ilfFilepath);
+}
+Graphics::IconButtonHwnd Graphics::createIconButton(xml_node<> *me) {
+  return createIconButton(
+    me->first_attribute("id")->value(),
+    loadLocation(me->first_node("location")),
+    getColor(me, "button", "bgcolor"),
+    getColor(me, "button", "activecolor"),
+    getColor(me, "button", "textcolor"),
+    me->value(),
+    me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
+    reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]),
+    me->first_attribute("icon")->value(),
+    me->first_attribute("ilf") ? me->first_attribute("ilf")->value() : "");
 }
 
 Graphics::CheckboxHwnd Graphics::createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback) {

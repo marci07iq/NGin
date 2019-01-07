@@ -471,10 +471,10 @@ iVec2 Gll::gllFontCharCount;
 void Gll::gllInit(string base) {
   gllBaseS.create(base + "LegDraw");
   gllTextS.create(base + "Text");
-  gllFontMap.load(base + "ascii.png");
+  gllFontMap = Texture(base + "ascii.png");
   initOn = (Graphics::current) ? Graphics::current->rawHwnd : NULL;
   gllFontCharCount = {16,16};
-  gllFontCharSize = gllFontMap.size / gllFontCharCount;
+  gllFontCharSize = gllFontMap._raw->size / gllFontCharCount;
 }
 
 void Gll::gllBegin(gllModes m) {
@@ -664,8 +664,8 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
       ((_col >> 16) & 0xff) / 255.0,
       ((_col >> 8) & 0xff) / 255.0,
       ((_col >> 0) & 0xff) / 255.0,
-      //((_col >> 24) & 0xff) / 255.0);
-      1);
+      ((_col >> 24) & 0xff) / 255.0);
+      //1);
   } else {
     cout << "color not found!" << endl;
   }
@@ -682,6 +682,102 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
   glDisable(GL_DEPTH_TEST);
   glBindVertexArray(vao);
   glDrawArrays(GL_TRIANGLES, 0, sz);
+  glEnable(GL_DEPTH_TEST);
+
+  gllTextS.unbind();
+
+  glDeleteBuffers(1, &vbo_p);
+  glDeleteBuffers(1, &vbo_l);
+  glDeleteVertexArrays(1, &vao);
+
+  delete texs, poss;
+}
+
+void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  float* poss = new float[12];
+  float* texs = new float[12];
+
+  fVec2 ca = fVec2(cax, cay) / fVec2(Graphics::current->width, Graphics::current->height) * 2.0 - 1;
+  fVec2 cb = fVec2(cbx, cby) / fVec2(Graphics::current->width, Graphics::current->height) * 2.0 - 1;
+
+  poss[0] = ca.x;
+  poss[1] = ca.y;
+  poss[2] = ca.x;
+  poss[3] = cb.y;
+  poss[4] = cb.x;
+  poss[5] = cb.y;
+
+  poss[6] = cb.x;
+  poss[7] = cb.y;
+  poss[8] = cb.x;
+  poss[9] = ca.y;
+  poss[10] = ca.x;
+  poss[11] = ca.y;
+
+  texs[0] = ic->_tl.x;
+  texs[1] = ic->_br.y;
+  texs[2] = ic->_tl.x;
+  texs[3] = ic->_tl.y;
+  texs[4] = ic->_br.x;
+  texs[5] = ic->_tl.y;
+
+  texs[6] = ic->_br.x;
+  texs[7] = ic->_tl.y;
+  texs[8] = ic->_br.x;
+  texs[9] = ic->_br.y;
+  texs[10] = ic->_tl.x;
+  texs[11] = ic->_br.y;
+
+  GLuint vbo_p, vbo_l, vao;
+
+  glGenBuffers(1, &vbo_p);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_p);
+  glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), poss, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &vbo_l);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_l);
+  glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), texs, GL_STATIC_DRAW);
+
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_p);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_l);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+  gllTextS.bind();
+
+  GLint loc = glGetUniformLocation(gllTextS._pID, "color");
+  if (loc != -1) {
+    glUniform4f(loc,
+      ((_col >> 16) & 0xff) / 255.0,
+      ((_col >> 8) & 0xff) / 255.0,
+      ((_col >> 0) & 0xff) / 255.0,
+      ((_col >> 24) & 0xff) / 255.0);
+      //1);
+  } else {
+    cout << "color not found!" << endl;
+  }
+
+  loc = glGetUniformLocation(gllTextS._pID, "font");
+  if (loc != -1) {
+
+    ic->_from->_dataSrc.bind(loc, 0);
+
+  } else {
+    cout << "font not found!" << endl;
+  }
+
+  glDisable(GL_DEPTH_TEST);
+  glBindVertexArray(vao);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
   glEnable(GL_DEPTH_TEST);
 
   gllTextS.unbind();
