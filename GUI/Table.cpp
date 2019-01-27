@@ -99,9 +99,9 @@ int TableRow::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down
   return state;
 }
 
-void TableRow::deleteElement(GUIElement * elem) {
+void TableRow::deleteElement(GUIElement * elem, bool hard) {
   data.remove((TableRow*)elem);
-  delete elem;
+  if(hard) delete elem;
 }
 
 int TableRow::activateElement(GUIElement* id) {
@@ -322,9 +322,9 @@ GUIElement* Table::getElementById(string id) {
   }
 }
 
-void Table::deleteElement(GUIElement * elem) {
+void Table::deleteElement(GUIElement * elem, bool hard) {
   data.remove((TableRow*)elem);
-  delete elem;
+  if (hard) delete elem;
 }
 
 Table::~Table() {

@@ -5,13 +5,13 @@ map<int, key_config> keybinds; //key, display name
 bool key::isKey() {
   return _type == type_key;
 }
-void key::fromKey(unsigned char key) {
+void key::fromKey(int key) {
   _keycode = key;
   _type = type_key;
 }
-void key::fromSpecial(int key) {
-  _keycode = key;
-  _type = type_special;
+void key::fromChar(int c) {
+  _keycode = c;
+  _type = type_char;
 }
 void key::fromMouse(int button) {
   _keycode = button;
@@ -219,11 +219,11 @@ const string key::toKeyName() {
   }
   return "ERROR" + to_string(_keycode);
 }
-const string key::toSpecialName() {
-  switch (_keycode) {
-    
+const string key::toCharName() {
+  if (_keycode < 256) {
+    return string(1, char(_keycode));
   }
-  return "ERROR" + to_string(_keycode);
+  return "ERROR" + _keycode;
 }
 const string key::toMouseName() {
   switch (_keycode) {
@@ -249,8 +249,8 @@ const string key::toName() {
     case type_key:
       return toKeyName();
       break;
-    case type_special:
-      return toSpecialName();
+    case type_char:
+      return toCharName();
       break;
     case type_mouse:
       return toMouseName();
@@ -448,18 +448,16 @@ void saveKeybinds(string filename) {
   ofstream binds;
   binds.open(filename);
 
-  int id = 0;
   for(auto&& it : keybinds) {
     string name = it.second.display;
     replaceChar(name, ' ', '_');
 
-    binds << id << " " << name << " " << it.second._parts.size();
+    binds << it.first << " " << name << " " << it.second._parts.size();
     for (auto&& itk : it.second._parts) {
       binds << " " << itk._type << " " << itk._keycode;
     }
     binds << endl;
 
-    id++;
   }
 
   binds.close();

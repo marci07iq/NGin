@@ -12,14 +12,14 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       }
       if (!active) {
         cursor = -1;
-        input(this, text);
+        input(this, data);
       }
     }
     return oactive xor active;
   }
 
   if (active) {
-    if(evt._key._type == key::type_special && evt._type == gui_event::evt_pressed) {
+    if(evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
       if (evt._key._keycode == GLFW_KEY_LEFT) {
         cursor = max(0, cursor - 1);
         return 1;
@@ -28,26 +28,28 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
         cursor = min(int(text.size()), cursor + 1);
         return 1;
       }
-    }
-    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
-      if (evt._key._keycode == '\b' && text.length() && cursor > 0) {
+      if (evt._key._keycode == GLFW_KEY_BACKSPACE && text.length() && cursor > 0) {
         text.erase(cursor - 1, 1);
-        input(this, text);
+        input(this, data);
         cursor--;
         return 1;
       }
-      if (evt._key._keycode == 127 && text.length() && cursor < text.size()) {
+      if (evt._key._keycode == GLFW_KEY_DELETE && text.length() && cursor < text.size()) {
         text.erase(cursor, 1);
-        input(this, text);
+        input(this, data);
         return 1;
       }
-      if (evt._key._keycode == '\n' || evt._key._keycode == '\r') {
-        input(this, text);
+      if (evt._key._keycode == GLFW_KEY_ENTER || evt._key._keycode == GLFW_KEY_KP_ENTER) {
+        input(this, data);
+        active = false;
+        cursor = -1;
         return 3;
       }
+    }
+    if (evt._key._type == key::type_char && evt._type == gui_event::evt_pressed) {
       if (validator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
-        input(this, text);
+        input(this, data);
         cursor++;
         return 1;
       }

@@ -117,9 +117,9 @@ int Panel::activateElement(GUIElement* id) {
   return bstate;
 }
 
-void Panel::deleteElement(GUIElement * elem) {
+void Panel::deleteElement(GUIElement * elem, bool hard) {
   elements.remove(elem);
-  delete elem;
+  if (hard) delete elem;
 }
 
 Panel::~Panel() {

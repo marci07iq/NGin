@@ -118,7 +118,7 @@ namespace Graphics {
 
   extern bool redrawFrame;
   extern list<WinHwnd> wdeleteQueue;
-  extern list<pair<ElemHwnd, ElemHwnd>> edeleteQueue;
+  extern list<pair<pair<ElemHwnd, ElemHwnd>,bool>> edeleteQueue;
 
   void initGraphics();
 
@@ -178,7 +178,7 @@ namespace Graphics {
   IconButtonHwnd createIconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, void* data, string icon, string ilfFilepath);
   IconButtonHwnd createIconButton(xml_node<> *me);
 
-  CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback);
+  CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback, void* data);
   CheckboxHwnd createCheckbox(xml_node<> *me);
   
   LabelHwnd createLabel(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int center);
@@ -187,7 +187,7 @@ namespace Graphics {
   ImageHwnd createImage(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int align);
   ImageHwnd createImage(xml_node<> *me);
 
-  TextInputHwnd createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator = *textValidator);
+  TextInputHwnd createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator = *textValidator, void* data = NULL);
   TextInputHwnd createTextInput(xml_node<> *me);
 
   ControlHwnd createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key_config selected, int id, ControlInputFunc inputCallback);
@@ -222,13 +222,13 @@ namespace Graphics {
 
   ElemHwnd createElement(xml_node<> *me);
 
-  void deleteElement(ElemHwnd elemId, ElemHwnd elemFrom);
+  void deleteElement(ElemHwnd elemId, ElemHwnd elemFrom, bool hard = true);
 
-  void deleteElements(PanelHwnd id);
-  void deleteElements(TableHwnd id);
-  void deleteElements(TablerowHwnd id);
+  void deleteElements(PanelHwnd id, bool hard = true);
+  void deleteElements(TableHwnd id, bool hard = true);
+  void deleteElements(TablerowHwnd id, bool hard = true);
   
-  void deleteElements(WinHwnd winId);
+  void deleteElements(WinHwnd winId, bool hard = true);
 
   void setElements(PanelHwnd id, xml_node<> *data);
   void setElements(TableHwnd id, xml_node<> *data);

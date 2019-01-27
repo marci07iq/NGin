@@ -43,15 +43,15 @@ typedef uint32_t colorargb;
 
 //----------------random number generator from numerical recipies ran1()--------
 //returns a number flatly distributed between 0 and 1
-#define IA 16807
-#define IM 2147483647
-#define AM (1.0/IM)
-#define IQ 127773
-#define IR 2836
-#define NTAB 32
-#define NDIV (1+(IM-1)/NTAB)
-#define EPS 1.2e-7
-#define RNMX (1.0-EPS)
+#define CONS_IA 16807
+#define CONS_IM 2147483647
+#define CONS_AM (1.0/CONS_IM)
+#define CONS_IQ 127773
+#define CONS_IR 2836
+#define CONS_NTAB 32
+#define CONS_NDIV (1+(CONS_IM-1)/CONS_NTAB)
+#define CONS_EPS 1.2e-7
+#define CONS_RNMX (1.0-CONS_EPS)
 
 #ifdef _MSC_VER
 /* DUMP MEMORY LEAKS */
@@ -351,8 +351,8 @@ vector<T> solveCubic(T &a, T &b, T &c, T &d)
     T r1, r2, r3;
     r1 = r2 = r3 = -2.0*sqrt(Q);
     r1 *= cos(theta / 3.0);
-    r2 *= cos((theta + 2 * PI) / 3.0);
-    r3 *= cos((theta - 2 * PI) / 3.0);
+    r2 *= cos((theta + 2 * CONS_PI) / 3.0);
+    r3 *= cos((theta - 2 * CONS_PI) / 3.0);
 
     r1 -= B / 3.0;
     r2 -= B / 3.0;
@@ -570,14 +570,14 @@ enum KeyConfigID {
 };
 
 
-#define THREE_PI    9.4247779607694
-#define TWO_PI      6.2831853071796
-#define PI          3.1415926535898
-#define HALF_PI     1.5707963267949
-#define THIRD_PI    1.0471975511966
-#define QUARTER_PI  0.7853981633974
+#define CONS_THREE_PI    9.4247779607694
+#define CONS_TWO_PI      6.2831853071796
+#define CONS_PI          3.1415926535898
+#define CONS_HALF_PI     1.5707963267949
+#define CONS_THIRD_PI    1.0471975511966
+#define CONS_QUARTER_PI  0.7853981633974
 
-#define E           2.71828182845904523536028747135266249775724709369995
+#define CONS_E           2.71828182845904523536028747135266249775724709369995
 
 #define SolvePrec 0.000001
 #define MaxTries 10

@@ -455,6 +455,21 @@ pair<float, float> scrollBar(float contentHeight, float offset, float poslow, fl
   return{ sliderMid - sliderSize / 2, sliderMid + sliderSize / 2 };
 }
 
+
+
+void insertColor(float* arr, size_t to, colorargb col, fVec3 light) {
+  arr[to] = ((col >> 16) & 255) / 255.0 * light.x;
+  arr[to + 1] = ((col >> 8) & 255) / 255.0 * light.y;
+  arr[to + 2] = ((col >> 0) & 255) / 255.0 * light.z;
+}
+
+void insertVector(float* arr, size_t to, fVec3 vec) {
+  arr[to] = vec.x;
+  arr[to + 1] = vec.y;
+  arr[to + 2] = vec.z;
+}
+
+
 Gll::gllModes Gll::_mode;
 vector<fVec2> Gll::_pts;
 colorargb Gll::_col;

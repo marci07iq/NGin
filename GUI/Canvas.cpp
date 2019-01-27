@@ -5,7 +5,7 @@ int Canvas::mouseEnter(int state) {
 }
 
 int Canvas::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
-  return managers.mouseMoveManager(mx, my, ox, oy, down);
+  return managers.mouseMoveManager(mx, my, ox, oy, down, this);
 }
 
 int Canvas::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {

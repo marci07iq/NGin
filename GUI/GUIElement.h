@@ -36,6 +36,6 @@ public:
   virtual GUIElement* getElementById(string id);
   virtual int activateElement(GUIElement* id);
 
-  virtual void deleteElement(GUIElement* elem);
+  virtual void deleteElement(GUIElement* elem, bool hard);
   ~GUIElement();
 };

@@ -23,8 +23,8 @@ namespace Graphics {
 }
 
 typedef void(*ClickCallback)(Graphics::ElemHwnd, void*);
-typedef void(*CheckCallback)(Graphics::ElemHwnd, bool);
-typedef void(*TextInputFunc)(Graphics::ElemHwnd, string);
+typedef void(*CheckCallback)(Graphics::ElemHwnd, void*);
+typedef void(*TextInputFunc)(Graphics::ElemHwnd, void*);
 typedef void(*ControlInputFunc)(Graphics::ElemHwnd, key_config);
 typedef void(*SliderInputFunc)(Graphics::ElemHwnd, float);
 typedef bool(*TextValidatorFunc)(Graphics::ElemHwnd, string, int, unsigned char);
@@ -44,7 +44,7 @@ typedef int(*IRenderManager)(int ax, int ay, int bx, int by, set<key_location>& 
 typedef int(*IResizeManager)(int x, int y);
 typedef int(*IGUIEventManager)(gui_event evt, int x, int y, set<key_location>& down, Canvas* me);
 typedef int(*IMouseEntryManager)(int state);
-typedef int(*IMouseMoveManager)(int x, int y, int ox, int oy, set<key_location>& down);
+typedef int(*IMouseMoveManager)(int x, int y, int ox, int oy, set<key_location>& down, Canvas* me);
 
 int defaultIRenderManager(int ax, int ay, int bx, int by, set<key_location>& down);
 int defaultIResizeManager(int x, int y);
@@ -174,6 +174,9 @@ void renderBitmapString(float x, float y, string text, colorargb color, bool cen
 bool numericalValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
 bool floatValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
 bool textValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+
+void insertColor(float* arr, size_t to, colorargb col, fVec3 light = { 1,1,1 });
+void insertVector(float* arr, size_t to, fVec3 vec);
 
 namespace Gll {
   enum gllModes {

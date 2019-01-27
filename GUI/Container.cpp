@@ -77,11 +77,11 @@ GUIElement* Container::getElementById(string id) {
   }
 }
 
-void Container::deleteElement(GUIElement * elem) {
+void Container::deleteElement(GUIElement * elem, bool hard) {
   if (element != elem) {
     throw 1;
   } else {
-    delete elem;
+    if(hard) delete elem;
     element = NULL;
   }
 }

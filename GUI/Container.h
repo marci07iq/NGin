@@ -19,7 +19,7 @@ public:
 
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
 
-  void deleteElement(GUIElement* elem);
+  void deleteElement(GUIElement* elem, bool hard);
 
   GUIElement* getElementById(string id);
   /*bool keyPressed(unsigned char key, int mx, int my);

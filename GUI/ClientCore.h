@@ -7,19 +7,19 @@ class key {
 public:
   enum type {
     type_key = 0,
-    type_special = 1,
+    type_char = 1,
     type_mouse = 2,
     type_wheel = 3
   };
   int _type;
   int _keycode;
   bool isKey();
-  void fromKey(unsigned char key);
-  void fromSpecial(int key);
+  void fromKey(int key);
+  void fromChar(int c);
   void fromMouse(int button);
   void fromWheel(int delta);
   const string toKeyName();
-  const string toSpecialName();
+  const string toCharName();
   const string toMouseName();
   const string toWheelName();
   const string toName();

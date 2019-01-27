@@ -74,7 +74,7 @@ int GUIElement::activateElement(GUIElement* id) {
   return oactive ^ active;
 }
 
-void GUIElement::deleteElement(GUIElement * elem) {
+void GUIElement::deleteElement(GUIElement * elem, bool hard) {
 }
 
 GUIElement::~GUIElement() {

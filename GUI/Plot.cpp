@@ -21,12 +21,12 @@ int Plot::mouseMoved(int mx, int my, int mox, int moy, set<key_location>& down) 
 
 int Plot::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == key::type_wheel) { //Zoom
-    if (!isDown(down, key(key::type_special, GLFW_KEY_LEFT_SHIFT))) {
+    if (!isDown(down, key(key::type_key, GLFW_KEY_LEFT_SHIFT))) {
       ox += ((cbx + cax) / 2.0 - mx)*(pow(1.1, -evt._key._keycode) - 1)*sx;
       sx *= pow(1.1, -evt._key._keycode);
     }
 
-    if (!isDown(down, key(key::type_special, GLFW_KEY_LEFT_CONTROL))) {
+    if (!isDown(down, key(key::type_key, GLFW_KEY_LEFT_CONTROL))) {
       oy += ((cby + cay) / 2.0 - my)*(pow(1.1, -evt._key._keycode) - 1)*sy;
       sy *= pow(1.1, -evt._key._keycode);
     }

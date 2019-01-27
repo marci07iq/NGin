@@ -2,3 +2,4 @@ Debug/
 Release/
 GUI/GLL_Res/ascii.png
 .vs/
+GL_Lib/glm/

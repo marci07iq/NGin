@@ -152,7 +152,7 @@ double ran1(long int nseed) {
   int j;
   long k;
   static long iy = 0;
-  static long iv[NTAB];
+  static long iv[CONS_NTAB];
   static long int idum = 0;
   /*long iy = 0;
   long iv[NTAB];*/
@@ -167,28 +167,28 @@ double ran1(long int nseed) {
     else {
       idum = -idum;
     }
-    for (j = NTAB + 7; j >= 0; j--) {
-      k = idum / IQ;
-      idum = IA * (idum - k * IQ) - IR * k;
+    for (j = CONS_NTAB + 7; j >= 0; j--) {
+      k = idum / CONS_IQ;
+      idum = CONS_IA * (idum - k * CONS_IQ) - CONS_IR * k;
       if (idum < 0) {
-        idum += IM;
+        idum += CONS_IM;
       }
-      if (j < NTAB) {
+      if (j < CONS_NTAB) {
         iv[j] = idum;
       }
     }
     iy = iv[0];
   }
-  k = idum / IQ;
-  idum = IA * (idum - k * IQ) - IR * k;
+  k = idum / CONS_IQ;
+  idum = CONS_IA * (idum - k * CONS_IQ) - CONS_IR * k;
   if (idum < 0) {
-    idum += IM;
+    idum += CONS_IM;
   }
-  j = iy / NDIV;
+  j = iy / CONS_NDIV;
   iy = iv[j];
   iv[j] = idum;
-  if ((temp = AM * iy) > RNMX) {
-    return RNMX;
+  if ((temp = CONS_AM * iy) > CONS_RNMX) {
+    return CONS_RNMX;
   }
   else {
     return temp;

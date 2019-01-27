@@ -56,12 +56,12 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
 
   bool otextActive = textActive;
 
-  if (!otextActive && isIn(mx, my) && (evt._key._type == key::type_special || evt._key._type == key::type_key) && evt._type == gui_event::evt_pressed) {
+  if (!otextActive && isIn(mx, my) && (evt._key._type == key::type_char || evt._key._type == key::type_key) && evt._type == gui_event::evt_pressed) {
     textActive = true;
     cursor = text.size();
   }
   if(textActive) {
-    if (evt._key._type == key::type_special && evt._type == gui_event::evt_pressed) {
+    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
       if (evt._key._keycode == GLFW_KEY_LEFT) {
         cursor = max(0, cursor - 1);
         return 1;
@@ -70,23 +70,23 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
         cursor = min(int(text.size()), cursor + 1);
         return 1;
       }
-    }
-    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
-      if (evt._key._keycode == '\b' && text.length() && cursor > 0) {
+      if (evt._key._keycode == GLFW_KEY_BACKSPACE && text.length() && cursor > 0) {
         text.erase(cursor - 1, 1);
         cursor--;
         return 1;
       }
-      if (evt._key._keycode == 127 && text.length() && cursor < text.size()) {
+      if (evt._key._keycode == GLFW_KEY_DELETE && text.length() && cursor < text.size()) {
         text.erase(cursor, 1);
         return 1;
       }
-      if (evt._key._keycode == '\n' || evt._key._keycode == '\r') {
+      if (evt._key._keycode == GLFW_KEY_ENTER || evt._key._keycode == GLFW_KEY_KP_ENTER) {
         textActive = false;
         cursor = -1;
         setVal(strTo<float>(text));
         return 3;
       }
+    }
+    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
       if (floatValidator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
         cursor++;

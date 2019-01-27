@@ -14,7 +14,7 @@ int Checkbox::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down
 int Checkbox::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
   if (isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
     checked = !checked;
-    checkCallback(this, checked);
+    checkCallback(this, data);
     return 3;
   }
   return 0;

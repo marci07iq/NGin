@@ -23,7 +23,7 @@ set<key_location> Graphics::keysdown;
 
 bool Graphics::redrawFrame = false;
 list<Graphics::WinHwnd> Graphics::wdeleteQueue;
-list<pair<Graphics::ElemHwnd, Graphics::ElemHwnd>> Graphics::edeleteQueue;
+list<pair<pair<Graphics::ElemHwnd, Graphics::ElemHwnd>, bool>> Graphics::edeleteQueue;
 list<Graphics::winCreationData> Graphics::wcreateQueue;
 
 //Engine management
@@ -56,7 +56,7 @@ void Graphics::mainLoop(bool needsWindows) {
     }
 
     /* Poll for and process events */
-    glfwPollEvents();
+    glfwWaitEvents();
   }
 }
 
@@ -71,7 +71,7 @@ void Graphics::cleanQueues() { //Never call from event handler. IT WILL CRASH
     wdeleteQueue.pop_front();
   }
   while (edeleteQueue.size()) {
-    edeleteQueue.front().second->deleteElement(edeleteQueue.front().first);
+    edeleteQueue.front().first.second->deleteElement(edeleteQueue.front().first.first, edeleteQueue.front().second);
     edeleteQueue.pop_front();
   }
   while (wcreateQueue.size()) {
@@ -282,6 +282,11 @@ void Graphics::rawKeyManager(GLFWwindow * window, int key, int scancode, int act
 }
 
 void Graphics::rawCharManager(GLFWwindow * window, unsigned int codepoint) {
+  glfwMakeContextCurrent(window);
+  current = GetWinHwnd(window);
+  key_location nkey = key_location(codepoint, key::type_char, current->oldMouseX, current->oldMouseY);
+  gui_event::type gEvtType = gui_event::evt_pressed; //Send press
+  current->windowManagers.guiEventManager(gui_event(nkey, gEvtType), current->oldMouseX, current->oldMouseY, keysdown);
 }
 
 /*void Graphics::defaultKeyManagerL(unsigned char keyc, int x, int y) {
@@ -645,8 +650,8 @@ Graphics::ButtonHwnd Graphics::createButton(xml_node<> *me) {
     getColor(me, "button", "textcolor"),
     me->value(),
     me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
-    NULL,
-    reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]));
+    reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]),
+    NULL);
 }
 
 Graphics::IconButtonHwnd Graphics::createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data, string icon, string ilfFilepath) {
@@ -667,8 +672,8 @@ Graphics::IconButtonHwnd Graphics::createIconButton(xml_node<> *me) {
     me->first_attribute("ilf") ? me->first_attribute("ilf")->value() : "");
 }
 
-Graphics::CheckboxHwnd Graphics::createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback) {
-  return new Checkbox(lname, location, bg, active, textColor, checked, checkCallback);
+Graphics::CheckboxHwnd Graphics::createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback, void* data) {
+  return new Checkbox(lname, location, bg, active, textColor, checked, checkCallback, data);
 }
 Graphics::CheckboxHwnd Graphics::createCheckbox(xml_node<> *me) {
   return createCheckbox(
@@ -678,7 +683,8 @@ Graphics::CheckboxHwnd Graphics::createCheckbox(xml_node<> *me) {
     getColor(me, "checkbox", "activecolor"),
     getColor(me, "checkbox", "textcolor"),
     strTo<bool>(me->value()),
-    reinterpret_cast<CheckCallback>(funcs[me->first_attribute("callback")->value()]));
+    reinterpret_cast<CheckCallback>(funcs[me->first_attribute("callback")->value()]),
+    NULL);
 }
 
 Graphics::LabelHwnd Graphics::createLabel(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int align) {
@@ -709,7 +715,7 @@ Graphics::ImageHwnd Graphics::createImage(xml_node<> *me) {
     strTo<int>(me->first_attribute("align")->value()));
 }
 
-Graphics::TextInputHwnd Graphics::createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator) {
+Graphics::TextInputHwnd Graphics::createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator, void* data) {
   return new TextInput(lname, location, bg, active, textColor, text, inputCallback, validator);
 }
 Graphics::TextInputHwnd Graphics::createTextInput(xml_node<> *me) {
@@ -865,26 +871,26 @@ Graphics::ElemHwnd Graphics::addElement(TablerowHwnd id, ElemHwnd elem) {
   return elem;
 }
 
-void Graphics::deleteElements(WinHwnd id) {
-  deleteElements(id->myPanel);
+void Graphics::deleteElements(WinHwnd id, bool hard) {
+  deleteElements(id->myPanel, hard);
 }
-void Graphics::deleteElement(ElemHwnd elem, ElemHwnd from) {
-  edeleteQueue.push_back({elem, from});
+void Graphics::deleteElement(ElemHwnd elem, ElemHwnd from, bool hard) {
+  edeleteQueue.push_back({{elem, from}, hard});
 }
 
-void Graphics::deleteElements(PanelHwnd id) {
+void Graphics::deleteElements(PanelHwnd id, bool hard) {
   for (auto&& it : id->elements) {
-    deleteElement(it, id);
+    deleteElement(it, id, hard);
   }
 }
-void Graphics::deleteElements(TableHwnd id) {
+void Graphics::deleteElements(TableHwnd id, bool hard) {
   for (auto&& it : id->data) {
-    deleteElement(it, id);
+    deleteElement(it, id, hard);
   }
 }
-void Graphics::deleteElements(TablerowHwnd id) {
+void Graphics::deleteElements(TablerowHwnd id, bool hard) {
   for (auto&& it : id->data) {
-    deleteElement(it, id);
+    deleteElement(it, id, hard);
   }
 }
 
