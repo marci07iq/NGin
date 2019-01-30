@@ -217,3 +217,7 @@ namespace Gll {
 }
 
 pair<float, float> scrollBar(float contentHeight, float offset, float poslow, float poshigh, float minSize, float margin);
+
+string openFileSelector(string message, list<pair<string, string>> formats = {});
+
+string saveFileSelector(string message, list<pair<string, string>> formats = {});

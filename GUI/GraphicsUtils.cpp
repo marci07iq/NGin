@@ -3,6 +3,11 @@
 #include "stb_image.h"
 #undef STB_IMAGE_IMPLEMENTATION
 
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+
 map<string, map<string, colorargb>> colors; //type, elem
 
 colorargb getColor(string object, string key) {
@@ -455,7 +460,117 @@ pair<float, float> scrollBar(float contentHeight, float offset, float poslow, fl
   return{ sliderMid - sliderSize / 2, sliderMid + sliderSize / 2 };
 }
 
+string openFileSelector(string message, list<pair<string, string>> formats) {
+#ifdef _WIN32
+  char filename[MAX_PATH];
 
+  OPENFILENAME ofn;
+  ZeroMemory(&filename, sizeof(filename));
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = NULL;  // If you have a window to center over, put its HANDLE here
+  string formatString = "";
+  for(auto&& it : formats) {
+    formatString += it.first + string("\0", 1) + it.second + string("\0", 1);
+  }
+  ofn.lpstrFilter = formatString.c_str();
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = message.c_str();
+  ofn.Flags = OFN_FILEMUSTEXIST;
+
+  //GLFW triggers event handles if window is opened on the same thread.
+  //That will crash the GUI Mutex lock.
+  std::thread dialog(GetOpenFileNameA, &ofn);
+  dialog.join();
+  return filename;
+  /*if (GetOpenFileNameA(&ofn)) {
+    //std::cout << "You chose the file \"" << filename << "\"\n";
+    return filename;
+  } else {
+    // All this stuff below is to tell you exactly how you messed up above. 
+    // Once you've got that fixed, you can often (not always!) reduce it to a 'user cancelled' assumption.
+    switch (CommDlgExtendedError()) {
+      case CDERR_DIALOGFAILURE: std::cout << "CDERR_DIALOGFAILURE\n";   break;
+      case CDERR_FINDRESFAILURE: std::cout << "CDERR_FINDRESFAILURE\n";  break;
+      case CDERR_INITIALIZATION: std::cout << "CDERR_INITIALIZATION\n";  break;
+      case CDERR_LOADRESFAILURE: std::cout << "CDERR_LOADRESFAILURE\n";  break;
+      case CDERR_LOADSTRFAILURE: std::cout << "CDERR_LOADSTRFAILURE\n";  break;
+      case CDERR_LOCKRESFAILURE: std::cout << "CDERR_LOCKRESFAILURE\n";  break;
+      case CDERR_MEMALLOCFAILURE: std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
+      case CDERR_MEMLOCKFAILURE: std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
+      case CDERR_NOHINSTANCE: std::cout << "CDERR_NOHINSTANCE\n";     break;
+      case CDERR_NOHOOK: std::cout << "CDERR_NOHOOK\n";          break;
+      case CDERR_NOTEMPLATE: std::cout << "CDERR_NOTEMPLATE\n";      break;
+      case CDERR_STRUCTSIZE: std::cout << "CDERR_STRUCTSIZE\n";      break;
+      case FNERR_BUFFERTOOSMALL: std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
+      case FNERR_INVALIDFILENAME: std::cout << "FNERR_INVALIDFILENAME\n"; break;
+      case FNERR_SUBCLASSFAILURE: std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
+      default: std::cout << "You cancelled.\n";
+    }
+    return "";
+  }*/
+#else
+  throw 1;
+  return "";
+#endif
+}
+
+string saveFileSelector(string message, list<pair<string, string>> formats) {
+#ifdef _WIN32
+  char filename[MAX_PATH];
+
+  OPENFILENAME ofn;
+  ZeroMemory(&filename, sizeof(filename));
+  ZeroMemory(&ofn, sizeof(ofn));
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = NULL;  // If you have a window to center over, put its HANDLE here
+  string formatString = "";
+  for (auto&& it : formats) {
+    formatString += it.first + string("\0", 1) + it.second + string("\0", 1);
+  }
+  ofn.lpstrFilter = formatString.c_str();
+  ofn.lpstrFile = filename;
+  ofn.nMaxFile = MAX_PATH;
+  ofn.lpstrTitle = message.c_str();
+  ofn.Flags = OFN_FILEMUSTEXIST;
+
+  //GLFW triggers event handles if window is opened on the same thread.
+  //That will crash the GUI Mutex lock.
+  std::thread dialog(GetSaveFileNameA, &ofn);
+  dialog.join();
+  return filename;
+  /*if (GetOpenFileNameA(&ofn)) {
+  //std::cout << "You chose the file \"" << filename << "\"\n";
+  return filename;
+  } else {
+  // All this stuff below is to tell you exactly how you messed up above.
+  // Once you've got that fixed, you can often (not always!) reduce it to a 'user cancelled' assumption.
+  switch (CommDlgExtendedError()) {
+  case CDERR_DIALOGFAILURE: std::cout << "CDERR_DIALOGFAILURE\n";   break;
+  case CDERR_FINDRESFAILURE: std::cout << "CDERR_FINDRESFAILURE\n";  break;
+  case CDERR_INITIALIZATION: std::cout << "CDERR_INITIALIZATION\n";  break;
+  case CDERR_LOADRESFAILURE: std::cout << "CDERR_LOADRESFAILURE\n";  break;
+  case CDERR_LOADSTRFAILURE: std::cout << "CDERR_LOADSTRFAILURE\n";  break;
+  case CDERR_LOCKRESFAILURE: std::cout << "CDERR_LOCKRESFAILURE\n";  break;
+  case CDERR_MEMALLOCFAILURE: std::cout << "CDERR_MEMALLOCFAILURE\n"; break;
+  case CDERR_MEMLOCKFAILURE: std::cout << "CDERR_MEMLOCKFAILURE\n";  break;
+  case CDERR_NOHINSTANCE: std::cout << "CDERR_NOHINSTANCE\n";     break;
+  case CDERR_NOHOOK: std::cout << "CDERR_NOHOOK\n";          break;
+  case CDERR_NOTEMPLATE: std::cout << "CDERR_NOTEMPLATE\n";      break;
+  case CDERR_STRUCTSIZE: std::cout << "CDERR_STRUCTSIZE\n";      break;
+  case FNERR_BUFFERTOOSMALL: std::cout << "FNERR_BUFFERTOOSMALL\n";  break;
+  case FNERR_INVALIDFILENAME: std::cout << "FNERR_INVALIDFILENAME\n"; break;
+  case FNERR_SUBCLASSFAILURE: std::cout << "FNERR_SUBCLASSFAILURE\n"; break;
+  default: std::cout << "You cancelled.\n";
+  }
+  return "";
+  }*/
+#else
+  throw 1;
+  return "";
+#endif
+}
 
 void insertColor(float* arr, size_t to, colorargb col, fVec3 light) {
   arr[to] = ((col >> 16) & 255) / 255.0 * light.x;

@@ -5,6 +5,9 @@
 
 //#ifdef WIN32
 #include <winsock2.h>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <Windows.h>
 #include <ws2tcpip.h>
 /*#else
