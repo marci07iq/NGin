@@ -411,7 +411,7 @@ key loadKey(xml_attribute<>* me) {
 }
 
 
-void keybindReply(Graphics::ElemHwnd e, key_config nkey) {
+void keybindReply(Graphics::ElemHwnd e, void* data, key_config& nkey) {
   int id = ((Graphics::ControlHwnd)e)->id;
   if (keybinds.count(id)) {
     keybinds[id] = nkey;

@@ -23,10 +23,10 @@ namespace Graphics {
 }
 
 typedef void(*ClickCallback)(Graphics::ElemHwnd, void*);
-typedef void(*CheckCallback)(Graphics::ElemHwnd, void*);
-typedef void(*TextInputFunc)(Graphics::ElemHwnd, void*);
-typedef void(*ControlInputFunc)(Graphics::ElemHwnd, key_config);
-typedef void(*SliderInputFunc)(Graphics::ElemHwnd, float);
+typedef void(*CheckCallback)(Graphics::ElemHwnd, void*, bool&);
+typedef void(*TextInputFunc)(Graphics::ElemHwnd, void*, string&);
+typedef void(*ControlInputFunc)(Graphics::ElemHwnd, void*, key_config&);
+typedef void(*SliderInputFunc)(Graphics::ElemHwnd, void*, float&);
 typedef bool(*TextValidatorFunc)(Graphics::ElemHwnd, string, int, unsigned char);
 
 typedef void(*RenderManager)();
@@ -40,17 +40,17 @@ typedef void(*MouseEntryManager)(int state);
 typedef void(*MouseMoveManager)(int x, int y);
 typedef void(*WindowCloseManager)();
 
-typedef int(*IRenderManager)(int ax, int ay, int bx, int by, set<key_location>& down);
-typedef int(*IResizeManager)(int x, int y);
-typedef int(*IGUIEventManager)(gui_event evt, int x, int y, set<key_location>& down, Canvas* me);
-typedef int(*IMouseEntryManager)(int state);
-typedef int(*IMouseMoveManager)(int x, int y, int ox, int oy, set<key_location>& down, Canvas* me);
+typedef int(*IRenderManager)(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
+typedef int(*IResizeManager)(Canvas*, int x, int y);
+typedef int(*IGUIEventManager)(Canvas*, gui_event evt, int x, int y, set<key_location>& down);
+typedef int(*IMouseEntryManager)(Canvas*, int state);
+typedef int(*IMouseMoveManager)(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
 
-int defaultIRenderManager(int ax, int ay, int bx, int by, set<key_location>& down);
-int defaultIResizeManager(int x, int y);
-int defaultIGUIEventManager(gui_event evt, int x, int y, set<key_location>& down);
-int defaultIMouseEntryManager(int state);
-int defaultIMouseMoveManager(int x, int y, int ox, int oy, set<key_location>& down);
+int defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
+int defaultIResizeManager(Canvas*, int x, int y);
+int defaultIGUIEventManager(Canvas*, gui_event evt, int x, int y, set<key_location>& down);
+int defaultIMouseEntryManager(Canvas*, int state);
+int defaultIMouseMoveManager(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
 
 struct OpenGLData {
   GLdouble model_view[16];
@@ -187,7 +187,7 @@ namespace Gll {
   };
 
   extern gllModes _mode;
-  extern vector<fVec2> _pts;
+  extern vector<pair<fVec2, colorargb>> _pts;
   extern colorargb _col;
 
   extern Shader gllBaseS;

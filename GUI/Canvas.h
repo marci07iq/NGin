@@ -5,8 +5,8 @@
 class Canvas : public GUIElement {
 public:
   IWindowManagers managers;
-  Canvas(string lname, LocationData llocation, IWindowManagers lmanagers) :
-    GUIElement(lname, llocation, 0, 0, 0) {
+  Canvas(string lname, LocationData llocation, IWindowManagers lmanagers, void* ldata) :
+    GUIElement(lname, llocation, 0, 0, 0, ldata) {
     managers = lmanagers;
   }
   int mouseEnter(int state);

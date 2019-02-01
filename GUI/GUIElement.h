@@ -7,12 +7,15 @@ public:
   string name;
   int cax, cay, cbx, cby; //Not for long term storage.
   LocationData location;
-  colorargb bgColor; //#aarrggbb
-  colorargb activeColor; //#aarrggbb
-  colorargb textColor;
-  bool active;
 
-  GUIElement(string name, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor);
+  colorargb bgColor;
+  colorargb activeColor;
+  colorargb textColor;
+
+  bool active;
+  void* data;
+
+  GUIElement(string name, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata);
   virtual bool isIn(int mx, int my);
   
   //Calculate and set new size

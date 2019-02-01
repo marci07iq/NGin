@@ -93,7 +93,7 @@ namespace Graphics {
   typedef GUIElement* ElemHwnd;
 }
 
-void keybindReply(Graphics::ElemHwnd e, key_config nkey);
+void keybindReply(Graphics::ElemHwnd e, void* data, key_config& nkey);
 
 void loadKeybinds(string filename = "html/keybinds.cfg");
 void saveKeybinds(string filename = "html/keybinds.cfg");

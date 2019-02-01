@@ -103,8 +103,8 @@ public:
   double ox, oy; //in plot coords, for center of plot
   double sx, sy; //data / plotwidth
 
-  Plot(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor) :
-    GUIElement(lname, llocation, lbg, lactive, ltextColor) {
+  Plot(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata) :
+    GUIElement(lname, llocation, lbg, lactive, ltextColor, ldata) {
     ox = 0;//(frames->getFirst() + frames->getLast())/2.0;
     oy = 0;//(frames->getDoubleAt(frames->getFirst()) +frames->getDoubleAt(frames->getLast()))/2.0;
     sx = 1;//frames->getLast() - frames->getFirst();

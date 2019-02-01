@@ -134,7 +134,7 @@ Graphics::WinHwnd Graphics::rawCreateMainWindow(winCreationData from) {
   GWindow* data = new GWindow();
 
   colorargb bgcolor = getColor("win", "bgcolor");
-  PanelHwnd panel = new Panel("base", fullContainer, bgcolor);
+  PanelHwnd panel = new Panel("base", fullContainer, bgcolor, NULL);
 
   glfwMakeContextCurrent(window);
   glClearColor(((bgcolor & 0xff0000) >> 16) / 255.0, ((bgcolor & 0xff00) >> 8) / 255.0, ((bgcolor & 0xff) >> 0) / 255.0, 1);
@@ -638,8 +638,8 @@ Graphics::ElemHwnd Graphics::createElement(xml_node<> *me) {
   }
 }
 
-Graphics::ButtonHwnd Graphics::createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data) {
-  return new Button(lname, location, bg, active, textColor, text, trigger, clickCallback, data);
+Graphics::ButtonHwnd Graphics::createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int trigger, ClickCallback clickCallback) {
+  return new Button(lname, location, bg, active, textColor, data, text, trigger, clickCallback);
 }
 Graphics::ButtonHwnd Graphics::createButton(xml_node<> *me) {
   return createButton(
@@ -648,14 +648,14 @@ Graphics::ButtonHwnd Graphics::createButton(xml_node<> *me) {
     getColor(me, "button", "bgcolor"),
     getColor(me, "button", "activecolor"),
     getColor(me, "button", "textcolor"),
+    NULL,
     me->value(),
     me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
-    reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]),
-    NULL);
+    reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]));
 }
 
-Graphics::IconButtonHwnd Graphics::createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data, string icon, string ilfFilepath) {
-  return new IconButton(lname, location, bg, active, textColor, text, trigger, clickCallback, data, icon, ilfFilepath);
+Graphics::IconButtonHwnd Graphics::createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int trigger, ClickCallback clickCallback, string icon, string ilfFilepath) {
+  return new IconButton(lname, location, bg, active, textColor, data, text, trigger, clickCallback, icon, ilfFilepath);
 }
 Graphics::IconButtonHwnd Graphics::createIconButton(xml_node<> *me) {
   return createIconButton(
@@ -664,16 +664,16 @@ Graphics::IconButtonHwnd Graphics::createIconButton(xml_node<> *me) {
     getColor(me, "button", "bgcolor"),
     getColor(me, "button", "activecolor"),
     getColor(me, "button", "textcolor"),
+    NULL,
     me->value(),
     me->first_attribute("trigger") ? strTo<int>(me->first_attribute("trigger")->value()) : -1,
     reinterpret_cast<ClickCallback>(funcs[me->first_attribute("callback")->value()]),
-    NULL,
     me->first_attribute("icon")->value(),
     me->first_attribute("ilf") ? me->first_attribute("ilf")->value() : "");
 }
 
-Graphics::CheckboxHwnd Graphics::createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback, void* data) {
-  return new Checkbox(lname, location, bg, active, textColor, checked, checkCallback, data);
+Graphics::CheckboxHwnd Graphics::createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, bool checked, CheckCallback checkCallback) {
+  return new Checkbox(lname, location, bg, active, textColor, data, checked, checkCallback);
 }
 Graphics::CheckboxHwnd Graphics::createCheckbox(xml_node<> *me) {
   return createCheckbox(
@@ -682,13 +682,13 @@ Graphics::CheckboxHwnd Graphics::createCheckbox(xml_node<> *me) {
     getColor(me, "checkbox", "bgcolor"),
     getColor(me, "checkbox", "activecolor"),
     getColor(me, "checkbox", "textcolor"),
+    NULL,
     strTo<bool>(me->value()),
-    reinterpret_cast<CheckCallback>(funcs[me->first_attribute("callback")->value()]),
-    NULL);
+    reinterpret_cast<CheckCallback>(funcs[me->first_attribute("callback")->value()]));
 }
 
-Graphics::LabelHwnd Graphics::createLabel(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int align) {
-  return new Label(lname, location, bg, active, textColor, text, align);
+Graphics::LabelHwnd Graphics::createLabel(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int align) {
+  return new Label(lname, location, bg, active, textColor, data, text, align);
 }
 Graphics::LabelHwnd Graphics::createLabel(xml_node<> *me) {
   return createLabel(
@@ -697,12 +697,13 @@ Graphics::LabelHwnd Graphics::createLabel(xml_node<> *me) {
     getColor(me, "label", "bgcolor"),
     getColor(me, "label", "activecolor"),
     getColor(me, "label", "textcolor"),
+    NULL,
     me->value(),
     strTo<int>(me->first_attribute("align")->value()));
 }
 
-Graphics::ImageHwnd Graphics::createImage(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int align) {
-  return new Image(lname, location, bg, active, textColor, text, align);
+Graphics::ImageHwnd Graphics::createImage(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int align) {
+  return new Image(lname, location, bg, active, textColor, data, text, align);
 }
 Graphics::ImageHwnd Graphics::createImage(xml_node<> *me) {
   return createImage(
@@ -711,12 +712,13 @@ Graphics::ImageHwnd Graphics::createImage(xml_node<> *me) {
     getColor(me, "image", "bgcolor"),
     getColor(me, "image", "activecolor"),
     getColor(me, "image", "textcolor"),
+    NULL,
     me->value(),
     strTo<int>(me->first_attribute("align")->value()));
 }
 
-Graphics::TextInputHwnd Graphics::createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator, void* data) {
-  return new TextInput(lname, location, bg, active, textColor, text, inputCallback, validator);
+Graphics::TextInputHwnd Graphics::createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, TextInputFunc inputCallback, TextValidatorFunc validator) {
+  return new TextInput(lname, location, bg, active, textColor, data, text, inputCallback, validator);
 }
 Graphics::TextInputHwnd Graphics::createTextInput(xml_node<> *me) {
   return createTextInput(
@@ -725,13 +727,14 @@ Graphics::TextInputHwnd Graphics::createTextInput(xml_node<> *me) {
     getColor(me, "input", "bgcolor"),
     getColor(me, "input", "activecolor"),
     getColor(me, "input", "textcolor"),
+    NULL,
     me->value(),
     reinterpret_cast<TextInputFunc>(funcs[me->first_attribute("inputfunc")->value()]),
     reinterpret_cast<TextValidatorFunc>(funcs[me->first_attribute("validatorfunc")->value()]));
 }
 
-Graphics::ControlHwnd Graphics::createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key_config selected, int id, ControlInputFunc inputCallback) {
-  return new ControlSetting(lname, location, bg, active, textColor, selected, id, inputCallback);
+Graphics::ControlHwnd Graphics::createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, key_config selected, int id, ControlInputFunc inputCallback) {
+  return new ControlSetting(lname, location, bg, active, textColor, data, selected, id, inputCallback);
 }
 Graphics::ControlHwnd Graphics::createControl(xml_node<> *me) {
   return createControl(
@@ -740,77 +743,82 @@ Graphics::ControlHwnd Graphics::createControl(xml_node<> *me) {
     getColor(me, "control", "bgcolor"),
     getColor(me, "control", "activecolor"),
     getColor(me, "control", "textcolor"),
+    NULL,
     keybinds[strTo<int>(me->first_attribute("id")->value())],
     strTo<int>(me->first_attribute("id")->value()),
     reinterpret_cast<ControlInputFunc>(funcs[me->first_attribute("inputfunc")->value()]));
 }
 
-Graphics::CanvasHwnd Graphics::createCanvas(string lname, LocationData location, IWindowManagers managers) {
-  return new Canvas(lname, location, managers);
+Graphics::CanvasHwnd Graphics::createCanvas(string lname, LocationData location, IWindowManagers managers, void* data) {
+  return new Canvas(lname, location, managers, data);
 }
 
-Graphics::PlotHwnd Graphics::createPlot(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor) {
-  return new Plot(lname, location, bg, active, textColor);
+Graphics::PlotHwnd Graphics::createPlot(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data) {
+  return new Plot(lname, location, bg, active, textColor, data);
 }
 
-Graphics::PanelHwnd Graphics::createPanel(string lname, LocationData location, colorargb bg) {
-  return new Panel(lname, location, bg);
+Graphics::PanelHwnd Graphics::createPanel(string lname, LocationData location, colorargb bg, void* data) {
+  return new Panel(lname, location, bg, data);
 }
 Graphics::PanelHwnd Graphics::createPanel(xml_node<> *me) {
   PanelHwnd p = createPanel(
     me->first_attribute("id")->value(),
     loadLocation(me->first_node("location")),
-    getColor(me, "panel", "bgcolor"));
+    getColor(me, "panel", "bgcolor"),
+    NULL);
 
   setElements(p, me);
 
   return p;
 }
 
-Graphics::TableHwnd Graphics::createTable(string lname, LocationData location, colorargb bg, colorargb active) {
-  return new Table(lname, location, bg, active);
+Graphics::TableHwnd Graphics::createTable(string lname, LocationData location, colorargb bg, colorargb active, void* data) {
+  return new Table(lname, location, bg, active, data);
 }
 Graphics::TableHwnd Graphics::createTable(xml_node<> *me) {
   TableHwnd p = createTable(
     me->first_attribute("id")->value(),
     loadLocation(me->first_node("location")),
     getColor(me, "table", "bgcolor"),
-    getColor(me, "table", "activecolor"));
+    getColor(me, "table", "activecolor"),
+    NULL);
 
   setElements(p, me);
 
   return p;
 }
 
-Graphics::TablerowHwnd Graphics::createTableRow(string lname, LocationData location, colorargb bg, colorargb active) {
-  return new TableRow(lname, location, bg, active);
+Graphics::TablerowHwnd Graphics::createTableRow(string lname, LocationData location, colorargb bg, colorargb active, void* data) {
+  return new TableRow(lname, location, bg, active, data);
 }
 Graphics::TablerowHwnd Graphics::createTableRow(xml_node<> *me) {
   TablerowHwnd p = createTableRow(
     me->first_attribute("id")->value(),
     loadLocation(me->first_node("location")),
     getColor(me, "tablerow", "bgcolor"),
-    getColor(me, "tablerow", "activecolor"));
+    getColor(me, "tablerow", "activecolor"),
+    NULL);
 
   setElements(p, me);
 
   return p;
 }
 
-Graphics::ContainerHwnd Graphics::createContainer(string lname, LocationData location, colorargb bg) {
-  return new Container(lname, location, bg);
+Graphics::ContainerHwnd Graphics::createContainer(string lname, LocationData location, colorargb bg, void* data) {
+  return new Container(lname, location, bg, data);
 }
 Graphics::ContainerHwnd Graphics::createContainer(xml_node<> *me) {
   ContainerHwnd p = createContainer(
     me->first_attribute("id")->value(),
     loadLocation(me->first_node("location")),
-    getColor(me, "container", "bgcolor"));
+    getColor(me, "container", "bgcolor"),
+    NULL);
 
   return p;
 }
 
-Graphics::SliderHwnd Graphics::createSlider(string name, LocationData location, colorargb bg, colorargb active, colorargb textColor, colorargb pulledcolor, float min, float max, float value, float quanta, SliderInputFunc clickCallback) {
-return new Slider(name, location, bg, active, textColor, pulledcolor, min, max, value, quanta, clickCallback);
+Graphics::SliderHwnd Graphics::createSlider(string name, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, colorargb pulledcolor, float min, float max, float value, float quanta, SliderInputFunc clickCallback) {
+return new Slider(name, location, bg, active, textColor, data, pulledcolor, min, max, value, quanta, clickCallback);
 }
 Graphics::SliderHwnd Graphics::createSlider(xml_node<> *me) {
   SliderHwnd p = createSlider(
@@ -819,6 +827,7 @@ Graphics::SliderHwnd Graphics::createSlider(xml_node<> *me) {
     getColor(me, "slider", "bgcolor"),
     getColor(me, "slider", "activecolor"),
     getColor(me, "slider", "textcolor"),
+    NULL,
     getColor(me, "slider", "dragcolor"),
     strTo<float>(me->first_attribute("minvalue")->value()),
     strTo<float>(me->first_attribute("maxvalue")->value()),
@@ -829,8 +838,8 @@ Graphics::SliderHwnd Graphics::createSlider(xml_node<> *me) {
   return p;
 }
 
-Graphics::LabelBindHwnd Graphics::createLabelBind(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, int center) {
-  return new LabelBind(lname, location, bg, active, textColor, center);
+Graphics::LabelBindHwnd Graphics::createLabelBind(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, int center) {
+  return new LabelBind(lname, location, bg, active, textColor, data, center);
 }
 Graphics::LabelBindHwnd Graphics::createLabelBind(xml_node<> *me) {
   return createLabelBind(
@@ -839,6 +848,7 @@ Graphics::LabelBindHwnd Graphics::createLabelBind(xml_node<> *me) {
     getColor(me, "lablebind", "bgcolor"),
     getColor(me, "lablebind", "activecolor"),
     getColor(me, "lablebind", "textcolor"),
+    NULL,
     strTo<int>(me->first_attribute("align")->value()));
 }
 

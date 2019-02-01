@@ -12,8 +12,8 @@ public:
   float scroll;
   int sab, sbb; //scroll bar left - right
 
-  TableRow(string lname, LocationData llocation, colorargb lbg, colorargb lactive) :
-    GUIElement(lname, llocation, lbg, lactive, 0) {
+  TableRow(string lname, LocationData llocation, colorargb lbg, colorargb lactive, void* ldata) :
+    GUIElement(lname, llocation, lbg, lactive, 0, ldata) {
   }
   void render(set<key_location>& down);
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
@@ -38,8 +38,8 @@ public:
   float scroll;
   int sba, sbb; //scroll bar top - bottom
 
-  Table(string lname, LocationData llocation, colorargb lbg, colorargb lactive) :
-    GUIElement(lname, llocation, lbg, lactive, 0) {
+  Table(string lname, LocationData llocation, colorargb lbg, colorargb lactive, void* ldata) :
+    GUIElement(lname, llocation, lbg, lactive, 0, ldata) {
   }
   void render(set<key_location>& down);
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);

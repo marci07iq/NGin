@@ -7,14 +7,14 @@ int ControlSetting::guiEvent(gui_event evt, int mx, int my, set<key_location>& d
       active = isIn(mx, my);
       if(active) {
         selected._parts.clear();
-        input(this, selected);
+        input(this, data, selected);
       }
     }
     return oactive xor active;
   }
   if (active && (evt._key._type == key::type_key)) { //keyboard
     selected.addKey(evt._key, evt._type);
-    input(this, selected);
+    input(this, data, selected);
     return 1;
   }
   return 0;

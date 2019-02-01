@@ -8,8 +8,8 @@ public:
   string filename;
   int align;
   int w, h;
-  Image(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string lfilename, int lalign) :
-    GUIElement(lname, llocation, lbg, lactive, ltextColor) {
+  Image(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string lfilename, int lalign) :
+    GUIElement(lname, llocation, lbg, lactive, ltextColor, ldata) {
     filename = lfilename;
     texture = 0;
     align = lalign;

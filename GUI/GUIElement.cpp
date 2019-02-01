@@ -1,12 +1,13 @@
 #include "GUIElement.h"
 
-GUIElement::GUIElement(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor) {
+GUIElement::GUIElement(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata) {
   name = lname;
   location = llocation;
   bgColor = lbg;
   activeColor = lactive;
   textColor = ltextColor;
   active = false;
+  data = ldata;
 }
 
 void GUIElement::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {

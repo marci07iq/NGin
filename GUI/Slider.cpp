@@ -5,7 +5,7 @@ void Slider::setVal(float nval) {
     val = nval + quanta / 2.0f - fmod(nval + quanta / 2.0f, quanta);
   }
   val = min(max(val, minv), maxv);
-  clickCallback(this, val);
+  clickCallback(this, data, val);
   cursor = -1;
 }
 void Slider::mouseAt(int x, int y) {

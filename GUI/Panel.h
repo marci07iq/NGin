@@ -5,8 +5,8 @@
 class Panel : public GUIElement {
 public:
   list<GUIElement*> elements; 
-  Panel(string lname, LocationData llocation, colorargb lbg) :
-    GUIElement(lname, llocation, lbg, 0, 0) {
+  Panel(string lname, LocationData llocation, colorargb lbg, void* ldata) :
+    GUIElement(lname, llocation, lbg, 0, 0, ldata) {
   }
   void transformCoordinates(int &mx, int &my);
   int mouseEnter(int state);

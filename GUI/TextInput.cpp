@@ -12,7 +12,7 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       }
       if (!active) {
         cursor = -1;
-        input(this, data);
+        input(this, data, text);
       }
     }
     return oactive xor active;
@@ -30,17 +30,17 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
       }
       if (evt._key._keycode == GLFW_KEY_BACKSPACE && text.length() && cursor > 0) {
         text.erase(cursor - 1, 1);
-        input(this, data);
+        input(this, data, text);
         cursor--;
         return 1;
       }
       if (evt._key._keycode == GLFW_KEY_DELETE && text.length() && cursor < text.size()) {
         text.erase(cursor, 1);
-        input(this, data);
+        input(this, data, text);
         return 1;
       }
       if (evt._key._keycode == GLFW_KEY_ENTER || evt._key._keycode == GLFW_KEY_KP_ENTER) {
-        input(this, data);
+        input(this, data, text);
         active = false;
         cursor = -1;
         return 3;
@@ -49,7 +49,7 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
     if (evt._key._type == key::type_char && evt._type == gui_event::evt_pressed) {
       if (validator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
-        input(this, data);
+        input(this, data, text);
         cursor++;
         return 1;
       }

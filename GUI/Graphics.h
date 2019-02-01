@@ -172,48 +172,49 @@ namespace Graphics {
     funcs[name] = reinterpret_cast<void(*)()>(func);
   }
 
-  ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int trigger, ClickCallback clickCallback, void* data);
+
+  ButtonHwnd createButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int trigger, ClickCallback clickCallback);
   ButtonHwnd createButton(xml_node<> *me);
 
-  IconButtonHwnd createIconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, void* data, string icon, string ilfFilepath);
+  IconButtonHwnd createIconButton(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int trigger, ClickCallback clickCallback, string icon, string ilfFilepath);
   IconButtonHwnd createIconButton(xml_node<> *me);
 
-  CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, bool checked, CheckCallback checkCallback, void* data);
+  CheckboxHwnd createCheckbox(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, bool checked, CheckCallback checkCallback);
   CheckboxHwnd createCheckbox(xml_node<> *me);
-  
-  LabelHwnd createLabel(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int center);
+
+  LabelHwnd createLabel(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int align);
   LabelHwnd createLabel(xml_node<> *me);
 
-  ImageHwnd createImage(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, int align);
+  ImageHwnd createImage(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, int align);
   ImageHwnd createImage(xml_node<> *me);
 
-  TextInputHwnd createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, string text, TextInputFunc inputCallback, TextValidatorFunc validator = *textValidator, void* data = NULL);
+  TextInputHwnd createTextInput(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, string text, TextInputFunc inputCallback, TextValidatorFunc validator);
   TextInputHwnd createTextInput(xml_node<> *me);
 
-  ControlHwnd createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, key_config selected, int id, ControlInputFunc inputCallback);
+  ControlHwnd createControl(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, key_config selected, int id, ControlInputFunc inputCallback);
   ControlHwnd createControl(xml_node<> *me);
 
-  CanvasHwnd createCanvas(string lname, LocationData location, IWindowManagers managers);
+  CanvasHwnd createCanvas(string lname, LocationData location, IWindowManagers managers, void* ldata);
 
-  PlotHwnd createPlot(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor);
+  PlotHwnd createPlot(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data);
 
-  PanelHwnd createPanel(string lname, LocationData location, colorargb bg);
+  PanelHwnd createPanel(string lname, LocationData location, colorargb bg, void* data);
   PanelHwnd createPanel(xml_node<> *me);
 
-  ContainerHwnd createContainer(string lname, LocationData location, colorargb bg);
+  TableHwnd createTable(string lname, LocationData location, colorargb bg, colorargb active, void* data);
+  TableHwnd createTable(xml_node<> *me);
+
+  TablerowHwnd createTableRow(string lname, LocationData location, colorargb bg, colorargb active, void* data);
+  TablerowHwnd createTableRow(xml_node<> *me);
+
+  ContainerHwnd createContainer(string lname, LocationData location, colorargb bg, void* data);
   ContainerHwnd createContainer(xml_node<> *me);
 
-  SliderHwnd createSlider(string name, LocationData location, colorargb bg, colorargb active, colorargb textColor, colorargb pulledcolor, float min, float max, float value, float quanta, SliderInputFunc clickCallback);
+  SliderHwnd createSlider(string name, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, colorargb pulledcolor, float min, float max, float value, float quanta, SliderInputFunc clickCallback);
   SliderHwnd createSlider(xml_node<> *me);
 
-  LabelBindHwnd createLabelBind(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, int center);
+  LabelBindHwnd createLabelBind(string lname, LocationData location, colorargb bg, colorargb active, colorargb textColor, void* data, int center);
   LabelBindHwnd createLabelBind(xml_node<> *me);
-
-  TableHwnd createTable(string lname, LocationData location, colorargb bg, colorargb active);
-  TableHwnd createTable( xml_node<> *me);
-
-  TablerowHwnd createTableRow(string lname, LocationData location, colorargb bg, colorargb active);
-  TablerowHwnd createTableRow(xml_node<> *me);
 
   ElemHwnd addElement(WinHwnd id, ElemHwnd elem);
   ElemHwnd addElement(PanelHwnd id, ElemHwnd elem);

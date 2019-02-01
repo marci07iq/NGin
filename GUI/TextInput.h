@@ -9,8 +9,8 @@ public:
   TextValidatorFunc validator;
   TextInputFunc input;
   void* data;
-  TextInput(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, TextInputFunc linput, TextValidatorFunc lvalidator = *textValidator, void* ldata = NULL) :
-    GUIElement(lname, llocation, lbg, lactive, ltextColor) {
+  TextInput(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string ltext, TextInputFunc linput, TextValidatorFunc lvalidator = *textValidator) :
+    GUIElement(lname, llocation, lbg, lactive, ltextColor, ldata) {
     text = ltext;
     input = linput;
     validator = lvalidator;

@@ -7,13 +7,11 @@ public:
   int triggerId;
   string text;
   ClickCallback clickCallback;
-  void* data;
-  Button(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, void* ldata) :
-  GUIElement(lname, llocation, lbg, lactive, ltextColor) {
+  Button(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string ltext, int ltriggerId, ClickCallback lclickCallback) :
+  GUIElement(lname, llocation, lbg, lactive, ltextColor, ldata) {
     text = ltext;
     clickCallback = lclickCallback;
     triggerId = ltriggerId;
-    data = ldata;
   }
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
@@ -25,8 +23,8 @@ public:
 class IconButton : public Button {
 public:
   Icon* ic;
-  IconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, string ltext, int ltriggerId, ClickCallback lclickCallback, void* ldata, string icon, string ilfFilepath) :
-    Button(lname, llocation, lbg, lactive, ltextColor, ltext, ltriggerId, lclickCallback, ldata) {
+  IconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string ltext, int ltriggerId, ClickCallback lclickCallback, string icon, string ilfFilepath) :
+    Button(lname, llocation, lbg, lactive, ltextColor, ldata, ltext, ltriggerId, lclickCallback) {
     ic = getIcon(icon, ilfFilepath);
   }
   void render(set<key_location>& down);
