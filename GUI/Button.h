@@ -7,6 +7,7 @@ public:
   int triggerId;
   string text;
   ClickCallback clickCallback;
+  bool stuck = false;
   Button(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string ltext, int ltriggerId, ClickCallback lclickCallback) :
   GUIElement(lname, llocation, lbg, lactive, ltextColor, ldata) {
     text = ltext;

@@ -27,7 +27,7 @@ int Button::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
 void Button::render(set<key_location>& down) {
 
   Gll::gllBegin(Gll::GLL_QUADS);
-  if (active) {
+  if (active || stuck) {
     setColor(activeColor);
   }
   else {
@@ -49,7 +49,7 @@ Button::~Button() {
 
 void IconButton::render(set<key_location>& down) {
 
-  if (active) {
+  if (active || stuck) {
     setColor(activeColor);
   } else {
     setColor(bgColor);
