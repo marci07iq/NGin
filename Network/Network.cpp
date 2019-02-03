@@ -1,5 +1,7 @@
 #include "Network.h"
 
+
+
 enum NetworkErrorCodes {
   NetworkErrorCodeInitalize,
   NetworkErrorCodeResolveServerAddress,

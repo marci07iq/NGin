@@ -7,7 +7,7 @@ void saveToFile(DataElement * data, string fileName) {
 
   data->fill(res, s);
 
-  ofstream out(fileName);
+  ofstream out(fileName, ios::binary);
   out.write(reinterpret_cast<char*>(res), len);
   out.close();
 
@@ -16,7 +16,7 @@ void saveToFile(DataElement * data, string fileName) {
 }
 
 int loadFromFile(DataElement * data, string fileName) {
-  ifstream in(fileName);
+  ifstream in(fileName, ios::binary);
   std::string contents((std::istreambuf_iterator<char>(in)),
     std::istreambuf_iterator<char>());
   in.close();

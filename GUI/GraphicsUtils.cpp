@@ -479,7 +479,7 @@ string openFileSelector(string message, list<pair<string, string>> formats) {
   ofn.lpstrTitle = message.c_str();
   ofn.Flags = OFN_FILEMUSTEXIST;
 
-  //GLFW triggers event handles if window is opened on the same thread.
+  //GLFW triggers event handlers if window is opened on the same thread.
   //That will crash the GUI Mutex lock.
   std::thread dialog(GetOpenFileNameA, &ofn);
   dialog.join();

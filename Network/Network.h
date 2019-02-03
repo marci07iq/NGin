@@ -3,6 +3,7 @@
 #include "Compress.h"
 #include "NetworkData.h"
 
+
 //#ifdef WIN32
 #include <winsock2.h>
 #ifndef NOMINMAX
@@ -22,12 +23,11 @@
 #endif
 //#endif
 
-using namespace std;
-
 // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
+
 
 class NetworkC;
 class NetworkS;
