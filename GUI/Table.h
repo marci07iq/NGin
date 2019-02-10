@@ -20,7 +20,7 @@ public:
   void getRect();
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
+  int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
 
   GUIElement* getElementById(string id);
 
@@ -46,7 +46,7 @@ public:
   void getRect();
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
+  int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
 
   GUIElement* getElementById(string id);
 

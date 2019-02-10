@@ -11,15 +11,17 @@ int Button::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) 
   return oactive xor active; //if state changed
 }
 
-int Button::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  if (isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
+int Button::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
+  if (!evt.captured && isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
+    evt.captured = true;
     clickCallback(this, data);
-    return 3;
+    return 1;
   }
-  if(evt._key._type == key::type_key && evt._type == gui_event::evt_down) {
+  if(!evt.captured && evt._key._type == key::type_key && evt._type == gui_event::evt_down) {
     if (triggerId != -1 && checkKey(triggerId, down, evt._key, true)) {
+      evt.captured = true;
       clickCallback(this, data);
-      return 3;
+      return 1;
     }
   }
   return 0;

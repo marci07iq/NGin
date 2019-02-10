@@ -69,6 +69,7 @@ public:
   type _type;
   string toName();
   gui_event(key_location key, type type);
+  bool captured = false;
 };
 
 class key_config {

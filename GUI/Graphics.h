@@ -85,8 +85,8 @@ namespace Graphics {
   void defaultWindowCloseManagerNL();
   extern WindowCloseManager defaultWindowCloseManager;
 
-  int defaultGUIEventManagerL(gui_event evt, int x, int y, set<key_location>& down);
-  int defaultGUIEventManagerNL(gui_event evt, int x, int y, set<key_location>& down);
+  int defaultGUIEventManagerL(gui_event& evt, int x, int y, set<key_location>& down);
+  int defaultGUIEventManagerNL(gui_event& evt, int x, int y, set<key_location>& down);
   extern GUIEventManager defaultGUIEventManager;
 
   typedef GUIElement* ElemHwnd;

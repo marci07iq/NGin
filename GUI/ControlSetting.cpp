@@ -1,20 +1,22 @@
 #include "ControlSetting.h"
 
-int ControlSetting::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ControlSetting::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   bool oactive = active;
   if(evt._key._type == key::type_mouse) { //mouse
-    if(evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //click, left
+    if(!evt.captured && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //click, left
       active = isIn(mx, my);
       if(active) {
+        evt.captured = true;
         selected._parts.clear();
         input(this, data, selected);
       }
     }
     return oactive xor active;
   }
-  if (active && (evt._key._type == key::type_key)) { //keyboard
+  if (!evt.captured && active && (evt._key._type == key::type_key)) { //keyboard
     selected.addKey(evt._key, evt._type);
     input(this, data, selected);
+    evt.captured = true;
     return 1;
   }
   return 0;

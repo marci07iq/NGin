@@ -424,15 +424,20 @@ void Graphics::defaultMouseClickManagerNL(int button, int state, int x, int y) {
   key_location keyd;
   keyd.fromMouse(button);
   keyd.setLocation(x, y);
+  bool captured = false;
   if (state == 1) { //Down
     if (!keysdown.count(keyd)) { //If new key, down
       keysdown.insert(keyd);
-      if (1 & elementGUIEventManager(gui_event(keyd, gui_event::evt_down), x, y, keysdown)) {
+      gui_event newDownEvt = gui_event(keyd, gui_event::evt_down);
+      if (1 & elementGUIEventManager(newDownEvt, x, y, keysdown)) {
         Graphics::requestRedraw();
       }
+      captured |= newDownEvt.captured;
     }
     //Always pressed
-    if (1 & elementGUIEventManager(gui_event(keyd, gui_event::evt_pressed), x, y, keysdown)) {
+    gui_event newPressEvt = gui_event(keyd, gui_event::evt_pressed);
+    newPressEvt.captured = captured;
+    if (1 & elementGUIEventManager(newPressEvt, x, y, keysdown)) {
       Graphics::requestRedraw();
     }
   }
@@ -483,7 +488,7 @@ void Graphics::defaultWindowCloseManagerNL() {
   
 }
 
-int Graphics::defaultGUIEventManagerL(gui_event evt, int mx, int my, set<key_location>& down) {
+int Graphics::defaultGUIEventManagerL(gui_event& evt, int mx, int my, set<key_location>& down) {
   netlock.lock();
 
   int res = defaultGUIEventManagerNL(evt, mx, my, down);
@@ -495,7 +500,7 @@ int Graphics::defaultGUIEventManagerL(gui_event evt, int mx, int my, set<key_loc
 
   return res;
 }
-int Graphics::defaultGUIEventManagerNL(gui_event evt, int mx, int my, set<key_location>& down) {
+int Graphics::defaultGUIEventManagerNL(gui_event& evt, int mx, int my, set<key_location>& down) {
   return Graphics::elementGUIEventManager(evt, mx, my, down);
 }
 

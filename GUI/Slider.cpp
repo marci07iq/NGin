@@ -25,7 +25,7 @@ int Slider::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) 
   return mdown | (oactive xor active); //if state changed
 }
 
-int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int Slider::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   bool oactive = active;
 
   if (evt._key._type == key::type_mouse) {
@@ -35,9 +35,10 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
         active = false;
       }
       if(isIn(mx, my)) {
-        if (evt._type == gui_event::evt_down) {
+        if (!evt.captured && evt._type == gui_event::evt_down) {
           mdown = true;
           active = true;
+          evt.captured = true;
           mouseAt(mx, my);
         }
       }
@@ -61,7 +62,8 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
     cursor = text.size();
   }
   if(textActive) {
-    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
+    if (!evt.captured && evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
+      textActive = true;
       if (evt._key._keycode == GLFW_KEY_LEFT) {
         cursor = max(0, cursor - 1);
         return 1;
@@ -83,10 +85,8 @@ int Slider::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
         textActive = false;
         cursor = -1;
         setVal(strTo<float>(text));
-        return 3;
+        return 1;
       }
-    }
-    if (evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
       if (floatValidator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
         cursor++;

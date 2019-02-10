@@ -29,8 +29,6 @@ void Image::render(set<key_location>& down) {
   setColor(0xffffffff);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   Gll::gllBegin(Gll::GLL_QUADS);
   glTexCoord2f(0, 1);
   Gll::gllVertex(rax, ray);
@@ -41,6 +39,4 @@ void Image::render(set<key_location>& down) {
   glTexCoord2f(0, 0);
   Gll::gllVertex(rax, rby);
   Gll::gllEnd();
-  glDisable(GL_BLEND);
-  glDisable(GL_TEXTURE_2D);
 }

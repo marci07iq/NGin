@@ -1703,7 +1703,7 @@ int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
 
   return code->mouseMoved(mx, my, ox, oy, down) | (dragging != NULL);
 }
-int ScriptGUI::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptGUI::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == evt._key.type_mouse && evt._key._keycode == GLUT_RIGHT_BUTTON) {
     if (evt._type == evt.evt_down) {
       mid = true;

@@ -1,11 +1,15 @@
 #include "TextInput.h"
 
-int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int TextInput::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == key::type_mouse) {
     bool oactive = active;
     if (evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //click, left
       active = isIn(mx, my);
+      if (active) {
+        evt.captured = true;
+      }
     }
+    
     if (oactive xor active) {
       if (active) {
         cursor = text.size();
@@ -15,11 +19,12 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
         input(this, data, text);
       }
     }
-    return oactive xor active;
+    return (oactive xor active);
   }
 
   if (active) {
-    if(evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
+    if(!evt.captured && evt._key._type == key::type_key && evt._type == gui_event::evt_pressed) {
+      evt.captured = true;
       if (evt._key._keycode == GLFW_KEY_LEFT) {
         cursor = max(0, cursor - 1);
         return 1;
@@ -43,15 +48,16 @@ int TextInput::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) 
         input(this, data, text);
         active = false;
         cursor = -1;
-        return 3;
+        return 1;
       }
     }
-    if (evt._key._type == key::type_char && evt._type == gui_event::evt_pressed) {
+    if (!evt.captured && evt._key._type == key::type_char && evt._type == gui_event::evt_pressed) {
+      evt.captured = true;
       if (validator(this, text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
         input(this, data, text);
         cursor++;
-        return 1;
+        return 3;
       }
     }
   }

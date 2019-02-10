@@ -19,7 +19,7 @@ int Plot::mouseMoved(int mx, int my, int mox, int moy, set<key_location>& down) 
   return 0;
 }
 
-int Plot::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int Plot::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == key::type_wheel) { //Zoom
     if (!isDown(down, key(key::type_key, GLFW_KEY_LEFT_SHIFT))) {
       ox += ((cbx + cax) / 2.0 - mx)*(pow(1.1, -evt._key._keycode) - 1)*sx;
@@ -30,33 +30,37 @@ int Plot::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
       oy += ((cby + cay) / 2.0 - my)*(pow(1.1, -evt._key._keycode) - 1)*sy;
       sy *= pow(1.1, -evt._key._keycode);
     }
+    evt.captured = true;
     return 1;
   }
-  if (checkKey(KeyPlotReset, down, evt._key, true) && evt._type == evt.evt_pressed) { //Reset
+  if (!evt.captured && checkKey(KeyPlotReset, down, evt._key, true) && evt._type == evt.evt_pressed) { //Reset
     /*double nsx, nsy;
     nsx = nsy = max(sx, sy);
     ox += ((cbx + cax) / 2.0 - mx)*(nsx - sx);
     oy += ((cby + cay) / 2.0 - my)*(nsy - sy);
     sx = nsx;
     sy = nsy;*/
+    evt.captured = true;
     reloadAxes();
     return 1;
   }
   if (evt._key._type == key::type_mouse) {
-    if (isIn(mx, my)) {
+    if (!evt.captured && isIn(mx, my)) {
       mousebuttons ^= mousebuttons & (1 << evt._key._keycode); //remove bit for button;
       mousebuttons ^= ((evt._type == gui_event::evt_down) | (evt._type == gui_event::evt_pressed)) << evt._key._keycode;
+      evt.captured = true;
     } else {
       mousebuttons = 0;
     }
   }
   if (evt._key._type == key::type_mouse) { //Mouse
-    if (evt._key._keycode == 0 && evt._type == gui_event::evt_pressed) { //left, down
+    if (!evt.captured && evt._key._keycode == 0 && evt._type == gui_event::evt_pressed) { //left, down
       int n = 0;
       for (auto&& dit : plotData) {
         double offset = 75 + (cbx - cax - 75) * double(n) / plotData.size();
         if (offset + 10 <= mx && mx <= offset + 30 && 5 <= my && my <= 15) {
           dit->enabled = !dit->enabled;
+          evt.captured = true;
           return 1;
         }
         n++;

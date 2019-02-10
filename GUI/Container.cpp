@@ -30,7 +30,7 @@ int Container::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
 
   return bstate;
 }
-int Container::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int Container::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   int bstate = 0;
   if (evt._key._type == evt._key.type_mouse && evt._key._keycode == GLFW_MOUSE_BUTTON_RIGHT) {
     if (evt._type == evt.evt_down) {

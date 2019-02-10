@@ -28,7 +28,7 @@ int Panel::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
   }
   return state;
 }
-int Panel::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int Panel::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   transformCoordinates(mx, my);
 
   auto it = elements.end();

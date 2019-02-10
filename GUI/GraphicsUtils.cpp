@@ -93,7 +93,7 @@ int defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_locat
 int defaultIResizeManager(Canvas*, int x, int y) {
   return 0;
 }
-int defaultIGUIEventManager(Canvas*, gui_event evt, int x, int y, set<key_location>& down) {
+int defaultIGUIEventManager(Canvas*, gui_event& evt, int x, int y, set<key_location>& down) {
   return 0;
 }
 int defaultIMouseEntryManager(Canvas*, int state) {
@@ -516,7 +516,7 @@ string openFileSelector(string message, list<pair<string, string>> formats) {
 #endif
 }
 
-string saveFileSelector(string message, list<pair<string, string>> formats) {
+string saveFileSelector(string message, list<pair<string, string>> formats, string ext) {
 #ifdef _WIN32
   char filename[MAX_PATH];
 
@@ -531,9 +531,10 @@ string saveFileSelector(string message, list<pair<string, string>> formats) {
   }
   ofn.lpstrFilter = formatString.c_str();
   ofn.lpstrFile = filename;
+  ofn.lpstrDefExt = ext.c_str();
   ofn.nMaxFile = MAX_PATH;
   ofn.lpstrTitle = message.c_str();
-  ofn.Flags = OFN_FILEMUSTEXIST;
+  ofn.Flags = OFN_EXTENSIONDIFFERENT;
 
   //GLFW triggers event handles if window is opened on the same thread.
   //That will crash the GUI Mutex lock.
@@ -732,9 +733,6 @@ void Gll::gllEnd() {
 }
 
 void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
   float width = s.size() * scale * gllFontCharSize.x;
   float height = scale * gllFontCharSize.y;
   
@@ -845,8 +843,6 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
 }
 
 void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   float* poss = new float[12];
   float* texs = new float[12];

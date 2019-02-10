@@ -17,7 +17,7 @@ public:
     cursor = -1;
     data = ldata;
   }
-  int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
+  int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
   void render(set<key_location>& down);
   int activateElement(GUIElement* id);
 

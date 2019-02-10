@@ -113,7 +113,7 @@ public:
   int mousebuttons;
   int mouseEnter(int state);
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(gui_event evt, int mx, int my, set<key_location>& down);
+  int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
   void render(set<key_location>& down);
   int get(double ori, double scale, double v, int h);
   ///Only after GetRect

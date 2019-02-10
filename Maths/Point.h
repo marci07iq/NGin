@@ -2,10 +2,10 @@
 
 #include "Types.h"
 
-#include "../GL_Lib/glm/glm.hpp"
-#include "../GL_Lib/glm/mat4x4.hpp"
-#include "../GL_Lib/glm/gtc/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include "../GL_Lib/glm/gtc/type_ptr.hpp"
+//#include "../GL_Lib/glm/glm.hpp"
+//#include "../GL_Lib/glm/mat4x4.hpp"
+//#include "../GL_Lib/glm/gtc/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale, glm::perspective
+//#include "../GL_Lib/glm/gtc/type_ptr.hpp"
 
 template<typename T> class vec3;
 //typedef vec2<float>           fVec3;
@@ -528,55 +528,55 @@ template<typename T> vec3<T> vecSwitch(bVec3& s, vec3<T> lhs, vec3<T> rhs) {
 template<typename T>
 class Matrix4 {
 public:
-  //T _vals[16];
-  glm::mat<4, 4, T, glm::defaultp> _base;
+  T _vals[16];
+  //glm::mat<4, 4, T, glm::defaultp> _base;
 
-  T& at(int i, int j) {
-    return base[j][i];
+  inline T& at(int i, int j) {
+    return _vals[4*i + j];
   }
 
   void setNull() {
-    /*for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        at(i, j) = 0;
-      }
-    }*/
-    _base = glm::zero<decltype(_base)>();
+    for (int i = 0; i < 16; i++) {
+      _vals[i] = 0;
+    }
+    //_base = glm::zero<decltype(_base)>();
   }
 
   void setIdentity() {
-    /*for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
         at(i, j) = (i == j) ? 1: 0;
       }
-    }*/
-    _base = glm::identity<decltype(_base)>();
+    }
+    //_base = glm::identity<decltype(_base)>();
   }
 
   Matrix4 & operator*(Matrix4 rhs) {
-    /*for (int i = 0; i < 4; i++) {
+    Matrix4f res;
+    for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
         res.at(i, j) = 0;
         for (int k = 0; k < 4; k++) {
           res.at(i, j) += at(i, k) * rhs.at(k, j);
         }
       }
-    }*/
-    return _base * rhs._base;
+    }
+    return res;
+    //return _base * rhs._base;
   }
 
   void set(float from[16]) {
     for (int i = 0; i < 16; i++) {
-      _base[i%4][i/4] = from[i];
+      _vals[i] = from[i];
     }
   }
   void transpose() {
-    /*for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       for (int j = i + 1; j < 4; j++) {
         swap(at(i, j), at(j, i));
       }
-    }*/
-    _base = glm::transpose(_base);
+    }
+    //_base = glm::transpose(_base);
   }
 
   Matrix4() {

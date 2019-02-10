@@ -31,7 +31,7 @@ typedef bool(*TextValidatorFunc)(Graphics::ElemHwnd, string, int, unsigned char)
 
 typedef void(*RenderManager)();
 typedef void(*ResizeManager)(int x, int y);
-typedef int(*GUIEventManager)(gui_event evt, int x, int y, set<key_location>& down);
+typedef int(*GUIEventManager)(gui_event& evt, int x, int y, set<key_location>& down);
 /*typedef void(*KeyManager)(unsigned char key, int x, int y);
 typedef void(*SpecialKeyManager)(int key, int x, int y);*/
 typedef void(*MouseClickManager)(int idk, int key, int x, int y);
@@ -42,13 +42,13 @@ typedef void(*WindowCloseManager)();
 
 typedef int(*IRenderManager)(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
 typedef int(*IResizeManager)(Canvas*, int x, int y);
-typedef int(*IGUIEventManager)(Canvas*, gui_event evt, int x, int y, set<key_location>& down);
+typedef int(*IGUIEventManager)(Canvas*, gui_event& evt, int x, int y, set<key_location>& down);
 typedef int(*IMouseEntryManager)(Canvas*, int state);
 typedef int(*IMouseMoveManager)(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
 
 int defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
 int defaultIResizeManager(Canvas*, int x, int y);
-int defaultIGUIEventManager(Canvas*, gui_event evt, int x, int y, set<key_location>& down);
+int defaultIGUIEventManager(Canvas*, gui_event& evt, int x, int y, set<key_location>& down);
 int defaultIMouseEntryManager(Canvas*, int state);
 int defaultIMouseMoveManager(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
 
@@ -220,4 +220,4 @@ pair<float, float> scrollBar(float contentHeight, float offset, float poslow, fl
 
 string openFileSelector(string message, list<pair<string, string>> formats = {});
 
-string saveFileSelector(string message, list<pair<string, string>> formats = {});
+string saveFileSelector(string message, list<pair<string, string>> formats = {}, string ext = "");

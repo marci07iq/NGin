@@ -11,11 +11,11 @@ int Checkbox::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down
   return oactive xor active; //if state changed
 }
 
-int Checkbox::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
-  if (isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
+int Checkbox::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
+  if (!evt.captured && isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
+    evt.captured = true;
     checked = !checked;
     checkCallback(this, data, checked);
-    return 3;
   }
   return 0;
 }

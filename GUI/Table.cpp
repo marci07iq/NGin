@@ -117,12 +117,13 @@ int TableRow::activateElement(GUIElement* id) {
   return bstate;
 }
 
-int TableRow::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int TableRow::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == key::type_wheel) {
-    if (isIn(mx, my)) {
+    if (!evt.captured && isIn(mx, my)) {
+      evt.captured = true;
       scroll += 30 * evt._key._keycode;
       getRect();
-      return 3;
+      return 1;
     }
     return 0;
   } else {
@@ -267,12 +268,13 @@ int Table::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
   return state;
 }
 
-int Table::guiEvent(gui_event evt, int mx, int my, set<key_location>& down) {
+int Table::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   if (evt._key._type == key::type_wheel) {
-    if (isIn(mx, my)) {
+    if (!evt.captured && isIn(mx, my)) {
+      evt.captured = true;
       scroll += 30 * evt._key._keycode;
       getRect();
-      return 3;
+      return 1;
     }
     return 0;
   } else {
