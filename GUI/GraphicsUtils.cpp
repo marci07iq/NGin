@@ -618,11 +618,19 @@ void Gll::gllColor(colorargb col) {
 }
 
 void Gll::gllVertex(double x, double y) {
-  gllVertex(fVec2(x, y));
+  gllVertex({x, y});//, 0);
 }
 void Gll::gllVertex(fVec2 pt) {
-  _pts.push_back({pt, _col});
+  //gllVertex(pt.x, pt.y, 0);
+  _pts.push_back({ pt, _col });
 }
+
+/*void Gll::gllVertex(double x, double y, double z) {
+  gllVertex({x, y, z});
+}
+void Gll::gllVertex(fVec3 pt) {
+  _pts.push_back({pt, _col})
+}*/
 
 void Gll::gllEnd() {
   int size = 0;
@@ -646,9 +654,8 @@ void Gll::gllEnd() {
         raw[6 * i + 5] = _pts[i + 2].first.y;
         insertColor(col, 12 * i + 8, _pts[i+2].second);
       }
-
-
       break;
+
     case GLL_QUADS:
       size = 6 * (_pts.size() / 4);
       raw = new float[size * 2];
@@ -678,8 +685,13 @@ void Gll::gllEnd() {
         raw[12 * i + 11] = _pts[4 * i + 0].first.y;
         insertColor(col, 24 * i + 20, _pts[4 * i + 0].second);
       }
-
       break;
+
+    /*case GLL_LINES:d
+      size = 2 * (_pts.size() / 2);
+      raw = new float[size * 2];
+      col = new float[size * 4];
+      break;*/
   }
 
   GLuint vbo_pos, vbo_col, vao;

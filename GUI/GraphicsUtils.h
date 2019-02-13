@@ -181,7 +181,8 @@ void insertVector(float* arr, size_t to, fVec3 vec);
 namespace Gll {
   enum gllModes {
     GLL_POLY,
-    GLL_QUADS
+    GLL_QUADS,
+    //GLL_LINES,
     //GLL_LINES,
     //GLL_LINE_STRIP
   };
@@ -191,6 +192,7 @@ namespace Gll {
   extern colorargb _col;
 
   extern Shader gllBaseS;
+  //extern Shader gllLinesS;
   extern Shader gllTextS;
 
   extern Texture gllFontMap;
@@ -204,8 +206,11 @@ namespace Gll {
   void gllBegin(gllModes m);
 
   void gllVertex(fVec2 pt);
-
   void gllVertex(double x, double y);
+
+  /*void gllVertex(fVec3 pt);
+  void gllVertex(double x, double y, double z);*/
+
 
   void gllColor(colorargb col);
 

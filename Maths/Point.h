@@ -582,6 +582,15 @@ public:
   Matrix4() {
     setNull();
   }
+  const Matrix4<T> invert() {
+    Eigen::Matrix<T, 4, 4, Eigen::RowMajor> inv = Eigen::Map<Eigen::Matrix<T, 4, 4, Eigen::RowMajor>>(_vals).inverse();
+    T* inv_T = inv.data();
+    Matrix4<T> res;
+    for (int i = 0; i < 16; i++) {
+      res._vals[i] = inv_T[i];
+    }
+    return res;
+  }
 };
 
 typedef Matrix4<int> Matrix4i;

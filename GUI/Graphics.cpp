@@ -148,6 +148,11 @@ Graphics::WinHwnd Graphics::rawCreateMainWindow(winCreationData from) {
   windows[window] = data;
 
   data->rescanSize();
+
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   //glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE | additionalFlags);
 
   //glutCreateWindow(caption.c_str());
