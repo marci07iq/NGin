@@ -39,6 +39,9 @@ int Panel::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
     --it;
     bstate |= (*it)->guiEvent(evt, mx, my, down);
   }
+  if (bgColor > 0xffffff && isIn(mx, my) && evt._key._type == key::type_mouse && (evt._type == evt.evt_pressed || evt._type == evt.evt_down)) { //Has alpha
+    evt.captured = true;
+  }
   return bstate;
 }
 void Panel::render(set<key_location>& down) {

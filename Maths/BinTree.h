@@ -75,4 +75,3 @@ class BinTree : public BinTreeNode<_VAL> {
     return lookup(_what);
   }
 };
-

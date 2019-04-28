@@ -4,15 +4,7 @@
 #include "Compress.h"
 
 #define PACKET_HEADER_LEN 4 //Used to store packet ID and data length;
-#define PACKET_HEADER_TYPE int
-
-typedef union {
-  struct {
-    char chars[PACKET_HEADER_LEN];
-  } chararr;
-  PACKET_HEADER_TYPE i;
-} Packet_Header_Convertor;
-//Breaks PACKET_HEADER_TYPE into PACKET_HEADER_LEN chars
+#define PACKET_HEADER_TYPE uint32_t
 
 
 class DataPair {
@@ -25,11 +17,11 @@ public:
   }
   template<typename T> void fromTypeV(T val) {
     delete[] _data;
-    serialize<T>(val, &_data, _len, 0);
+    serialize<T>(val, &_data, _len);
   }
   template<typename T> void fromType(T& val) {
     delete[] _data;
-    serialize<T>(val, &_data, _len, 0);
+    serialize<T>(val, &_data, _len);
   }
   template<typename T> T toType() {
     return deserializeT<T>(_data, _len);
@@ -72,10 +64,10 @@ public:
     return true;
   }
   void fill(unsigned char* data, int &start) {
-    Packet_Header_Convertor conv;
-    conv.i = getLen() - 4;
+    PACKET_HEADER_TYPE conv;
+    conv = getLen() - 4;
     for (int i = 0; i < PACKET_HEADER_LEN; i++) {
-      data[start + i] = conv.chararr.chars[i];
+      data[start + i] = reinterpret_cast<unsigned char*>(&conv)[i];
     }
     start += 4;
 
@@ -86,9 +78,9 @@ public:
     }
     data[start] = 1;
     start++;
-    conv.i = _core->_len;
+    conv = _core->_len;
     for (int i = 0; i < PACKET_HEADER_LEN; i++) {
-      data[start + i] = conv.chararr.chars[i];
+      data[start + i] = reinterpret_cast<unsigned char*>(&conv)[i];
     }
     start += 4;
     for (int i = 0; i < _core->_len; i++) {
@@ -97,14 +89,14 @@ public:
     start += _core->_len;
   }
   void empty(const unsigned char* data, int &start) {
-    Packet_Header_Convertor conv;
+    PACKET_HEADER_TYPE conv;
 
     for (int i = 0; i < PACKET_HEADER_LEN; i++) {
-      conv.chararr.chars[i] = data[start + i];
+      reinterpret_cast<unsigned char*>(&conv)[i] = data[start + i];
     }
     start += 4;
 
-    int end = conv.i + start;
+    int end = conv + start;
 
     while (start < end) {
       int type = data[start];
@@ -116,11 +108,11 @@ public:
       }
       if (type == 1) {
         for (int i = 0; i < PACKET_HEADER_LEN; i++) {
-          conv.chararr.chars[i] = data[start + i];
+          reinterpret_cast<unsigned char*>(&conv)[i] = data[start + i];
         }
         start += 4;
 
-        int nlen = conv.i;
+        int nlen = conv;
 
         delete _core;
 

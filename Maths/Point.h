@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include <Eigen/Dense>
 
 //#include "../GL_Lib/glm/glm.hpp"
 //#include "../GL_Lib/glm/mat4x4.hpp"
@@ -68,7 +69,7 @@ public:
     return *this;
   }
   vec3<T> & operator%=(const vec3<T> rhs) {
-    x %= rhs.x; y %= rhs.y; z %= rhs.z;
+    x = modulo<T>(x, rhs.x); y = modulo<T>(y, rhs.y); z = modulo<T>(z, rhs.z);
     return *this;
   }
   vec3<T> & operator&=(const vec3<T> rhs) {
@@ -220,17 +221,18 @@ public:
     z = strTo<T>(me->first_node("z")->value());
   }
 
+  size_t maxI() {
+    return (x > y) ? ((x > z) ? 0 : 2) : ((y > z) ? 1 : 2);
+  }
+  size_t minI() {
+    return (x < y) ? ((x < z) ? 0 : 2) : ((y < z) ? 1 : 2);
+  }
+
   T maxV() {
-    T res = x;
-    res = (res < y) ? y : res;
-    res = (res < z) ? z : res;
-    return res;
+    return this->operator[](maxI());
   }
   T minV() {
-    T res = x;
-    res = (res > y) ? y : res;
-    res = (res > z) ? z : res;
-    return res;
+    return this->operator[](minI());
   }
 };
 
@@ -309,7 +311,7 @@ public:
     return *this;
   }
   vec2<T> & operator%=(vec2<T> rhs) {
-    x %= rhs.x; y %= rhs.y;
+    x = modulo<T>(x, rhs.x); y = modulo<T>(y, rhs.y);
     return *this;
   }
   vec2<T> & operator&=(vec2<T> rhs) {
@@ -404,7 +406,7 @@ public:
   }
 
   fVec2 at(float t) { //Only for polynomial vectors
-    return{ to_double(x.at(t)), to_double(y.at(t)), to_double(z.at(t)) };
+    return{ to_double(x.at(t)), to_double(y.at(t)) };
   }
 
   vec2<T> randomize(T r) {
@@ -445,6 +447,21 @@ public:
     x = strTo<T>(me->first_node("x")->value());
     y = strTo<T>(me->first_node("y")->value());
   }
+
+
+  size_t maxI() {
+    return (x > y) ? 0 : 1;
+  }
+  size_t minI() {
+    return (x < y) ? 0 : 1;
+  }
+
+  T maxV() {
+    return this->operator[](maxI());
+  }
+  T minV() {
+    return this->operator[](minI());
+  }
 };
 
 
@@ -483,9 +500,12 @@ template<typename T> std::istream& operator>> <>(std::istream& is, vec2<T>& v) {
 template<typename T> inline T dot(vec2<T> lhs, vec2<T> rhs) {
   return lhs.x * rhs.x + lhs.y * rhs.y;
 }
-
 template<typename T> inline T dot(vec3<T> lhs, vec3<T> rhs) {
   return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+}
+
+template<typename T> inline T crs(vec2<T> lhs, vec2<T> rhs) {
+  return lhs.x*rhs.y - lhs.y*rhs.x;
 }
 template<typename T> inline vec3<T> crs(vec3<T> lhs, vec3<T> rhs) {
   return vec3<T>(lhs.y*rhs.z - lhs.z*rhs.y,
@@ -551,8 +571,8 @@ public:
     //_base = glm::identity<decltype(_base)>();
   }
 
-  Matrix4 & operator*(Matrix4 rhs) {
-    Matrix4f res;
+  Matrix4<T>& operator*(Matrix4<T> rhs) {
+    Matrix4<T> res;
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
         res.at(i, j) = 0;
@@ -579,7 +599,7 @@ public:
     //_base = glm::transpose(_base);
   }
 
-  Matrix4() {
+  Matrix4<T>() {
     setNull();
   }
   const Matrix4<T> invert() {

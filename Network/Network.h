@@ -29,28 +29,26 @@
 #pragma comment (lib, "AdvApi32.lib")
 
 
-class NetworkC;
-class NetworkS;
+class Network;
 
-class NetBinder;
+class NetworkBinder;
 
-typedef bool(*RecivePacketFuncS)(DataElement *Data, int Id, NetworkS* thisptr, NetBinder* ship);
-typedef bool(*RecivePacketFuncC)(DataElement *Data, int Id, NetworkC* thisptr, NetBinder* ship);
+typedef bool(*RecivePacketFunc)(DataElement *Data, int Id, Network* connection, NetworkBinder* binder);
 
 
 //void defaultRecivePacketFunc(unsigned char *Data, int Id, int DataLen);
 
-class NetworkS {
+class Network {
 public:
-  NetworkS();
-  NetworkS(string port, RecivePacketFuncS recivePacketFunc);
-  ~NetworkS();
-  int error = 0;
-  bool cleaned = true;
-  string _port;
-  void Loop();
-  int SendData(char *Data, int Id, int DataLen);
-  int SendData(unsigned char *Data, int Id, int DataLen);
+  Network(RecivePacketFunc recivePacketFunc) {
+    RecivePacket = recivePacketFunc;
+  }
+  ~Network() {
+
+  }
+
+  int SendData(char* Data, int Id, int DataLen);
+  int SendData(unsigned char* Data, int Id, int DataLen);
   template<typename T> int SendData(T& data, int Id) {
     unsigned char* c;
     int l;
@@ -58,56 +56,47 @@ public:
     return SendData(c, Id, l);
   }
   int SendData(DataElement* data, int Id);
+  
   int ReciveData();
+  
   thread ReciveLoopThread;
+  
+  void Loop();
+  
   bool Running = true;
-  RecivePacketFuncS RecivePacket;
-  NetBinder* ConnectedBinder;
-private:
+  int error = 0;
+  bool cleaned = true;
+  
+  RecivePacketFunc RecivePacket;
+  string _port;
+
+  NetworkBinder* _binder;
+protected:
   WSADATA wsaData;
-  SOCKET ListenSocket = INVALID_SOCKET;
   SOCKET ClientSocket = INVALID_SOCKET;
   struct addrinfo hints;
 };
 
-class NetworkC {
+class NetworkS : public Network {
 public:
-  NetworkC();
-  NetworkC(string IP, string port, RecivePacketFuncC recivePacketFunc);
-  ~NetworkC();
-  int error = 0;
-  bool cleaned = true;
-  string _IP = "";
-  string _port;
-  void Loop();
-  int SendData(char *Data, int Id, int DataLen);
-  int SendData(unsigned char *Data, int Id, int DataLen);
-  template<typename T> int SendData(T& data, int Id) {
-    stringstream ss;
-    ss << data;
-    std::string datas = ss.str();
-
-    char* id_c = new char[datas.size() + 1];
-    strcpy_s(id_c, datas.size(), datas.c_str());
-
-    int val = SendData(id_c, Id, datas.length());
-
-    delete[] id_c;
-    return val;
-  }
-  int SendData(DataElement* data, int Id);
-  int ReciveData();
-  bool Running = true;
-  thread ReciveLoopThread;
-  NetBinder* ConnectedBinder;
+  NetworkS(string port, RecivePacketFunc recivePacketFunc);
+  ~NetworkS();
 private:
-  WSADATA wsaData;
-  SOCKET ConnectSocket = INVALID_SOCKET;
-  struct addrinfo hints;
-  RecivePacketFuncC RecivePacket;
+  SOCKET ListenSocket = INVALID_SOCKET;
 };
 
-/*
-void concat(vector<pair<unsigned char*, int> > in, unsigned char** C, int &lenC, bool destroy = true);
+class NetworkC : public Network {
+public:
+  NetworkC(string IP, string port, RecivePacketFunc recivePacketFunc);
+  ~NetworkC();
+private:
+  string _IP;
+};
 
-void split(unsigned char* data, int dataLen, vector<pair<unsigned char*, int> > &split, bool destroy = true);*/
+class NetworkBinder {
+public:
+  Network* connection;
+  virtual bool recivePacket(DataElement* Data, int Id, Network* connection) {
+    return true;
+  }
+};

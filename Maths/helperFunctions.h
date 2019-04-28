@@ -37,7 +37,7 @@
 
 
 
-typedef std::shared_timed_mutex shared_mutex;
+//typedef std::shared_timed_mutex shared_mutex;
 
 using namespace rapidxml;
 using namespace std;
@@ -54,6 +54,35 @@ typedef uint32_t colorargb;
 #define CONS_NDIV (1+(CONS_IM-1)/CONS_NTAB)
 #define CONS_EPS 1.2e-7
 #define CONS_RNMX (1.0-CONS_EPS)
+
+
+#define CONS_THREE_PI    9.4247779607694
+#define CONS_TWO_PI      6.2831853071796
+#define CONS_PI          3.1415926535898
+#define CONS_HALF_PI     1.5707963267949
+#define CONS_THIRD_PI    1.0471975511966
+#define CONS_QUARTER_PI  0.7853981633974
+
+#define CONS_E           2.71828182845904523536028747135266249775724709369995
+
+#define SolvePrec 0.000001
+#define MaxTries 10
+
+#define LOG cout <<
+#define END << endl
+#define FATAL "[FATAL]\t"    << 
+#define LERROR "[ERROR]\t"    << 
+#define WARN  "[WARN]\t"     << 
+#define INFO  "[INFO]\t"     << 
+
+#define NETWORK "[NET]\t"    <<
+#define SCRIPTS "[SCR]\t"    <<
+#define MISC "[MISC]\t"      <<
+#define MATH  "[MATH]\t"     << 
+#define GRAPHICS "[GUI]\t"   << 
+#define GAME "[GAME]\t"      << 
+#define SHIP "[SHIP]\t"      <<
+
 
 #ifdef _MSC_VER
 /* DUMP MEMORY LEAKS */
@@ -321,7 +350,7 @@ vector<T> solveQuadratic(T &a, T &b, T &c)
     }
   }
 
-  longDouble discriminant = b * b - 4.0 * a * c;
+  long double discriminant = b * b - 4.0 * a * c;
   if (discriminant >= 0.0)
   {
     discriminant = sqrt(discriminant);
@@ -337,7 +366,9 @@ vector<T> solveCubic(T &a, T &b, T &c, T &d)
   if (a == 0.0/* || abs(a / b) < 1.0e-6*/)
     return solveQuadratic(b, c, d);
 
-  longDouble B = b / a, C = c / a, D = d / a;
+  long double B = b / a;
+  long double C = c / a;
+  long double D = d / a;
 
   T Q = (B*B - C*3.0) / 9.0, QQQ = Q*Q*Q;
   T R = (2.0*B*B*B - 9.0*B*C + 27.0*D) / 54.0, RR = R*R;
@@ -449,7 +480,7 @@ vector<T> solveQuartic(T &a, T &b, T &c, T &d, T &e)
       }
     }
     else {
-      LOG ERROR MATH "Quartic root error:" << a << " " << b << " " << c << " " << d << " " << e END;
+      LOG LERROR MATH "Quartic root error:" << a << " " << b << " " << c << " " << d << " " << e << endl;
     }
     //fine derivative correction
     vector<T> corres;
@@ -476,20 +507,45 @@ vector<T> solveQuartic(T &a, T &b, T &c, T &d, T &e)
   }
 }
 
-void serialize(string& s, unsigned char** data, int& dataLen);
-template <typename T>
-void serialize(T& v, unsigned char** data, int& dataLen, int prec = 3) {
-  serialize(to_string(v,prec), data, dataLen);
+template<typename T>
+void clean_weak_ptr_list(list<weak_ptr<T>>& l) {
+  auto it1 = l.begin();
+  while (it1 != l.end()) {
+    if (it1->expired()) {
+      auto it2 = it1;
+      ++it1;
+      l.erase(it2);
+    }
+    else {
+      ++it1;
+    }
+  }
 }
 
-string deserializes(unsigned char* data, int dataLen);
-int    deserializei(unsigned char* data, int dataLen);
-float  deserializef(unsigned char* data, int dataLen);
-double deserialized(unsigned char* data, int dataLen);
 template <typename T>
-T deserializeT(unsigned char* data, int dataLen) {
-  return strTo<T>(deserializes(data, dataLen));
+void serialize(const T& v, unsigned char** data, int& dataLen) {
+  //serialize(to_string(v,prec), data, dataLen);
+  dataLen = sizeof(T);
+  *data = new unsigned char[sizeof(T)];
+  for (int i = 0; i < sizeof(T); i++) {
+    (*data)[i] = reinterpret_cast<const char*>(&v)[i];
+  }
 }
+template <>
+void serialize<string>(const string& v, unsigned char** data, int& dataLen);
+
+string deserializes(const unsigned char* data, int dataLen);
+/*int    deserializei(unsigned char* data, int dataLen);
+float  deserializef(unsigned char* data, int dataLen);
+double deserialized(unsigned char* data, int dataLen);*/
+template <typename T>
+T deserializeT(const unsigned char* data, int dataLen) {
+  //return strTo<T>(deserializes(data, dataLen));
+  assert(dataLen == sizeof(T));
+  return *reinterpret_cast<const T*>(data);
+}
+template <>
+string deserializeT<string>(const unsigned char* data, int dataLen);
 
 string randomHexString(size_t length);
 
@@ -499,9 +555,14 @@ template <typename T>
 inline T modulo(const T& lhs, const T& rhs) {
   return (((lhs%rhs)+rhs)%rhs);
 }
+template<>
+inline double modulo<double>(const double & lhs, const double & rhs) {
+  return lhs - rhs * floor(lhs / rhs);
+}
 
-inline double modulo(const double & lhs, const double & rhs) {
-  return fmod((fmod(lhs, rhs) + rhs), rhs);
+template<>
+inline float modulo<float>(const float & lhs, const float & rhs) {
+  return lhs - rhs * floor(lhs / rhs);
 }
 
 template <typename T>
@@ -571,33 +632,13 @@ enum KeyConfigID {
   KeyPlotReset = 9
 };
 
-
-#define CONS_THREE_PI    9.4247779607694
-#define CONS_TWO_PI      6.2831853071796
-#define CONS_PI          3.1415926535898
-#define CONS_HALF_PI     1.5707963267949
-#define CONS_THIRD_PI    1.0471975511966
-#define CONS_QUARTER_PI  0.7853981633974
-
-#define CONS_E           2.71828182845904523536028747135266249775724709369995
-
-#define SolvePrec 0.000001
-#define MaxTries 10
-
-#define LOG cout <<
-#define END << endl
-#define FATAL "[FATAL]\t"    << 
-#define LERROR "[ERROR]\t"    << 
-#define WARN  "[WARN]\t"     << 
-#define INFO  "[INFO]\t"     << 
-
-#define NETWORK "[NET]\t"    <<
-#define SCRIPTS "[SCR]\t"    <<
-#define MISC "[MISC]\t"      <<
-#define MATH  "[MATH]\t"     << 
-#define GRAPHICS "[GUI]\t"   << 
-#define GAME "[GAME]\t"      << 
-#define SHIP "[SHIP]\t"      <<
-
 #define SightingSize 0.02
 #define ShipSize 0.03
+
+#if defined(_WIN32)
+  #define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
+#elif defined(__linux__)
+  #define PACK( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+#else
+  #error Please add you platform specific definitin of PACK
+#endif

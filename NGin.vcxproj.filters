@@ -10,14 +10,14 @@
     <Filter Include="Maths\BigNumberLibrary">
       <UniqueIdentifier>{07a16c0c-cc92-4f3f-b4cb-7eada997641b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GUI">
-      <UniqueIdentifier>{273325cf-0601-4b82-9bd9-bef3fc4d3ff0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scripts">
       <UniqueIdentifier>{f71d15b6-e52e-44a1-9cd3-a8068247f5c3}</UniqueIdentifier>
     </Filter>
     <Filter Include="rapidxml">
       <UniqueIdentifier>{fbdbcc07-4b28-4b34-a731-455fb1d2692e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GUI">
+      <UniqueIdentifier>{4c3f3ce2-10e5-4b5b-a1a8-2ab205cc46bb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -66,6 +66,12 @@
     <ClCompile Include="Network\NetworkData.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Scripts\Scripts.cpp">
+      <Filter>Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\Compress.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
     <ClCompile Include="GUI\Button.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -73,6 +79,9 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Checkbox.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\ClientCore.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\Container.cpp">
@@ -108,6 +117,9 @@
     <ClCompile Include="GUI\Popup.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\Shader.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
     <ClCompile Include="GUI\Slider.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -117,14 +129,8 @@
     <ClCompile Include="GUI\TextInput.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Scripts\Scripts.cpp">
-      <Filter>Scripts</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\ClientCore.cpp">
+    <ClCompile Include="GUI\Texture.cpp">
       <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Network\Compress.cpp">
-      <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +173,25 @@
     <ClInclude Include="Network\NetworkData.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="Scripts\Scripts.h">
+      <Filter>Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="NGin.h" />
+    <ClInclude Include="rapidxml\rapidxml.hpp">
+      <Filter>rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml\rapidxml_iterators.hpp">
+      <Filter>rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml\rapidxml_print.hpp">
+      <Filter>rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml\rapidxml_utils.hpp">
+      <Filter>rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="Network\Compress.h">
+      <Filter>Network</Filter>
+    </ClInclude>
     <ClInclude Include="GUI\Button.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -174,6 +199,9 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Checkbox.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\ClientCore.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Container.h">
@@ -209,7 +237,13 @@
     <ClInclude Include="GUI\Popup.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\Shader.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
     <ClInclude Include="GUI\Slider.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\stb_image.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\Table.h">
@@ -218,27 +252,8 @@
     <ClInclude Include="GUI\TextInput.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Scripts\Scripts.h">
-      <Filter>Scripts</Filter>
-    </ClInclude>
-    <ClInclude Include="NGin.h" />
-    <ClInclude Include="rapidxml\rapidxml.hpp">
-      <Filter>rapidxml</Filter>
-    </ClInclude>
-    <ClInclude Include="rapidxml\rapidxml_iterators.hpp">
-      <Filter>rapidxml</Filter>
-    </ClInclude>
-    <ClInclude Include="rapidxml\rapidxml_print.hpp">
-      <Filter>rapidxml</Filter>
-    </ClInclude>
-    <ClInclude Include="rapidxml\rapidxml_utils.hpp">
-      <Filter>rapidxml</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\ClientCore.h">
+    <ClInclude Include="GUI\Texture.h">
       <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Network\Compress.h">
-      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

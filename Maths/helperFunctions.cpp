@@ -121,15 +121,15 @@ bool endsWith(string const & fullString, string const & ending) {
   }
 }
 
-void serialize(string& s, unsigned char** data, int& dataLen) {
-  *data = new unsigned char[s.size()];
-  for (int i = 0; i < s.size(); i++) {
-    (*data)[i] = s[i];
+template <>
+void serialize<string>(const string& v, unsigned char** data, int& dataLen) {
+  *data = new unsigned char[v.size()];
+  for (int i = 0; i < v.size(); i++) {
+    (*data)[i] = v[i];
   }
-  dataLen = s.size();
+  dataLen = v.size();
 }
-
-string deserializes(unsigned char* data, int dataLen) {
+string deserializes(const unsigned char* data, int dataLen) {
   string s(dataLen, ' ');
   for (int i = 0; i < s.size(); i++) {
     s[i] = data[i];
@@ -137,7 +137,11 @@ string deserializes(unsigned char* data, int dataLen) {
   //delete data;
   return s;
 }
-int    deserializei(unsigned char* data, int dataLen) {
+template <>
+string deserializeT<string>(const unsigned char* data, int dataLen) {
+  return deserializes(data, dataLen);
+}
+/*int    deserializei(unsigned char* data, int dataLen) {
   return strTo<int>(deserializes(data, dataLen));
 }
 float  deserializef(unsigned char* data, int dataLen) {
@@ -145,7 +149,7 @@ float  deserializef(unsigned char* data, int dataLen) {
 }
 double deserialized(unsigned char* data, int dataLen) {
   return strTo<double>(deserializes(data, dataLen));
-}
+}*/
 
 double ran1(long int nseed) {
   //random -seed expected

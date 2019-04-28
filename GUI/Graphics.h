@@ -28,7 +28,7 @@ namespace Graphics {
     RawWinHwnd rawHwnd;
     WindowManagers windowManagers;
     Panel* myPanel;
-    bool autoRedraw = false;
+    bool autoRedraw = false; //So other thread redraws can update
     //void getWin(float pax, float pay, float pbx, float pby);
     ~GWindow();
   };

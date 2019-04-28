@@ -172,11 +172,15 @@ void compress(DataPair* in, DataPair** out) {
 
   *out = new DataPair(res.size() * sizeof(CodeType) + PACKET_HEADER_LEN);
 
-  Packet_Header_Convertor conv;
-  conv.i = in->_len;
+  PACKET_HEADER_TYPE conv;
+  conv = in->_len;
+
+  /*if (conv >= (1 << 23)) {
+    cout << "Hey look" << endl;
+  }*/
 
   for (int lit = 0; lit < PACKET_HEADER_LEN; lit++) {
-    (*out)->_data[lit] = conv.chararr.chars[lit];
+    (*out)->_data[lit] = reinterpret_cast<unsigned char*>(&conv)[lit];
   }
 
   int itnum = 0;
@@ -184,6 +188,10 @@ void compress(DataPair* in, DataPair** out) {
     *(reinterpret_cast<CodeType*>((*out)->_data + PACKET_HEADER_LEN + itnum*sizeof(CodeType))) = lit;
     ++itnum;
   }
+
+  DataPair* test;
+  decompress(*out, &test);
+  delete test;
 }
 
 ///
@@ -194,14 +202,14 @@ void compress(DataPair* in, DataPair** out) {
 void decompress(DataPair* in, DataPair** out) {
   vector<pair<CodeType, char>> dictionary;
 
-  Packet_Header_Convertor conv;
+  PACKET_HEADER_TYPE conv;
   for (int lit = 0; lit < PACKET_HEADER_LEN; lit++) {
-    conv.chararr.chars[lit] = in->_data[lit];
+    reinterpret_cast<unsigned char*>(&conv)[lit] = in->_data[lit];
   }
 
   int oit = 0;
 
-  *out = new DataPair(conv.i);
+  *out = new DataPair(conv);
 
   // "named" lambda function, used to reset the dictionary to its initial contents
   const auto reset_dictionary = [&dictionary] {
@@ -268,7 +276,7 @@ void decompress(DataPair* in, DataPair** out) {
     dit += sizeof(CodeType);
   }
 
-  if (oit != conv.i) {
+  if (oit != conv) {
     cout << "Corrupt decrypt data!" << endl;
     //throw 1;
   }

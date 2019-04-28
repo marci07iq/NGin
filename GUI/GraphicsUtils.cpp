@@ -87,8 +87,7 @@ void loadColors(string filename) {
   glPopMatrix();
 }*/
 
-int defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down) {
-  return 0;
+void defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down) {
 }
 int defaultIResizeManager(Canvas*, int x, int y) {
   return 0;
@@ -104,6 +103,8 @@ int defaultIMouseMoveManager(Canvas*, int x, int y, int ox, int oy, set<key_loca
 }
 
 void Graphics::resetViewport() {
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
   glViewport(0, 0, Graphics::current->width, Graphics::current->height);
   glScissor(0, 0, Graphics::current->width, Graphics::current->height);
 
@@ -136,31 +137,31 @@ int LinearScale::getVal(int size) {
   return size*relc + absc;
 }
 
-LinearScale operator+(LinearScale& lhs, LinearScale& rhs) {
+LinearScale operator+(const LinearScale& lhs, const LinearScale& rhs) {
   return LinearScale(lhs.relc + rhs.relc, lhs.absc + rhs.absc);
 }
-LinearScale operator-(LinearScale& lhs, LinearScale& rhs) {
+LinearScale operator-(const LinearScale& lhs, const LinearScale& rhs) {
   return LinearScale(lhs.relc - rhs.relc, lhs.absc - rhs.absc);
 }
-LinearScale operator-(LinearScale& lhs) {
+LinearScale operator-(const LinearScale& lhs) {
   return LinearScale(-lhs.relc, -lhs.absc);
 }
-LinearScale operator*(LinearScale& lhs, float& rhs) {
+LinearScale operator*(const LinearScale& lhs, float& rhs) {
   return LinearScale(lhs.relc * rhs, lhs.absc * rhs);
 }
 LinearScale operator*(float& rhs, LinearScale& lhs) {
   return LinearScale(lhs.relc * rhs, lhs.absc * rhs);
 }
-LinearScale operator/(LinearScale& lhs, float& rhs) {
+LinearScale operator/(const LinearScale& lhs, float& rhs) {
   return LinearScale(lhs.relc / rhs, lhs.absc / rhs);
 }
-LinearScale operator*(LinearScale& lhs, float rhs) {
+LinearScale operator*(const LinearScale& lhs, float rhs) {
   return LinearScale(lhs.relc * rhs, lhs.absc * rhs);
 }
-LinearScale operator*(float rhs, LinearScale& lhs) {
+LinearScale operator*(float rhs, const LinearScale& lhs) {
   return LinearScale(lhs.relc * rhs, lhs.absc * rhs);
 }
-LinearScale operator/(LinearScale& lhs, float rhs) {
+LinearScale operator/(const LinearScale& lhs, float rhs) {
   return LinearScale(lhs.relc / rhs, lhs.absc / rhs);
 }
 
@@ -633,115 +634,7 @@ void Gll::gllVertex(fVec3 pt) {
 }*/
 
 void Gll::gllEnd() {
-  int size = 0;
-  float* raw = NULL;
-  float* col = NULL;
-  switch (_mode) {
-    case GLL_POLY:
-      size = 3 * (_pts.size() - 2);
-      raw = new float[size * 2];
-      col = new float[size * 4];
-      for (int i = 0; i < _pts.size() - 2; i++) {
-        raw[6 * i + 0] = _pts[0].first.x;
-        raw[6 * i + 1] = _pts[0].first.y;
-        insertColor(col, 12*i, _pts[0].second);
-
-        raw[6 * i + 2] = _pts[i + 1].first.x;
-        raw[6 * i + 3] = _pts[i + 1].first.y;
-        insertColor(col, 12 * i + 4, _pts[i+1].second);
-
-        raw[6 * i + 4] = _pts[i + 2].first.x;
-        raw[6 * i + 5] = _pts[i + 2].first.y;
-        insertColor(col, 12 * i + 8, _pts[i+2].second);
-      }
-      break;
-
-    case GLL_QUADS:
-      size = 6 * (_pts.size() / 4);
-      raw = new float[size * 2];
-      col = new float[size * 4];
-      for (int i = 0; i < _pts.size() / 4; i++) {
-        raw[12 * i + 0] = _pts[4 * i + 0].first.x;
-        raw[12 * i + 1] = _pts[4 * i + 0].first.y;
-        insertColor(col, 24 * i + 0, _pts[4 * i + 0].second);
-
-        raw[12 * i + 2] = _pts[4 * i + 1].first.x;
-        raw[12 * i + 3] = _pts[4 * i + 1].first.y;
-        insertColor(col, 24 * i + 4, _pts[4 * i + 1].second);
-
-        raw[12 * i + 4] = _pts[4 * i + 2].first.x;
-        raw[12 * i + 5] = _pts[4 * i + 2].first.y;
-        insertColor(col, 24 * i + 8, _pts[4 * i + 2].second);
-
-        raw[12 * i + 6] = _pts[4 * i + 2].first.x;
-        raw[12 * i + 7] = _pts[4 * i + 2].first.y;
-        insertColor(col, 24 * i + 12, _pts[4 * i + 2].second);
-
-        raw[12 * i + 8] = _pts[4 * i + 3].first.x;
-        raw[12 * i + 9] = _pts[4 * i + 3].first.y;
-        insertColor(col, 24 * i + 16, _pts[4 * i + 3].second);
-
-        raw[12 * i + 10] = _pts[4 * i + 0].first.x;
-        raw[12 * i + 11] = _pts[4 * i + 0].first.y;
-        insertColor(col, 24 * i + 20, _pts[4 * i + 0].second);
-      }
-      break;
-
-    /*case GLL_LINES:d
-      size = 2 * (_pts.size() / 2);
-      raw = new float[size * 2];
-      col = new float[size * 4];
-      break;*/
-  }
-
-  GLuint vbo_pos, vbo_col, vao;
-
-  glGenBuffers(1, &vbo_pos);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
-  glBufferData(GL_ARRAY_BUFFER, size * 2 * sizeof(float), raw, GL_STATIC_DRAW);
-
-  glGenBuffers(1, &vbo_col);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_col);
-  glBufferData(GL_ARRAY_BUFFER, size * 4 * sizeof(float), col, GL_STATIC_DRAW);
-
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-  
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo_col);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
-
-  delete raw;
-  delete col;
-  _pts.clear();
-
-  gllBaseS.bind();
-
-  GLint loc = glGetUniformLocation(gllBaseS._pID, "scale");
-  if (loc != -1) {
-    //cout << Graphics::current->width << " " <<  << endl;
-    glUniform2f(loc,
-      Graphics::current->width / 2.0,
-      Graphics::current->height / 2.0);
-  } else {
-    cout << "scale not found!" << endl;
-  }
-
-  glDisable(GL_DEPTH_TEST);
-  
-  glBindVertexArray(vao);
-  glDrawArrays(GL_TRIANGLES, 0, size);
-  glEnable(GL_DEPTH_TEST);
-
-  gllBaseS.unbind();
-
-  glDeleteBuffers(1, &vbo_pos);
-  glDeleteBuffers(1, &vbo_col);
-  glDeleteVertexArrays(1, &vao);
+  gllRender(gllBuild());
 }
 
 void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
@@ -851,7 +744,138 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
   glDeleteBuffers(1, &vbo_l);
   glDeleteVertexArrays(1, &vao);
 
-  delete texs, poss;
+  delete[] texs;
+  delete[] poss;
+}
+
+Gll::PolyVao Gll::gllBuild() {
+  int size = 0;
+  float* raw = NULL;
+  float* col = NULL;
+  switch (_mode) {
+    case GLL_POLY:
+      size = 3 * (_pts.size() - 2);
+      raw = new float[size * 2];
+      col = new float[size * 4];
+      for (int i = 0; i < _pts.size() - 2; i++) {
+        raw[6 * i + 0] = _pts[0].first.x;
+        raw[6 * i + 1] = _pts[0].first.y;
+        insertColor(col, 12 * i, _pts[0].second);
+
+        raw[6 * i + 2] = _pts[i + 1].first.x;
+        raw[6 * i + 3] = _pts[i + 1].first.y;
+        insertColor(col, 12 * i + 4, _pts[i + 1].second);
+
+        raw[6 * i + 4] = _pts[i + 2].first.x;
+        raw[6 * i + 5] = _pts[i + 2].first.y;
+        insertColor(col, 12 * i + 8, _pts[i + 2].second);
+      }
+      break;
+
+    case GLL_QUADS:
+      size = 6 * (_pts.size() / 4);
+      raw = new float[size * 2];
+      col = new float[size * 4];
+      for (int i = 0; i < _pts.size() / 4; i++) {
+        raw[12 * i + 0] = _pts[4 * i + 0].first.x;
+        raw[12 * i + 1] = _pts[4 * i + 0].first.y;
+        insertColor(col, 24 * i + 0, _pts[4 * i + 0].second);
+
+        raw[12 * i + 2] = _pts[4 * i + 1].first.x;
+        raw[12 * i + 3] = _pts[4 * i + 1].first.y;
+        insertColor(col, 24 * i + 4, _pts[4 * i + 1].second);
+
+        raw[12 * i + 4] = _pts[4 * i + 2].first.x;
+        raw[12 * i + 5] = _pts[4 * i + 2].first.y;
+        insertColor(col, 24 * i + 8, _pts[4 * i + 2].second);
+
+        raw[12 * i + 6] = _pts[4 * i + 2].first.x;
+        raw[12 * i + 7] = _pts[4 * i + 2].first.y;
+        insertColor(col, 24 * i + 12, _pts[4 * i + 2].second);
+
+        raw[12 * i + 8] = _pts[4 * i + 3].first.x;
+        raw[12 * i + 9] = _pts[4 * i + 3].first.y;
+        insertColor(col, 24 * i + 16, _pts[4 * i + 3].second);
+
+        raw[12 * i + 10] = _pts[4 * i + 0].first.x;
+        raw[12 * i + 11] = _pts[4 * i + 0].first.y;
+        insertColor(col, 24 * i + 20, _pts[4 * i + 0].second);
+      }
+      break;
+
+      /*case GLL_LINES:d
+      size = 2 * (_pts.size() / 2);
+      raw = new float[size * 2];
+      col = new float[size * 4];
+      break;*/
+  }
+
+  GLuint vbo_pos, vbo_col, vao;
+
+  glGenBuffers(1, &vbo_pos);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+  glBufferData(GL_ARRAY_BUFFER, size * 2 * sizeof(float), raw, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &vbo_col);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_col);
+  glBufferData(GL_ARRAY_BUFFER, size * 4 * sizeof(float), col, GL_STATIC_DRAW);
+
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+  glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo_col);
+  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, NULL);
+
+  delete[] raw;
+  delete[] col;
+  _pts.clear();
+
+  PolyVao res = make_shared<PolyVao_Raw>();
+  res->vao = vao;
+  res->vbo_col = vbo_col;
+  res->vbo_pos = vbo_pos;
+  res->size = size;
+  //cout << res->vao << endl;
+  return res;
+}
+
+void Gll::gllRender(Gll::PolyVao what, fVec2 center, fVec2 zoom) {
+
+  gllBaseS.bind();
+
+  GLint loc = glGetUniformLocation(gllBaseS._pID, "scale");
+  if (loc != -1) {
+    //cout << Graphics::current->width << " " <<  << endl;
+    glUniform2f(loc,
+      Graphics::current->width / 2.0 * zoom.x,
+      Graphics::current->height / 2.0 * zoom.y);
+  } else {
+    cout << "scale not found!" << endl;
+  }
+
+  loc = glGetUniformLocation(gllBaseS._pID, "offset");
+  if (loc != -1) {
+    //cout << Graphics::current->width << " " <<  << endl;
+    glUniform2f(loc,
+      center.x,
+      center.y);
+  } else {
+    cout << "scale not found!" << endl;
+  }
+
+  glDisable(GL_DEPTH_TEST);
+
+  glBindVertexArray(what->vao);
+  glDrawArrays(GL_TRIANGLES, 0, what->size);
+  glEnable(GL_DEPTH_TEST);
+
+  gllBaseS.unbind();
+
 }
 
 void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
@@ -945,5 +969,12 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
   glDeleteBuffers(1, &vbo_l);
   glDeleteVertexArrays(1, &vao);
 
-  delete texs, poss;
+  delete[] texs;
+  delete[] poss;
+}
+
+Gll::PolyVao_Raw::~PolyVao_Raw() {
+  glDeleteBuffers(1, &vbo_pos);
+  glDeleteBuffers(1, &vbo_col);
+  glDeleteVertexArrays(1, &vao);
 }

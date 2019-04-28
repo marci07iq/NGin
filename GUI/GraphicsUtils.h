@@ -40,13 +40,13 @@ typedef void(*MouseEntryManager)(int state);
 typedef void(*MouseMoveManager)(int x, int y);
 typedef void(*WindowCloseManager)();
 
-typedef int(*IRenderManager)(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
+typedef void(*IRenderManager)(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
 typedef int(*IResizeManager)(Canvas*, int x, int y);
 typedef int(*IGUIEventManager)(Canvas*, gui_event& evt, int x, int y, set<key_location>& down);
 typedef int(*IMouseEntryManager)(Canvas*, int state);
 typedef int(*IMouseMoveManager)(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
 
-int defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
+void defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
 int defaultIResizeManager(Canvas*, int x, int y);
 int defaultIGUIEventManager(Canvas*, gui_event& evt, int x, int y, set<key_location>& down);
 int defaultIMouseEntryManager(Canvas*, int state);
@@ -100,15 +100,15 @@ public:
   int getVal(int size);
 };
 
-LinearScale operator+(LinearScale& lhs, LinearScale& rhs);
-LinearScale operator-(LinearScale& lhs, LinearScale& rhs);
-LinearScale operator-(LinearScale& lhs);
-LinearScale operator*(LinearScale& lhs, float rhs);
-LinearScale operator*(float rhs, LinearScale& lhs);
-LinearScale operator/(LinearScale& lhs, float rhs);
-LinearScale operator*(LinearScale& lhs, float& rhs);
-LinearScale operator*(float& rhs, LinearScale& lhs);
-LinearScale operator/(LinearScale& lhs, float& rhs);
+LinearScale operator+(const LinearScale& lhs, const LinearScale& rhs);
+LinearScale operator-(const LinearScale& lhs, const LinearScale& rhs);
+LinearScale operator-(const LinearScale& lhs);
+LinearScale operator*(const LinearScale& lhs, float rhs);
+LinearScale operator*(float rhs, const LinearScale& lhs);
+LinearScale operator/(const LinearScale& lhs, float rhs);
+LinearScale operator*(const LinearScale& lhs, float& rhs);
+LinearScale operator*(float& rhs, const LinearScale& lhs);
+LinearScale operator/(const LinearScale& lhs, float& rhs);
 
 class LocationData {
 public:
@@ -199,6 +199,15 @@ namespace Gll {
   extern iVec2 gllFontCharSize;
   extern iVec2 gllFontCharCount;
 
+  class PolyVao_Raw {
+  public:
+    GLuint vbo_pos, vbo_col, vao;
+    size_t size;
+    ~PolyVao_Raw();
+  };
+
+  typedef shared_ptr<PolyVao_Raw> PolyVao;
+
   extern Graphics::RawWinHwnd initOn;
 
   void gllInit(string base);
@@ -215,6 +224,9 @@ namespace Gll {
   void gllColor(colorargb col);
 
   void gllText(string s, int x, int y, int xAlign = -1, int yAlign = -1, float scale = 1); //-1: left, 0:center, 1:right
+
+  PolyVao gllBuild();
+  void gllRender(PolyVao what, fVec2 center = fVec2(0), fVec2 zoom = fVec2(1));
 
   void gllEnd();
 

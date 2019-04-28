@@ -46,6 +46,7 @@ void Graphics::mainLoop(bool needsWindows) {
       if (redraw || it.second->autoRedraw) {
         current = it.second;
         current->windowManagers.renderManager();
+        //cout << "F" << endl;
         //cout << "DRAW" << endl;
         //glfwSwapBuffers(current->rawHwnd);
       }
@@ -55,13 +56,14 @@ void Graphics::mainLoop(bool needsWindows) {
       }
     }
 
-    /* Poll for and process events */
+    /* Wait for events */
     glfwWaitEvents();
   }
 }
 
 void Graphics::requestRedraw() {
   redrawFrame = true;
+  glfwPostEmptyEvent();
 }
 
 void Graphics::cleanQueues() { //Never call from event handler. IT WILL CRASH
@@ -268,12 +270,17 @@ void Graphics::rawKeyManager(GLFWwindow * window, int key, int scancode, int act
   current = GetWinHwnd(window);
   key_location nkey = key_location(key, key::type_key, current->oldMouseX, current->oldMouseY);
   gui_event::type gEvtType = gui_event::evt_none;
+
+  //cout << key << " " << scancode << endl;
+
   if (action == GLFW_PRESS) { //Down
     keysdown.insert(nkey);
-    gEvtType = gui_event::evt_pressed; //Send press
-    current->windowManagers.guiEventManager(gui_event(nkey, gEvtType), current->oldMouseX, current->oldMouseY, keysdown);
+    gEvtType = gui_event::evt_down; //Send press
 
-    gEvtType = gui_event::evt_down;
+    gui_event temp_evt = gui_event(nkey, gEvtType);
+    current->windowManagers.guiEventManager(temp_evt, current->oldMouseX, current->oldMouseY, keysdown);
+
+    gEvtType = gui_event::evt_pressed;
   }
   if(action == GLFW_REPEAT) { //Repeat
    keysdown.insert(nkey);
@@ -283,7 +290,8 @@ void Graphics::rawKeyManager(GLFWwindow * window, int key, int scancode, int act
     keysdown.erase(nkey);
     gEvtType = gui_event::evt_up;
   }
-  current->windowManagers.guiEventManager(gui_event(nkey, gEvtType), current->oldMouseX, current->oldMouseY, keysdown);
+  gui_event temp_evt = gui_event(nkey, gEvtType);
+  current->windowManagers.guiEventManager(temp_evt, current->oldMouseX, current->oldMouseY, keysdown);
 }
 
 void Graphics::rawCharManager(GLFWwindow * window, unsigned int codepoint) {
@@ -291,7 +299,9 @@ void Graphics::rawCharManager(GLFWwindow * window, unsigned int codepoint) {
   current = GetWinHwnd(window);
   key_location nkey = key_location(codepoint, key::type_char, current->oldMouseX, current->oldMouseY);
   gui_event::type gEvtType = gui_event::evt_pressed; //Send press
-  current->windowManagers.guiEventManager(gui_event(nkey, gEvtType), current->oldMouseX, current->oldMouseY, keysdown);
+
+  gui_event temp_evt = gui_event(nkey, gEvtType);
+  current->windowManagers.guiEventManager(temp_evt, current->oldMouseX, current->oldMouseY, keysdown);
 }
 
 /*void Graphics::defaultKeyManagerL(unsigned char keyc, int x, int y) {
