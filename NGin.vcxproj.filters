@@ -132,6 +132,9 @@
     <ClCompile Include="GUI\Texture.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Maths\Transpose.cpp">
+      <Filter>Maths</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Maths\BigFloat.h">
@@ -254,6 +257,9 @@
     </ClInclude>
     <ClInclude Include="GUI\Texture.h">
       <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Maths\Transpose.h">
+      <Filter>Maths</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

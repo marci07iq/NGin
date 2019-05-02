@@ -52,6 +52,7 @@
     <ClCompile Include="Maths\Keyframe.cpp" />
     <ClCompile Include="Maths\Point.cpp" />
     <ClCompile Include="Maths\Polynomial.cpp" />
+    <ClCompile Include="Maths\Transpose.cpp" />
     <ClCompile Include="Network\Compress.cpp" />
     <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Network\NetworkData.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="Maths\Keyframe.h" />
     <ClInclude Include="Maths\Point.h" />
     <ClInclude Include="Maths\Polynomial.h" />
+    <ClInclude Include="Maths\Transpose.h" />
     <ClInclude Include="Maths\Types.h" />
     <ClInclude Include="Network\Compress.h" />
     <ClInclude Include="Network\Network.h" />

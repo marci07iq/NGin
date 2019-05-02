@@ -1,5 +1,12 @@
 #include "Button.h"
 
+Button::Button(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string ltext, int ltriggerId, ClickCallback lclickCallback) :
+  GUIElement(lname, llocation, lbg, lactive, ltextColor, ldata) {
+  text = ltext;
+  clickCallback = lclickCallback;
+  triggerId = ltriggerId;
+}
+
 int Button::mouseEnter(int state) {
   bool oactive = active;
   active &= state; //if mouse leaves, deactivate.
@@ -47,6 +54,11 @@ void Button::render(set<key_location>& down) {
 
 Button::~Button() {
 
+}
+
+IconButton::IconButton(string lname, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata, string ltext, int ltriggerId, ClickCallback lclickCallback, string icon, string ilfFilepath) :
+  Button(lname, llocation, lbg, lactive, ltextColor, ldata, ltext, ltriggerId, lclickCallback) {
+  ic = getIcon(icon, ilfFilepath);
 }
 
 void IconButton::render(set<key_location>& down) {

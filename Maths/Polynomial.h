@@ -1,7 +1,7 @@
 #pragma once
 
 #include "helperFunctions.h"
-#include "Point.h"
+#include "Transpose.h"
 
 template<typename T> class Polynomial;
 
