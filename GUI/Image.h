@@ -15,7 +15,7 @@ public:
     align = lalign;
   }
   void render(set<key_location>& down);
-  ~Image() {
+  virtual ~Image() {
     glDeleteTextures(1, &texture);
   }
 };

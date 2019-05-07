@@ -1,10 +1,10 @@
 #include "Shader.h"
 
-Shader::Shader() {
-
+Shader_Raw::Shader_Raw(string files, int flags) {
+  create(files, flags);
 }
 
-void Shader::create(string files, int flags) {
+void Shader_Raw::create(string files, int flags) {
   if (flags & 1) _v_shaderID = compileShader(files + ".vert", GL_VERTEX_SHADER);
   if (flags & 2) _g_shaderID = compileShader(files + ".geom", GL_GEOMETRY_SHADER);
   if (flags & 4) _f_shaderID = compileShader(files + ".frag", GL_FRAGMENT_SHADER);
@@ -22,15 +22,15 @@ void Shader::create(string files, int flags) {
   cout << "Created shader program " << _pID << endl;
 }
 
-void Shader::bind() {
+void Shader_Raw::bind() {
   glUseProgram(_pID);
 }
 
-void Shader::unbind() {
+void Shader_Raw::unbind() {
   glUseProgram(0);
 }
 
-Shader::~Shader() {
+Shader_Raw::~Shader_Raw() {
   cout << "Delete shader program " << _pID << endl;
   if(_pID != 0) {
     if (_v_shaderID) glDetachShader(_pID, _v_shaderID);

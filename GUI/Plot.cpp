@@ -194,7 +194,7 @@ void Plot::render(set<key_location>& down) {
     n++;
   }
 
-  Graphics::resetViewport();
+  NGin::Graphics::resetViewport();
 }
 
 int Plot::get(double ori, double scale, double v, int h) {

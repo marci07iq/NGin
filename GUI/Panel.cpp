@@ -85,17 +85,17 @@ void Panel::getRect() {
   }
 }
 
-GUIElement* Panel::getElementById(string id) {
+shared_ptr<GUIElement> Panel::getElementById(string id) {
   if (name == id) {
-    return this;
+    return shared_from_this();
   }
   else {
-    GUIElement* res = NULL;
+    shared_ptr<GUIElement> res = NULL;
 
     auto it = elements.begin();
 
     while (it != elements.end() && res == NULL) {
-      GUIElement* e = (*it)->getElementById(id);
+      shared_ptr<GUIElement> e = (*it)->getElementById(id);
 
       if (e != NULL) {
         res = e;
@@ -107,7 +107,7 @@ GUIElement* Panel::getElementById(string id) {
   }
 }
 
-int Panel::activateElement(GUIElement* id) {
+int Panel::activateElement(shared_ptr<GUIElement> id) {
   auto it = elements.end();
 
   int bstate = 0;
@@ -120,16 +120,10 @@ int Panel::activateElement(GUIElement* id) {
   return bstate;
 }
 
-void Panel::deleteElement(GUIElement * elem, bool hard) {
+void Panel::deleteElement(shared_ptr<GUIElement> elem, bool hard) {
   elements.remove(elem);
-  if (hard) delete elem;
 }
 
 Panel::~Panel() {
-  while (elements.size()) {
-    if (elements.front() != NULL) {
-      delete elements.front();
-      elements.pop_front();
-    }
-  }
+
 }

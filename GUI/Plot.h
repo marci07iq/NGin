@@ -118,5 +118,5 @@ public:
   int get(double ori, double scale, double v, int h);
   ///Only after GetRect
   void reloadAxes();
-  ~Plot();
+  virtual ~Plot();
 };

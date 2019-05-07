@@ -15,5 +15,5 @@ public:
   }
   int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
   void render(set<key_location>& down);
-  ~ControlSetting();
+  virtual ~ControlSetting();
 };

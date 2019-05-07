@@ -6,7 +6,7 @@ Coordinate to_maxcorner(int topleftx, int toplefty, Coordinate dimension);
 
 class Popup : public GUIElement {
 public:
-  GUIElement* element;
+  shared_ptr<GUIElement> element;
   Coordinate topleftc;
   Coordinate sizec;
   Popup(string lname, int topleftx, int toplefty, Coordinate dimension, colorargb lbg) :
@@ -27,7 +27,7 @@ public:
 
   void deleteElements(bool hard);
 
-  GUIElement* getElementById(string id);
+  shared_ptr<GUIElement> getElementById(string id);
   /*bool keyPressed(unsigned char key, int mx, int my);
   bool specialPressed(int key, int mx, int my);
   bool mouseClicked(int mx, int my);

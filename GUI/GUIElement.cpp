@@ -47,9 +47,9 @@ void GUIElement::render(set<key_location>& down) {
 
 }
 
-GUIElement* GUIElement::getElementById(string id) {
+shared_ptr<GUIElement> GUIElement::getElementById(string id) {
   if (name == id) {
-    return this;
+    return shared_from_this();
   }
   else {
     return NULL;
@@ -69,13 +69,13 @@ int GUIElement::getHeight(int winHeight) {
   return location.getHeight(winHeight);
 }
 
-int GUIElement::activateElement(GUIElement* id) {
+int GUIElement::activateElement(shared_ptr<GUIElement> id) {
   bool oactive = active;
-  active = (this == id);
+  active = (shared_from_this() == id);
   return oactive ^ active;
 }
 
-void GUIElement::deleteElement(GUIElement * elem, bool hard) {
+void GUIElement::deleteElement(shared_ptr<GUIElement> elem) {
 }
 
 GUIElement::~GUIElement() {

@@ -3,7 +3,7 @@
 #include "Texture.h"
 
 
-class Shader {
+class Shader_Raw {
 public:
   GLuint _v_shaderID;
   GLuint _g_shaderID;
@@ -30,7 +30,7 @@ public:
     }
   }
 
-  Shader();
+  Shader_Raw(string files, int flags = 5);
   void create(string files, int flags = 5);
 
   static GLuint compileShader(string filename, GLenum shaderType) {
@@ -61,5 +61,7 @@ public:
   void bind();
   void unbind();
 
-  ~Shader();
+  ~Shader_Raw();
 };
+
+typedef shared_ptr<Shader_Raw> Shader;

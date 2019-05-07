@@ -1823,7 +1823,7 @@ void ScriptGUI::render(set<key_location>& down) {
   glEnable(GL_SCISSOR_TEST);
   code->render(this, 0);
   glDisable(GL_SCISSOR_TEST);
-  Graphics::resetViewport();
+  NGin::Graphics::resetViewport();
 
   if (dragging) {
     dragging->getRect(dragPos.x + dragOffset.x, dragPos.y + dragOffset.y);

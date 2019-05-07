@@ -90,11 +90,13 @@ key loadKey(xml_attribute<>* me);
 extern map<int, key_config> keybinds; //key, display name
 
 class GUIElement;
-namespace Graphics {
-  typedef GUIElement* ElemHwnd;
+namespace NGin {
+  namespace Graphics {
+    typedef shared_ptr<GUIElement> ElemHwnd;
+  }
 }
 
-void keybindReply(Graphics::ElemHwnd e, void* data, key_config& nkey);
+void keybindReply(NGin::Graphics::ElemHwnd e, key_config& nkey);
 
 void loadKeybinds(string filename = "html/keybinds.cfg");
 void saveKeybinds(string filename = "html/keybinds.cfg");

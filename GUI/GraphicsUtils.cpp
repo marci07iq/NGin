@@ -87,34 +87,34 @@ void loadColors(string filename) {
   glPopMatrix();
 }*/
 
-void defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down) {
+void defaultIRenderManager(NGin::Graphics::CanvasHwnd, int ax, int ay, int bx, int by, set<key_location>& down) {
 }
-int defaultIResizeManager(Canvas*, int x, int y) {
+int defaultIResizeManager(NGin::Graphics::CanvasHwnd, int x, int y) {
   return 0;
 }
-int defaultIGUIEventManager(Canvas*, gui_event& evt, int x, int y, set<key_location>& down) {
+int defaultIGUIEventManager(NGin::Graphics::CanvasHwnd, gui_event& evt, int x, int y, set<key_location>& down) {
   return 0;
 }
-int defaultIMouseEntryManager(Canvas*, int state) {
+int defaultIMouseEntryManager(NGin::Graphics::CanvasHwnd, int state) {
   return 0;
 }
-int defaultIMouseMoveManager(Canvas*, int x, int y, int ox, int oy, set<key_location>& down) {
+int defaultIMouseMoveManager(NGin::Graphics::CanvasHwnd, int x, int y, int ox, int oy, set<key_location>& down) {
   return 0;
 }
 
-void Graphics::resetViewport() {
+void NGin::Graphics::resetViewport() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  glViewport(0, 0, Graphics::current->width, Graphics::current->height);
-  glScissor(0, 0, Graphics::current->width, Graphics::current->height);
+  glViewport(0, 0, NGin::Graphics::current->width, NGin::Graphics::current->height);
+  glScissor(0, 0, NGin::Graphics::current->width, NGin::Graphics::current->height);
 
   //glGetIntegerv(GL_VIEWPORT, arr);
   glDisable(GL_DEPTH_TEST);
   //glMatrixMode(GL_PROJECTION);
   //glPushMatrix();
   //glLoadIdentity();
-  //glOrtho(0, Graphics::current->width,
-  //  0, Graphics::current->height, -1, 1);
+  //glOrtho(0, NGin::Graphics::current->width,
+  //  0, NGin::Graphics::current->height, -1, 1);
   //glMatrixMode(GL_MODELVIEW);
   //glPushMatrix();
   //glLoadIdentity();
@@ -428,18 +428,18 @@ void renderBitmapString(float x, float y, string text, colorargb color, bool cen
   //glutBitmapString(GLUT_BITMAP_9_BY_15, reinterpret_cast<const unsigned char*>(text.c_str()));
 }
 
-bool numericalValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
+bool numericalValidator(NGin::Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
   size_t Fminus = s.find('-');
   return ('0' <= c && c <= '9' && (Fminus == string::npos || Fminus < cursor)) || (cursor == 0 && c == '-');
 }
 
-bool floatValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
+bool floatValidator(NGin::Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
   size_t Fminus = s.find('-');
   size_t Fdot = s.find('.');
   return ('0' <= c && c <= '9' && (Fminus == string::npos || Fminus < cursor)) || (Fdot == string::npos && c == '.' && (Fminus == string::npos || Fminus < cursor)) || (cursor == 0 && c == '-');
 }
 
-bool textValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
+bool textValidator(NGin::Graphics::ElemHwnd e, string s, int cursor, unsigned char c) {
   return (32 <= c && c < 127);
 }
 
@@ -592,7 +592,7 @@ Gll::gllModes Gll::_mode;
 vector<pair<fVec2, colorargb>> Gll::_pts;
 colorargb Gll::_col;
 
-Graphics::RawWinHwnd Gll::initOn = NULL;
+NGin::Graphics::RawWinHwnd Gll::initOn = NULL;
 
 Shader Gll::gllBaseS;
 Shader Gll::gllTextS;
@@ -602,10 +602,10 @@ iVec2 Gll::gllFontCharSize;
 iVec2 Gll::gllFontCharCount;
 
 void Gll::gllInit(string base) {
-  gllBaseS.create(base + "LegDraw");
-  gllTextS.create(base + "Text");
+  gllBaseS = make_shared<Shader_Raw>(base + "LegDraw");
+  gllTextS = make_shared<Shader_Raw>(base + "Text");
   gllFontMap = Texture(base + "ascii.png");
-  initOn = (Graphics::current) ? Graphics::current->rawHwnd : NULL;
+  initOn = (NGin::Graphics::current) ? NGin::Graphics::current->rawHwnd : NULL;
   gllFontCharCount = {16,16};
   gllFontCharSize = gllFontMap._raw->size / gllFontCharCount;
 }
@@ -641,11 +641,11 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
   float width = s.size() * scale * gllFontCharSize.x;
   float height = scale * gllFontCharSize.y;
   
-  float tx = (x - (xAlign + 1) * 0.5 * width) * 2 / Graphics::current->width - 1;
-  float ty = (y - (yAlign + 1) * 0.5 * height) * 2 / Graphics::current->height - 1;
+  float tx = (x - (xAlign + 1) * 0.5 * width) * 2 / NGin::Graphics::current->width - 1;
+  float ty = (y - (yAlign + 1) * 0.5 * height) * 2 / NGin::Graphics::current->height - 1;
 
-  float cx = scale * gllFontCharSize.x / Graphics::current->width * 2;
-  float cy = scale * gllFontCharSize.y / Graphics::current->height * 2;
+  float cx = scale * gllFontCharSize.x / NGin::Graphics::current->width * 2;
+  float cy = scale * gllFontCharSize.y / NGin::Graphics::current->height * 2;
 
   int sz = 6 * s.size();
 
@@ -710,9 +710,9 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo_l);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-  gllTextS.bind();
+  gllTextS->bind();
 
-  GLint loc = glGetUniformLocation(gllTextS._pID, "color");
+  GLint loc = glGetUniformLocation(gllTextS->_pID, "color");
   if (loc != -1) {
     glUniform4f(loc,
       ((_col >> 16) & 0xff) / 255.0,
@@ -724,7 +724,7 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
     cout << "color not found!" << endl;
   }
 
-  loc = glGetUniformLocation(gllTextS._pID, "font");
+  loc = glGetUniformLocation(gllTextS->_pID, "font");
   if (loc != -1) {
    
     gllFontMap.bind(loc, 0);
@@ -738,7 +738,7 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
   glDrawArrays(GL_TRIANGLES, 0, sz);
   glEnable(GL_DEPTH_TEST);
 
-  gllTextS.unbind();
+  gllTextS->unbind();
 
   glDeleteBuffers(1, &vbo_p);
   glDeleteBuffers(1, &vbo_l);
@@ -846,21 +846,21 @@ Gll::PolyVao Gll::gllBuild() {
 
 void Gll::gllRender(Gll::PolyVao what, fVec2 center, fVec2 zoom) {
 
-  gllBaseS.bind();
+  gllBaseS->bind();
 
-  GLint loc = glGetUniformLocation(gllBaseS._pID, "scale");
+  GLint loc = glGetUniformLocation(gllBaseS->_pID, "scale");
   if (loc != -1) {
-    //cout << Graphics::current->width << " " <<  << endl;
+    //cout << NGin::Graphics::current->width << " " <<  << endl;
     glUniform2f(loc,
-      Graphics::current->width / 2.0 * zoom.x,
-      Graphics::current->height / 2.0 * zoom.y);
+      NGin::Graphics::current->width / 2.0 * zoom.x,
+      NGin::Graphics::current->height / 2.0 * zoom.y);
   } else {
     cout << "scale not found!" << endl;
   }
 
-  loc = glGetUniformLocation(gllBaseS._pID, "offset");
+  loc = glGetUniformLocation(gllBaseS->_pID, "offset");
   if (loc != -1) {
-    //cout << Graphics::current->width << " " <<  << endl;
+    //cout << NGin::Graphics::current->width << " " <<  << endl;
     glUniform2f(loc,
       center.x,
       center.y);
@@ -874,7 +874,7 @@ void Gll::gllRender(Gll::PolyVao what, fVec2 center, fVec2 zoom) {
   glDrawArrays(GL_TRIANGLES, 0, what->size);
   glEnable(GL_DEPTH_TEST);
 
-  gllBaseS.unbind();
+  gllBaseS->unbind();
 
 }
 
@@ -883,8 +883,8 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
   float* poss = new float[12];
   float* texs = new float[12];
 
-  fVec2 ca = fVec2(cax, cay) / fVec2(Graphics::current->width, Graphics::current->height) * 2.0 - 1;
-  fVec2 cb = fVec2(cbx, cby) / fVec2(Graphics::current->width, Graphics::current->height) * 2.0 - 1;
+  fVec2 ca = fVec2(cax, cay) / fVec2(NGin::Graphics::current->width, NGin::Graphics::current->height) * 2.0 - 1;
+  fVec2 cb = fVec2(cbx, cby) / fVec2(NGin::Graphics::current->width, NGin::Graphics::current->height) * 2.0 - 1;
 
   poss[0] = ca.x;
   poss[1] = ca.y;
@@ -935,9 +935,9 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo_l);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-  gllTextS.bind();
+  gllTextS->bind();
 
-  GLint loc = glGetUniformLocation(gllTextS._pID, "color");
+  GLint loc = glGetUniformLocation(gllTextS->_pID, "color");
   if (loc != -1) {
     glUniform4f(loc,
       ((_col >> 16) & 0xff) / 255.0,
@@ -949,7 +949,7 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
     cout << "color not found!" << endl;
   }
 
-  loc = glGetUniformLocation(gllTextS._pID, "font");
+  loc = glGetUniformLocation(gllTextS->_pID, "font");
   if (loc != -1) {
 
     ic->_from->_dataSrc.bind(loc, 0);
@@ -963,7 +963,7 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glEnable(GL_DEPTH_TEST);
 
-  gllTextS.unbind();
+  gllTextS->unbind();
 
   glDeleteBuffers(1, &vbo_p);
   glDeleteBuffers(1, &vbo_l);

@@ -2,7 +2,7 @@
 
 #include "GraphicsUtils.h"
 
-class GUIElement {
+class GUIElement : public enable_shared_from_this<GUIElement> {
 public:
   string name;
   int cax, cay, cbx, cby; //Not for long term storage.
@@ -36,9 +36,9 @@ public:
   virtual int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
   virtual int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
   virtual void render(set<key_location>& down);
-  virtual GUIElement* getElementById(string id);
-  virtual int activateElement(GUIElement* id);
+  virtual shared_ptr<GUIElement> getElementById(string id);
+  virtual int activateElement(shared_ptr<GUIElement> id);
 
-  virtual void deleteElement(GUIElement* elem, bool hard);
-  ~GUIElement();
+  virtual void deleteElement(shared_ptr<GUIElement> elem);
+  virtual ~GUIElement();
 };

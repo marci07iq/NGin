@@ -16,7 +16,7 @@ int TextInput::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down)
       }
       if (!active) {
         cursor = -1;
-        input(this, data, text);
+        input(shared_from_this(), text);
       }
     }
     return (oactive xor active);
@@ -35,17 +35,17 @@ int TextInput::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down)
       }
       if (evt._key._keycode == GLFW_KEY_BACKSPACE && text.length() && cursor > 0) {
         text.erase(cursor - 1, 1);
-        input(this, data, text);
+        input(shared_from_this(), text);
         cursor--;
         return 1;
       }
       if (evt._key._keycode == GLFW_KEY_DELETE && text.length() && cursor < text.size()) {
         text.erase(cursor, 1);
-        input(this, data, text);
+        input(shared_from_this(), text);
         return 1;
       }
       if (evt._key._keycode == GLFW_KEY_ENTER || evt._key._keycode == GLFW_KEY_KP_ENTER) {
-        input(this, data, text);
+        input(shared_from_this(), text);
         active = false;
         cursor = -1;
         return 1;
@@ -53,9 +53,9 @@ int TextInput::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down)
     }
     if (!evt.captured && evt._key._type == key::type_char && evt._type == gui_event::evt_pressed) {
       evt.captured = true;
-      if (validator(this, text, cursor, evt._key._keycode)) {
+      if (validator(shared_from_this(), text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
-        input(this, data, text);
+        input(shared_from_this(), text);
         cursor++;
         return 3;
       }
@@ -83,9 +83,9 @@ void TextInput::render(set<key_location>& down) {
   //shapesPrintf(0, 0, text.c_str());
 }
 
-int TextInput::activateElement(GUIElement* id) {
+int TextInput::activateElement(shared_ptr<GUIElement> id) {
   bool oactive = active;
-  active = (this == id);
+  active = (shared_from_this() == id);
   if (active) {
     cursor = text.size();
   } else {

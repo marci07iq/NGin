@@ -52,13 +52,13 @@ void Popup::deleteElements(bool hard) {
   }
 }
 
-GUIElement* Popup::getElementById(string id) {
+shared_ptr<GUIElement> Popup::getElementById(string id) {
   if (name == id) {
     return this;
   } else {
-    GUIElement* res = NULL;
+    shared_ptr<GUIElement> res = NULL;
     if (element != NULL) {
-      GUIElement* e = element->getElementById(id);
+      shared_ptr<GUIElement> e = element->getElementById(id);
     }
     return res;
   }

@@ -4,7 +4,7 @@
 
 class Container : public GUIElement {
 public:
-  GUIElement* element;
+  shared_ptr<GUIElement> element;
   int mxo;
   int myo;
   bool mid = false;
@@ -19,13 +19,13 @@ public:
 
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
 
-  void deleteElement(GUIElement* elem, bool hard);
+  void deleteElement(shared_ptr<GUIElement> elem, bool hard);
 
-  GUIElement* getElementById(string id);
+  shared_ptr<GUIElement> getElementById(string id);
   /*bool keyPressed(unsigned char key, int mx, int my);
   bool specialPressed(int key, int mx, int my);
   bool mouseClicked(int mx, int my);
   void render(set<key_location>& down);*/
-  ~Container();
+  virtual ~Container();
 
 };

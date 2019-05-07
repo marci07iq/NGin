@@ -12,5 +12,5 @@ public:
     align = lalign;
   }
   void render(set<key_location>& down);
-  ~Label();
+  virtual ~Label();
 };

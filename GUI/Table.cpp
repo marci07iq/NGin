@@ -31,7 +31,7 @@ void TableRow::render(set<key_location>& down) {
   Gll::gllVertex(sbb, cay + 5);
   Gll::gllEnd();
 
-  Graphics::resetViewport();
+  NGin::Graphics::resetViewport();
 }
 
 void TableRow::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
@@ -99,12 +99,11 @@ int TableRow::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down
   return state;
 }
 
-void TableRow::deleteElement(GUIElement * elem, bool hard) {
-  data.remove((TableRow*)elem);
-  if(hard) delete elem;
+void TableRow::deleteElement(shared_ptr<GUIElement> elem) {
+  data.remove(static_pointer_cast<TableRow, GUIElement>(elem));
 }
 
-int TableRow::activateElement(GUIElement* id) {
+int TableRow::activateElement(shared_ptr<GUIElement> id) {
   auto it = data.end();
 
   int bstate = 0;
@@ -140,25 +139,20 @@ int TableRow::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) 
 }
 
 TableRow::~TableRow() {
-  while (data.size()) {
-    if (data.front() != NULL) {
-      delete data.front();
-      data.pop_front();
-    }
-  }
+
 }
 
-GUIElement* TableRow::getElementById(string id) {
+shared_ptr<GUIElement> TableRow::getElementById(string id) {
   if (name == id) {
-    return this;
+    return shared_from_this();
   }
   else {
-    GUIElement* res = NULL;
+    shared_ptr<GUIElement> res = NULL;
 
     auto it = data.begin();
 
     while (it != data.end() && res == NULL) {
-        GUIElement* e = (*it)->getElementById(id);
+        shared_ptr<GUIElement> e = (*it)->getElementById(id);
 
         if (e != NULL) {
           res = e;
@@ -201,7 +195,7 @@ void Table::render(set<key_location>& down) {
   Gll::gllVertex(cbx - 15, sbb);
   Gll::gllEnd();
 
-  Graphics::resetViewport();
+  NGin::Graphics::resetViewport();
 }
 
 void Table::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
@@ -290,7 +284,7 @@ int Table::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
   }
 }
 
-int Table::activateElement(GUIElement* id) {
+int Table::activateElement(shared_ptr<GUIElement> id) {
   auto it = data.end();
 
   int bstate = 0;
@@ -302,17 +296,17 @@ int Table::activateElement(GUIElement* id) {
   return bstate;
 }
 
-GUIElement* Table::getElementById(string id) {
+shared_ptr<GUIElement> Table::getElementById(string id) {
   if (name == id) {
-    return this;
+    return shared_from_this();
   }
   else {
-    GUIElement* res = NULL;
+    shared_ptr<GUIElement> res = NULL;
 
     auto it = data.begin();
 
     while (it != data.end() && res == NULL) {
-        GUIElement* e = (*it)->getElementById(id);
+        shared_ptr<GUIElement> e = (*it)->getElementById(id);
 
         if (e != NULL) {
           res = e;
@@ -324,16 +318,10 @@ GUIElement* Table::getElementById(string id) {
   }
 }
 
-void Table::deleteElement(GUIElement * elem, bool hard) {
-  data.remove((TableRow*)elem);
-  if (hard) delete elem;
+void Table::deleteElement(shared_ptr<GUIElement> elem) {
+  data.remove(static_pointer_cast<TableRow, GUIElement>(elem));
 }
 
 Table::~Table() {
-  while (data.size()) {
-    if (data.front() != NULL) {
-      delete data.front();
-      data.pop_front();
-    }
-  }
+  
 }

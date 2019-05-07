@@ -15,7 +15,7 @@ int Checkbox::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) 
   if (!evt.captured && isIn(mx, my) && evt._key._type == key::type_mouse && evt._type == gui_event::evt_pressed && evt._key._keycode == 0) { //mouse, click, left
     evt.captured = true;
     checked = !checked;
-    checkCallback(this, data, checked);
+    checkCallback(shared_from_this(), checked);
   }
   return 0;
 }

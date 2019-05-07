@@ -5,7 +5,7 @@
 
 class TableRow : public GUIElement {
 public:
-  list<GUIElement*> data;
+  list<shared_ptr<GUIElement>> data;
 
   int width;
 
@@ -22,17 +22,17 @@ public:
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
   int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
 
-  GUIElement* getElementById(string id);
+  shared_ptr<GUIElement> getElementById(string id);
 
-  int activateElement(GUIElement* id);
-  void deleteElement(GUIElement* elem, bool hard);
+  int activateElement(shared_ptr<GUIElement> id);
+  void deleteElement(shared_ptr<GUIElement> elem);
 
-  ~TableRow();
+  virtual ~TableRow();
 };
 
 class Table : public GUIElement {
 public:
-  list<GUIElement*> data;
+  list<shared_ptr<GUIElement>> data;
   int height;
 
   float scroll;
@@ -48,10 +48,10 @@ public:
   int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
   int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
 
-  GUIElement* getElementById(string id);
+  shared_ptr<GUIElement> getElementById(string id);
 
-  int activateElement(GUIElement* id);
-  void deleteElement(GUIElement* elem, bool hard);
+  int activateElement(shared_ptr<GUIElement> id);
+  void deleteElement(shared_ptr<GUIElement> elem);
 
-  ~Table();
+  virtual ~Table();
 };

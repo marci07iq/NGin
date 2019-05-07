@@ -64,30 +64,27 @@ void Container::getRect(int winWidth, int winHeight, int offsetX, int offsetY) {
   }
 }
 
-GUIElement* Container::getElementById(string id) {
+shared_ptr<GUIElement> Container::getElementById(string id) {
   if (name == id) {
-    return this;
+    return shared_from_this();
   }
   else {
-    GUIElement* res = NULL;
+    shared_ptr<GUIElement> res = NULL;
     if(element != NULL) {
-      GUIElement* e = element->getElementById(id);
+      shared_ptr<GUIElement> e = element->getElementById(id);
     }
     return res;
   }
 }
 
-void Container::deleteElement(GUIElement * elem, bool hard) {
+void Container::deleteElement(shared_ptr<GUIElement> elem, bool hard) {
   if (element != elem) {
     throw 1;
   } else {
-    if(hard) delete elem;
-    element = NULL;
+    element.reset();
   }
 }
 
 Container::~Container() {
-  if (element != NULL) {
-    delete element;
-  }
+
 }

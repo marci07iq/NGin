@@ -2,6 +2,8 @@
 
 #include "Shader.h"
 
+//Colors
+
 extern map<string, map<string, colorargb>> colors;
 
 colorargb getColor(string object, string key);
@@ -10,47 +12,79 @@ colorargb getColor(xml_node<>* me, string elem, string key);
 
 void loadColors(string filename = "html/colors.cfg");
 
+void setColor(colorargb v);
+
+//Keys
+
 class key_config;
 class key_location;
 class gui_event;
 
+//Callback types
+
 class Canvas;
 class GUIElement;
-namespace Graphics {
-  class GWindow;
-  typedef GUIElement* ElemHwnd;
-  typedef GLFWwindow* RawWinHwnd;
+namespace NGin {
+  namespace Graphics {
+    class GWindow;
+    typedef shared_ptr<GUIElement> ElemHwnd;
+    typedef shared_ptr<Canvas> CanvasHwnd;
+    typedef GLFWwindow* RawWinHwnd;
+  }
 }
 
-typedef void(*ClickCallback)(Graphics::ElemHwnd, void*);
-typedef void(*CheckCallback)(Graphics::ElemHwnd, void*, bool&);
-typedef void(*TextInputFunc)(Graphics::ElemHwnd, void*, string&);
-typedef void(*ControlInputFunc)(Graphics::ElemHwnd, void*, key_config&);
-typedef void(*SliderInputFunc)(Graphics::ElemHwnd, void*, float&);
-typedef bool(*TextValidatorFunc)(Graphics::ElemHwnd, string, int, unsigned char);
+typedef void(*ClickCallback)(NGin::Graphics::ElemHwnd);
+typedef void(*CheckCallback)(NGin::Graphics::ElemHwnd, bool&);
+typedef void(*TextInputFunc)(NGin::Graphics::ElemHwnd, string&);
+typedef void(*ControlInputFunc)(NGin::Graphics::ElemHwnd, key_config&);
+typedef void(*SliderInputFunc)(NGin::Graphics::ElemHwnd, float&);
+typedef bool(*TextValidatorFunc)(NGin::Graphics::ElemHwnd, string, int, unsigned char);
+
+//Window managers
 
 typedef void(*RenderManager)();
 typedef void(*ResizeManager)(int x, int y);
 typedef int(*GUIEventManager)(gui_event& evt, int x, int y, set<key_location>& down);
-/*typedef void(*KeyManager)(unsigned char key, int x, int y);
-typedef void(*SpecialKeyManager)(int key, int x, int y);*/
 typedef void(*MouseClickManager)(int idk, int key, int x, int y);
 typedef void(*MouseWheelManager)(int idk, int key, int x, int y);
 typedef void(*MouseEntryManager)(int state);
 typedef void(*MouseMoveManager)(int x, int y);
 typedef void(*WindowCloseManager)();
 
-typedef void(*IRenderManager)(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
-typedef int(*IResizeManager)(Canvas*, int x, int y);
-typedef int(*IGUIEventManager)(Canvas*, gui_event& evt, int x, int y, set<key_location>& down);
-typedef int(*IMouseEntryManager)(Canvas*, int state);
-typedef int(*IMouseMoveManager)(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
+struct WindowManagers {
+  RenderManager renderManager;
+  ResizeManager resizeManager;
+  GUIEventManager guiEventManager;
+  MouseEntryManager mouseEntryManager;
+  MouseMoveManager mouseMoveManager;
+  MouseClickManager mouseClickManager;
+  MouseWheelManager mouseWheelManager;
+  WindowCloseManager windowCloseManager;
+};
 
-void defaultIRenderManager(Canvas*, int ax, int ay, int bx, int by, set<key_location>& down);
-int defaultIResizeManager(Canvas*, int x, int y);
-int defaultIGUIEventManager(Canvas*, gui_event& evt, int x, int y, set<key_location>& down);
-int defaultIMouseEntryManager(Canvas*, int state);
-int defaultIMouseMoveManager(Canvas*, int x, int y, int ox, int oy, set<key_location>& down);
+//Canvas managers
+
+typedef void(*IRenderManager)(NGin::Graphics::CanvasHwnd, int ax, int ay, int bx, int by, set<key_location>& down);
+typedef int(*IResizeManager)(NGin::Graphics::CanvasHwnd, int x, int y);
+typedef int(*IGUIEventManager)(NGin::Graphics::CanvasHwnd, gui_event& evt, int x, int y, set<key_location>& down);
+typedef int(*IMouseEntryManager)(NGin::Graphics::CanvasHwnd, int state);
+typedef int(*IMouseMoveManager)(NGin::Graphics::CanvasHwnd, int x, int y, int ox, int oy, set<key_location>& down);
+
+void defaultIRenderManager(NGin::Graphics::CanvasHwnd, int ax, int ay, int bx, int by, set<key_location>& down);
+int defaultIResizeManager(NGin::Graphics::CanvasHwnd, int x, int y);
+int defaultIGUIEventManager(NGin::Graphics::CanvasHwnd, gui_event& evt, int x, int y, set<key_location>& down);
+int defaultIMouseEntryManager(NGin::Graphics::CanvasHwnd, int state);
+int defaultIMouseMoveManager(NGin::Graphics::CanvasHwnd, int x, int y, int ox, int oy, set<key_location>& down);
+
+struct IWindowManagers {
+  IRenderManager renderManager;//= defaultIRenderManager;
+  IResizeManager resizeManager;//= defaultIResizeManager;
+  IGUIEventManager guiEventManager;// = defaultIKeyManager;
+  IMouseEntryManager mouseEntryManager;//= defaultIMouseEntryManager;
+  IMouseMoveManager mouseMoveManager;//= defaultIMouseMoveManager;
+};
+
+//OpenGL data
 
 struct OpenGLData {
   GLdouble model_view[16];
@@ -59,36 +93,15 @@ struct OpenGLData {
   vec3<double> cameraEye;
 };
 
-struct WindowManagers {
-  RenderManager renderManager;
-  ResizeManager resizeManager;
-  GUIEventManager guiEventManager;
-  /*KeyManager keyManager;
-  SpecialKeyManager specialKeyManager;
-  KeyManager keyUpManager;
-  SpecialKeyManager specialUpKeyManager;*/
-  MouseEntryManager mouseEntryManager;
-  MouseMoveManager mouseMoveManager;
-  MouseClickManager mouseClickManager;
-  MouseWheelManager mouseWheelManager;
-  WindowCloseManager windowCloseManager;
-};
+//Misc
 
-struct IWindowManagers {
-  IRenderManager renderManager         ;//= defaultIRenderManager;
-  IResizeManager resizeManager;//= defaultIResizeManager;
-  IGUIEventManager guiEventManager;// = defaultIKeyManager;
-  IMouseEntryManager mouseEntryManager;//= defaultIMouseEntryManager;
-  IMouseMoveManager mouseMoveManager;//= defaultIMouseMoveManager;
-};
-
-//extern map<int, Graphics::WindowData> Graphics::windows;
-
-namespace Graphics {
-
-  void resetViewport();
-
+namespace NGin {
+  namespace Graphics {
+    void resetViewport();
+  }
 }
+
+//Location
 
 class LinearScale {
 public:
@@ -165,18 +178,16 @@ LinearScale loadLinear(xml_node<>* me);
 /// <returns>Loaded location data</returns>
 LocationData loadLocation(xml_node<>* me);
 
-//static void shapesPrintf(int row, int col, const char *fmt, ...);
-
-void setColor(colorargb v);
-
 void renderBitmapString(float x, float y, string text, colorargb color, bool center, int cursor = -1);
 
-bool numericalValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
-bool floatValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
-bool textValidator(Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+bool numericalValidator(NGin::Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+bool floatValidator(NGin::Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
+bool textValidator(NGin::Graphics::ElemHwnd e, string s, int cursor, unsigned char c);
 
 void insertColor(float* arr, size_t to, colorargb col, fVec3 light = { 1,1,1 });
 void insertVector(float* arr, size_t to, fVec3 vec);
+
+//Gll
 
 namespace Gll {
   enum gllModes {
@@ -208,7 +219,7 @@ namespace Gll {
 
   typedef shared_ptr<PolyVao_Raw> PolyVao;
 
-  extern Graphics::RawWinHwnd initOn;
+  extern NGin::Graphics::RawWinHwnd initOn; //main shared Gll context
 
   void gllInit(string base);
 
@@ -233,7 +244,11 @@ namespace Gll {
   void gllIcon(Icon* ic, int cax, int cay, int cbx, int cby);
 }
 
+//Utility
+
 pair<float, float> scrollBar(float contentHeight, float offset, float poslow, float poshigh, float minSize, float margin);
+
+//File dialogs (WINDOWS ONLY)
 
 string openFileSelector(string message, list<pair<string, string>> formats = {});
 

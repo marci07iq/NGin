@@ -5,7 +5,7 @@ void Slider::setVal(float nval) {
     val = nval + quanta / 2.0f - fmod(nval + quanta / 2.0f, quanta);
   }
   val = min(max(val, minv), maxv);
-  clickCallback(this, data, val);
+  clickCallback(shared_from_this(), val);
   cursor = -1;
 }
 void Slider::mouseAt(int x, int y) {
@@ -87,7 +87,7 @@ int Slider::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
         setVal(strTo<float>(text));
         return 1;
       }
-      if (floatValidator(this, text, cursor, evt._key._keycode)) {
+      if (floatValidator(shared_from_this(), text, cursor, evt._key._keycode)) {
         text.insert(cursor, 1, evt._key._keycode);
         cursor++;
         return 1;

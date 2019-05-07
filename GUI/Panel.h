@@ -4,7 +4,7 @@
 
 class Panel : public GUIElement {
 public:
-  list<GUIElement*> elements; 
+  list<shared_ptr<GUIElement>> elements; 
   Panel(string lname, LocationData llocation, colorargb lbg, void* ldata) :
     GUIElement(lname, llocation, lbg, 0, 0, ldata) {
   }
@@ -17,13 +17,13 @@ public:
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
   void getRect();
 
-  int activateElement(GUIElement* id);
-  void deleteElement(GUIElement* elem, bool hard);
+  int activateElement(shared_ptr<GUIElement> id);
+  void deleteElement(shared_ptr<GUIElement> elem, bool hard);
 
-  GUIElement* getElementById(string id);
+  shared_ptr<GUIElement> getElementById(string id);
   /*bool keyPressed(unsigned char key, int mx, int my);
   bool specialPressed(int key, int mx, int my);
   bool mouseClicked(int mx, int my);
   void render(set<key_location>& down);*/
-  ~Panel();
+  virtual ~Panel();
 };

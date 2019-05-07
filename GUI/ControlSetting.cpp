@@ -8,14 +8,14 @@ int ControlSetting::guiEvent(gui_event& evt, int mx, int my, set<key_location>& 
       if(active) {
         evt.captured = true;
         selected._parts.clear();
-        input(this, data, selected);
+        input(shared_from_this(), selected);
       }
     }
     return oactive xor active;
   }
   if (!evt.captured && active && (evt._key._type == key::type_key)) { //keyboard
     selected.addKey(evt._key, evt._type);
-    input(this, data, selected);
+    input(shared_from_this(), selected);
     evt.captured = true;
     return 1;
   }
