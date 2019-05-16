@@ -45,9 +45,9 @@ int TextInput::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down)
         return 1;
       }
       if (evt._key._keycode == GLFW_KEY_ENTER || evt._key._keycode == GLFW_KEY_KP_ENTER) {
-        input(shared_from_this(), text);
         active = false;
         cursor = -1;
+        input(shared_from_this(), text);
         return 1;
       }
     }

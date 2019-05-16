@@ -110,6 +110,11 @@ void NGin::Graphics::resetViewport() {
 
   //glGetIntegerv(GL_VIEWPORT, arr);
   glDisable(GL_DEPTH_TEST);
+
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   //glMatrixMode(GL_PROJECTION);
   //glPushMatrix();
   //glLoadIdentity();
@@ -601,6 +606,16 @@ Texture Gll::gllFontMap;
 iVec2 Gll::gllFontCharSize;
 iVec2 Gll::gllFontCharCount;
 
+stack<fVec2> Gll::_offsets;
+
+void Gll::pushOffset(fVec2 offset) {
+  _offsets.push(_offsets.top() + offset);
+}
+
+void Gll::popOffset() {
+  _offsets.pop();
+}
+
 void Gll::gllInit(string base) {
   gllBaseS = make_shared<Shader_Raw>(base + "LegDraw");
   gllTextS = make_shared<Shader_Raw>(base + "Text");
@@ -608,6 +623,7 @@ void Gll::gllInit(string base) {
   initOn = (NGin::Graphics::current) ? NGin::Graphics::current->rawHwnd : NULL;
   gllFontCharCount = {16,16};
   gllFontCharSize = gllFontMap._raw->size / gllFontCharCount;
+  _offsets.push(fVec2(0, 0));
 }
 
 void Gll::gllBegin(gllModes m) {
@@ -623,7 +639,7 @@ void Gll::gllVertex(double x, double y) {
 }
 void Gll::gllVertex(fVec2 pt) {
   //gllVertex(pt.x, pt.y, 0);
-  _pts.push_back({ pt, _col });
+  _pts.push_back({ pt + +_offsets.top(), _col });
 }
 
 /*void Gll::gllVertex(double x, double y, double z) {
@@ -641,8 +657,8 @@ void Gll::gllText(string s, int x, int y, int xAlign, int yAlign, float scale) {
   float width = s.size() * scale * gllFontCharSize.x;
   float height = scale * gllFontCharSize.y;
   
-  float tx = (x - (xAlign + 1) * 0.5 * width) * 2 / NGin::Graphics::current->width - 1;
-  float ty = (y - (yAlign + 1) * 0.5 * height) * 2 / NGin::Graphics::current->height - 1;
+  float tx = (x - (xAlign + 1) * 0.5 * width + _offsets.top().x) * 2 / NGin::Graphics::current->width - 1;
+  float ty = (y - (yAlign + 1) * 0.5 * height + _offsets.top().y) * 2 / NGin::Graphics::current->height - 1;
 
   float cx = scale * gllFontCharSize.x / NGin::Graphics::current->width * 2;
   float cy = scale * gllFontCharSize.y / NGin::Graphics::current->height * 2;
@@ -883,8 +899,8 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
   float* poss = new float[12];
   float* texs = new float[12];
 
-  fVec2 ca = fVec2(cax, cay) / fVec2(NGin::Graphics::current->width, NGin::Graphics::current->height) * 2.0 - 1;
-  fVec2 cb = fVec2(cbx, cby) / fVec2(NGin::Graphics::current->width, NGin::Graphics::current->height) * 2.0 - 1;
+  fVec2 ca = (fVec2(cax, cay) + _offsets.top()) / fVec2(NGin::Graphics::current->width, NGin::Graphics::current->height) * 2.0 - 1;
+  fVec2 cb = (fVec2(cbx, cby) + _offsets.top()) / fVec2(NGin::Graphics::current->width, NGin::Graphics::current->height) * 2.0 - 1;
 
   poss[0] = ca.x;
   poss[1] = ca.y;
@@ -959,6 +975,7 @@ void Gll::gllIcon(Icon* ic, int cax, int cay, int cbx, int cby) {
   }
 
   glDisable(GL_DEPTH_TEST);
+
   glBindVertexArray(vao);
   glDrawArrays(GL_TRIANGLES, 0, 6);
   glEnable(GL_DEPTH_TEST);

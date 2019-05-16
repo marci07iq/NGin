@@ -537,11 +537,18 @@ template<typename T> vector<vec3<T>> randstartpos(T radius)
   return {firstship, secondship};
 }
 
-template<typename T> vec3<T> vecSwitch(bVec3& s, vec3<T> lhs, vec3<T> rhs) {
+template<typename T> vec3<T> vecSwitch(const bVec3& s, const vec3<T>& lhs, const vec3<T>& rhs) {
   return {
   s.x ? lhs.x : rhs.x,
   s.y ? lhs.y : rhs.y,
   s.z ? lhs.z : rhs.z
+  };
+}
+
+template<typename T> vec2<T> vecSwitch(const bVec2& s, const vec2<T>& lhs, const vec2<T>& rhs) {
+  return {
+  s.x ? lhs.x : rhs.x,
+  s.y ? lhs.y : rhs.y
   };
 }
 

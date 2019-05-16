@@ -217,6 +217,11 @@ namespace Gll {
     ~PolyVao_Raw();
   };
 
+  extern stack<fVec2> _offsets;
+
+  void pushOffset(fVec2 offset);
+  void popOffset();
+
   typedef shared_ptr<PolyVao_Raw> PolyVao;
 
   extern NGin::Graphics::RawWinHwnd initOn; //main shared Gll context

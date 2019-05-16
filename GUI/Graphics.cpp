@@ -42,8 +42,8 @@ void NGin::Graphics::mainLoop(bool needsWindows) {
     redrawFrame = false;
     for (auto&& it : windows) {
       glfwMakeContextCurrent(it.second->rawHwnd);
+      current = it.second;
       if (redraw || it.second->autoRedraw) {
-        current = it.second;
         current->windowManagers.renderManager();
         //cout << "F" << endl;
         //cout << "DRAW" << endl;
@@ -135,14 +135,12 @@ NGin::Graphics::WinHwnd NGin::Graphics::rawCreateMainWindow(winCreationData from
 
   glfwMakeContextCurrent(window);
   glClearColor(((bgcolor & 0xff0000) >> 16) / 255.0, ((bgcolor & 0xff00) >> 8) / 255.0, ((bgcolor & 0xff) >> 0) / 255.0, 1);
-  if (current != nullptr) {
-    glfwMakeContextCurrent(current->rawHwnd);
-  }
-  
+
   data->rawHwnd = window;
   data->windowManagers = from.managers;
   data->myPanel = panel;
   windows[window] = data;
+  current = data;
 
   data->rescanSize();
 
