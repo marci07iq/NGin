@@ -51,25 +51,17 @@ void Transform::createLook(mVec3 from, sVec3 dir, sVec3 up) {
   up.norm();
   sVec3 right = crs(dir, up).norm();
 
+  translate(-from);
   Matrix4f with_d;
   float with_df[16] = {
     right.x, right.y, right.z, 0,
     up.x, up.y, up.z, 0,
-    dir.x, dir.y, dir.z, 0,
-    0, 0, 0, 1
+    -dir.x, -dir.y, -dir.z, 0,
+    0,       0,    0,     1
   };
   with_d.set(with_df);
 
-  Matrix4f with_t;
-  float with_tf[16] = {
-    1, 0, 0, -from.x,
-    0, 1, 0, -from.y,
-    0, 0, 1, -from.z,
-    0, 0, 0, 1
-  };
-  with_t.set(with_tf);
-
-  matrix = with_d * with_t * matrix;
+  matrix = with_d * matrix;
 }
 
 void Transform::project(float fov, float aspectRatio, float zFar, float zNear) {

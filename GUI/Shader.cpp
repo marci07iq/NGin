@@ -1,46 +1,52 @@
 #include "Shader.h"
 
-Shader_Raw::Shader_Raw(string files, int flags) {
-  create(files, flags);
-}
 
-void Shader_Raw::create(string files, int flags) {
-  if (flags & 1) _v_shaderID = compileShader(files + ".vert", GL_VERTEX_SHADER);
-  if (flags & 2) _g_shaderID = compileShader(files + ".geom", GL_GEOMETRY_SHADER);
-  if (flags & 4) _f_shaderID = compileShader(files + ".frag", GL_FRAGMENT_SHADER);
+namespace NGin {
+  namespace Graphics {
 
-  _pID = glCreateProgram();
-  if (flags & 4) glAttachShader(_pID, _f_shaderID);
-  if (flags & 2) glAttachShader(_pID, _g_shaderID);
-  if (flags & 1) glAttachShader(_pID, _v_shaderID);
+    Shader_Raw::Shader_Raw(string files, int flags) {
+      create(files, flags);
+    }
 
-  glLinkProgram(_pID);
-  glValidateProgram(_pID);
+    void Shader_Raw::create(string files, int flags) {
+      if (flags & 1) _v_shaderID = compileShader(files + ".vert", GL_VERTEX_SHADER);
+      if (flags & 2) _g_shaderID = compileShader(files + ".geom", GL_GEOMETRY_SHADER);
+      if (flags & 4) _f_shaderID = compileShader(files + ".frag", GL_FRAGMENT_SHADER);
 
-  checkError(_pID, GL_LINK_STATUS, true, "Shader link failed");
+      _pID = glCreateProgram();
+      if (flags & 4) glAttachShader(_pID, _f_shaderID);
+      if (flags & 2) glAttachShader(_pID, _g_shaderID);
+      if (flags & 1) glAttachShader(_pID, _v_shaderID);
 
-  cout << "Created shader program " << _pID << endl;
-}
+      glLinkProgram(_pID);
+      glValidateProgram(_pID);
 
-void Shader_Raw::bind() {
-  glUseProgram(_pID);
-}
+      checkError(_pID, GL_LINK_STATUS, true, "Shader link failed");
 
-void Shader_Raw::unbind() {
-  glUseProgram(0);
-}
+      cout << "Created shader program " << _pID << endl;
+    }
 
-Shader_Raw::~Shader_Raw() {
-  cout << "Delete shader program " << _pID << endl;
-  if(_pID != 0) {
-    if (_v_shaderID) glDetachShader(_pID, _v_shaderID);
-    if (_g_shaderID) glDetachShader(_pID, _g_shaderID);
-    if (_f_shaderID) glDetachShader(_pID, _f_shaderID);
+    void Shader_Raw::bind() {
+      glUseProgram(_pID);
+    }
 
-    _v_shaderID = 0;
-    _g_shaderID = 0;
-    _f_shaderID = 0;
+    void Shader_Raw::unbind() {
+      glUseProgram(0);
+    }
 
-    glDeleteProgram(_pID);
+    Shader_Raw::~Shader_Raw() {
+      cout << "Delete shader program " << _pID << endl;
+      if (_pID != 0) {
+        if (_v_shaderID) glDetachShader(_pID, _v_shaderID);
+        if (_g_shaderID) glDetachShader(_pID, _g_shaderID);
+        if (_f_shaderID) glDetachShader(_pID, _f_shaderID);
+
+        _v_shaderID = 0;
+        _g_shaderID = 0;
+        _f_shaderID = 0;
+
+        glDeleteProgram(_pID);
+      }
+    }
   }
 }

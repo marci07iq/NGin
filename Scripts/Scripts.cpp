@@ -1689,7 +1689,7 @@ void ScriptGUI::getRect() {
 int ScriptGUI::mouseEnter(int state) {
   return code->mouseEnter(state);
 }
-int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   dragPos = {mx, my};
 
   if (mid) {
@@ -1703,7 +1703,7 @@ int ScriptGUI::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& dow
 
   return code->mouseMoved(mx, my, ox, oy, down) | (dragging != NULL);
 }
-int ScriptGUI::guiEvent(gui_event& evt, int mx, int my, set<key_location>& down) {
+int ScriptGUI::guiEvent(gui_event& evt, int mx, int my, std::set<key_location>& down) {
   if (evt._key._type == evt._key.type_mouse && evt._key._keycode == GLUT_RIGHT_BUTTON) {
     if (evt._type == evt.evt_down) {
       mid = true;
@@ -1874,10 +1874,10 @@ void ScriptGUIBase::getRect(int lcax, int lcby) {
 int ScriptGUIBase::mouseEnter(int state) {
   return 0;
 }
-int ScriptGUIBase::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptGUIBase::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptGUIBase::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptGUIBase::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   return 0;
 }
 void ScriptGUIBase::render(ScriptGUI* base, int depth) {
@@ -2321,50 +2321,50 @@ int ScriptIBlock::mouseEnter(int state) {
   return 0;
 }
 
-int ScriptInstruction::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptInstruction::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIIfElse::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIIfElse::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptILoop::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptILoop::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIAssign::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIAssign::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIConstant::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIConstant::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIMath::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIMath::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptILogic::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptILogic::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIVariable::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIVariable::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIIndex::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIIndex::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIFunctionCall::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIFunctionCall::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIAPICall::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIAPICall::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
-int ScriptIBlock::mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down) {
+int ScriptIBlock::mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down) {
   return 0;
 }
 
-int ScriptInstruction  ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptInstruction  ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
   return 0;
 }
-int ScriptIIfElse      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIIfElse      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2389,7 +2389,7 @@ int ScriptIIfElse      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return res;
 }
-int ScriptILoop        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptILoop        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2408,7 +2408,7 @@ int ScriptILoop        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return res;
 }
-int ScriptIAssign      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIAssign      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2427,7 +2427,7 @@ int ScriptIAssign      ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return res;
 }
-int ScriptIConstant    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIConstant    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2448,7 +2448,7 @@ int ScriptIConstant    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
     }
   }
 }
-int ScriptIMath        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIMath        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2489,7 +2489,7 @@ int ScriptIMath        ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return res;
 }
-int ScriptILogic       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptILogic       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2508,7 +2508,7 @@ int ScriptILogic       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return res;
 }
-int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2530,7 +2530,7 @@ int ScriptIVariable    ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return 0;
 }
-int ScriptIIndex       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIIndex       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
@@ -2549,19 +2549,19 @@ int ScriptIIndex       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my
   }
   return res;
 }
-int ScriptIFunctionCall::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIFunctionCall::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
   return 0;
 }
-int ScriptIAPICall     ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIAPICall     ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     return 0;
   }
   return 0;
 }
-int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down) {
+int ScriptIBlock       ::guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down) {
   if (!isIn(mx, my)) {
     insertingIn = false;
     return 0;

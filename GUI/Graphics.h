@@ -71,8 +71,8 @@ namespace NGin {
     void defaultWindowCloseManagerNL();
     extern WindowCloseManager defaultWindowCloseManager;
 
-    int defaultGUIEventManagerL(gui_event& evt, int x, int y, set<key_location>& down);
-    int defaultGUIEventManagerNL(gui_event& evt, int x, int y, set<key_location>& down);
+    int defaultGUIEventManagerL(gui_event& evt, int x, int y, std::set<key_location>& down);
+    int defaultGUIEventManagerNL(gui_event& evt, int x, int y, std::set<key_location>& down);
     extern GUIEventManager defaultGUIEventManager;
 
     typedef shared_ptr<GUIElement> ElemHwnd;
@@ -97,10 +97,10 @@ namespace NGin {
     extern int oldMouseX, oldMouseY;
 
     extern WindowManagers defaultWindowManagers;
-    extern map<RawWinHwnd, WinHwnd> windows;
+    extern std::map<RawWinHwnd, WinHwnd> windows;
 
-    extern map<string, void(*)()> funcs;
-    extern set<key_location> keysdown;
+    extern std::map<string, void(*)()> funcs;
+    extern std::set<key_location> keysdown;
 
     extern bool redrawFrame;
     extern list<WinHwnd> wdeleteQueue;
@@ -118,7 +118,7 @@ namespace NGin {
 
     void forceShutdown();
 
-    typedef void(*WinCreateManager)(NGin::Graphics::WinHwnd);
+    typedef void(*WinCreateManager)(WinHwnd);
     struct winCreationData {
       string caption = "";
       WindowManagers managers = defaultWindowManagers;
@@ -144,7 +144,7 @@ namespace NGin {
     int elementMouseEnterManager(int mstate);
     int elementMouseMoveManager(int x, int y);
 
-    int elementGUIEventManager(gui_event evt, int mx, int my, set<key_location>& down);
+    int elementGUIEventManager(gui_event evt, int mx, int my, std::set<key_location>& down);
 
     void elementResizeManager(int width, int height);
     void elementResizeManager(PanelHwnd id, int width, int height);

@@ -45,7 +45,7 @@ public:
   }
   void set(DataElement* data)
   {
-    set<void>(data, std::integral_constant<bool, HasSetMethod<V>::Has>());
+    std::set<void>(data, std::integral_constant<bool, HasSetMethod<V>::Has>());
   }
 
   template<typename T>void get(DataElement* data, std::true_type)
@@ -140,9 +140,9 @@ public:
   }
   void set(DataElement* data)
   {
-    set<V>(data->_children[0], _val, std::integral_constant<bool, HasSetMethod<V>::Has>());
-    set<T>(data->_children[1], _at, std::integral_constant<bool, HasSetMethod<T>::Has>());
-    set<dV>(data->_children[2], _change, std::integral_constant<bool, HasSetMethod<dV>::Has>());
+    std::set<V>(data->_children[0], _val, std::integral_constant<bool, HasSetMethod<V>::Has>());
+    std::set<T>(data->_children[1], _at, std::integral_constant<bool, HasSetMethod<T>::Has>());
+    std::set<dV>(data->_children[2], _change, std::integral_constant<bool, HasSetMethod<dV>::Has>());
   }
 
   template<typename X>void get(DataElement* data, X val, std::true_type)
@@ -173,7 +173,7 @@ public:
 template<typename V, typename U = V, typename T = time_type_s>
 class keyframe {
 public:
-  map<T, V> _frames;
+  std::map<T, V> _frames;
   void addFrame(T _time, V _val) {
     _frames[_time] = _val;
   }

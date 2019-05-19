@@ -224,7 +224,7 @@ public:
 };
 class ScriptDataDict : public ScriptDataBase {
 public:
-  map<string, ScriptData*> _elems;
+  std::map<string, ScriptData*> _elems;
   ScriptDataDict();
   VarType type();
   ScriptDataBase* CopyContent();
@@ -285,7 +285,7 @@ bool DeletePtr(ScriptData* _in);
 
 typedef ScriptData*(*APICall)(ScriptData&);
 
-extern map<string, APICall> apiMap;
+extern std::map<string, APICall> apiMap;
 
 class ScriptIBlock;
 class ScriptInstruction;
@@ -313,8 +313,8 @@ public:
   void getRect(int winWidth, int winHeight, int offsetX, int offsetY);
   void getRect();
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(gui_event& evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(gui_event& evt, int mx, int my, std::set<key_location>& down);
   void render(set<key_location>& down);
 };
 
@@ -327,8 +327,8 @@ public:
   bool isIn(int mx, int my);
   virtual void getRect(int lcax, int lcay);
   virtual int mouseEnter(int state);
-  virtual int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  virtual int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  virtual int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  virtual int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   virtual void renderBg(ScriptGUI* base, int depth);
   virtual void render(ScriptGUI* base, int depth);
 };
@@ -353,8 +353,8 @@ public:
 
   virtual void getRect(int offsetX, int offsetY);
   virtual int mouseEnter(int state);
-  virtual int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  virtual int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  virtual int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  virtual int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   virtual void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -373,8 +373,8 @@ public:
   int cey;
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -391,8 +391,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -409,8 +409,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -425,8 +425,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };*/
@@ -442,8 +442,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -484,8 +484,8 @@ public:
   int cox; //Operator sign (for binary)
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -514,8 +514,8 @@ public:
   int cox; //Operator sign (for binary)
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -530,8 +530,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -548,8 +548,8 @@ public:
   int cix;
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -565,8 +565,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -581,8 +581,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };
@@ -597,8 +597,8 @@ public:
 #ifdef SCRIPT_GUI
   void getRect(int offsetX, int offsetY);
   int mouseEnter(int state);
-  int mouseMoved(int mx, int my, int ox, int oy, set<key_location>& down);
-  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, set<key_location>& down);
+  int mouseMoved(int mx, int my, int ox, int oy, std::set<key_location>& down);
+  int guiEvent(ScriptGUI* base, gui_event evt, int mx, int my, std::set<key_location>& down);
   void render(ScriptGUI* base, int depth);
 #endif
 };

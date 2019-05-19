@@ -462,7 +462,7 @@ template<typename T> ostream& operator<<(ostream& o, Polynomial<T>& p) {
 template<typename T> struct Term {
 public:
   T coefficient;
-  map<char, int> terms;
+  std::map<char, int> terms;
   Term();
   Term(T t, string s);
   int getPower(char c) {
@@ -749,5 +749,5 @@ template<typename T> Equation<T> operator/(Equation<T>& lhs, T rhs) {
 template<typename T>
 class Eqnsys {
 public:
-  map<char, Equation<T> > eqns;
+  std::map<char, Equation<T> > eqns;
 };
