@@ -603,6 +603,7 @@ namespace NGin {
 
     NGin::Graphics::Shader gllBaseS;
     NGin::Graphics::Shader gllTextS;
+    NGin::Graphics::Shader gllTextureS;
 
     NGin::Graphics::Texture gllFontMap;
     iVec2 gllFontCharSize;
@@ -621,6 +622,7 @@ namespace NGin {
     void gllInit(string base) {
       gllBaseS = make_shared<NGin::Graphics::Shader_Raw>(base + "LegDraw");
       gllTextS = make_shared<NGin::Graphics::Shader_Raw>(base + "Text");
+      gllTextureS = make_shared<NGin::Graphics::Shader_Raw>(base + "LegTexture");
       gllFontMap = NGin::Graphics::Texture(base + "ascii.png");
       initOn = (NGin::Graphics::current) ? NGin::Graphics::current->rawHwnd : NULL;
       gllFontCharCount = { 16,16 };

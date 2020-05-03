@@ -78,7 +78,10 @@ namespace NGin {
       return oactive ^ active;
     }
 
+    void GUIElement::deleteElement(shared_ptr<GUIElement> elem, bool hard) {}
+
     void GUIElement::deleteElement(shared_ptr<GUIElement> elem) {
+      deleteElement(elem, false);
     }
 
     GUIElement::~GUIElement() {

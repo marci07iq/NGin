@@ -29,7 +29,7 @@ namespace NGin {
       shared_ptr<GUIElement> getElementById(string id);
 
       int activateElement(shared_ptr<GUIElement> id);
-      void deleteElement(shared_ptr<GUIElement> elem);
+      void deleteElement(shared_ptr<GUIElement> elem, bool hard);
 
       virtual ~TableRow();
     };
@@ -55,7 +55,7 @@ namespace NGin {
       shared_ptr<GUIElement> getElementById(string id);
 
       int activateElement(shared_ptr<GUIElement> id);
-      void deleteElement(shared_ptr<GUIElement> elem);
+      void deleteElement(shared_ptr<GUIElement> elem, bool hard);
 
       virtual ~Table();
     };

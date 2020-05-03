@@ -22,8 +22,14 @@ namespace NGin {
       auto it = data.begin();
 
       while (it != data.end()) {
-        (*it)->render(down);
-        ++it;
+        if ((*it)->toDelete) {
+          auto it2 = it++;
+          data.erase(it2);
+        }
+        else {
+          (*it)->render(down);
+          ++it;
+        }
       }
 
 
@@ -103,8 +109,12 @@ namespace NGin {
       return state;
     }
 
-    void TableRow::deleteElement(shared_ptr<GUIElement> elem) {
-      data.remove(static_pointer_cast<TableRow, GUIElement>(elem));
+    void TableRow::deleteElement(shared_ptr<GUIElement> elem, bool hard) {
+      if (hard) {
+        data.remove(elem);
+      } else {
+        elem->toDelete = true;
+      }
     }
 
     int TableRow::activateElement(shared_ptr<GUIElement> id) {
@@ -185,8 +195,14 @@ namespace NGin {
       auto it = data.begin();
 
       while (it != data.end()) {
-        (*it)->render(down);
-        ++it;
+        if ((*it)->toDelete) {
+          auto it2 = it++;
+          data.erase(it2);
+        }
+        else {
+          (*it)->render(down);
+          ++it;
+        }
       }
 
 
@@ -320,8 +336,13 @@ namespace NGin {
       }
     }
 
-    void Table::deleteElement(shared_ptr<GUIElement> elem) {
-      data.remove(static_pointer_cast<TableRow, GUIElement>(elem));
+    void Table::deleteElement(shared_ptr<GUIElement> elem, bool hard) {
+      if(hard) {
+        data.remove(static_pointer_cast<TableRow, GUIElement>(elem));
+      }
+      else {
+        elem->toDelete = true;
+      }
     }
 
     Table::~Table() {

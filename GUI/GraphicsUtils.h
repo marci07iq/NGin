@@ -216,6 +216,7 @@ namespace NGin {
     extern NGin::Graphics::Shader gllBaseS;
     //extern Shader gllLinesS;
     extern NGin::Graphics::Shader gllTextS;
+    extern NGin::Graphics::Shader gllTextureS;
 
     extern NGin::Graphics::Texture gllFontMap;
     extern iVec2 gllFontCharSize;

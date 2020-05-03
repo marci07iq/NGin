@@ -19,6 +19,8 @@ namespace NGin {
       bool active;
       void* data;
 
+      bool toDelete = false;
+
       GUIElement(string name, LocationData llocation, colorargb lbg, colorargb lactive, colorargb ltextColor, void* ldata);
       virtual bool isIn(int mx, int my);
 
@@ -43,7 +45,8 @@ namespace NGin {
       virtual shared_ptr<GUIElement> getElementById(string id);
       virtual int activateElement(shared_ptr<GUIElement> id);
 
-      virtual void deleteElement(shared_ptr<GUIElement> elem);
+      virtual void deleteElement(shared_ptr<GUIElement> elem, bool hard);
+      void deleteElement(shared_ptr<GUIElement> elem);
       virtual ~GUIElement();
     };
   }

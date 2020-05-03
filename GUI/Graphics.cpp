@@ -564,6 +564,7 @@ namespace NGin {
 
     //Element creation
     void setElements(PanelHwnd id, xml_node<>* data) {
+      deleteElements(id);
       for (xml_node<>* pElem = data->first_node(); pElem; pElem = pElem->next_sibling()) {
         addElement(id, createElement(pElem));
       }
@@ -592,11 +593,13 @@ namespace NGin {
     }
 
     void setElements(TableHwnd id, xml_node<>* data) {
+      deleteElements(id);
       for (xml_node<>* pElem = data->first_node(); pElem; pElem = pElem->next_sibling()) {
         addElement(id, createElement(pElem));
       }
     }
     void setElements(TablerowHwnd id, xml_node<>* data) {
+      deleteElements(id);
       for (xml_node<>* pElem = data->first_node(); pElem; pElem = pElem->next_sibling()) {
         addElement(id, createElement(pElem));
       }
@@ -844,18 +847,19 @@ namespace NGin {
     }
 
     void deleteElements(PanelHwnd id) {
-      for (auto&& it : id->elements) {
-        deleteElement(it, id);
+      //while(id->elements.size()) {
+      for(auto&& elem: id->elements) {
+        deleteElement(elem, id);
       }
     }
     void deleteElements(TableHwnd id) {
-      for (auto&& it : id->data) {
-        deleteElement(it, id);
+      for (auto&& elem : id->data) {
+        deleteElement(elem, id);
       }
     }
     void deleteElements(TablerowHwnd id) {
-      for (auto&& it : id->data) {
-        deleteElement(it, id);
+      for (auto&& elem : id->data) {
+        deleteElement(elem, id);
       }
     }
 

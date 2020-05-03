@@ -62,12 +62,17 @@ namespace NGin {
       auto it = elements.begin();
 
       while (it != elements.end()) {
-        //glPushMatrix();
-        //glViewport(cax, cay, cbx - cax, cby - cay);
-        //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
-        (*it)->render(down);
-        //glPopMatrix();
-        ++it;
+        if ((*it)->toDelete) {
+          auto it2 = it++;
+          elements.erase(it2);
+        } else {
+          //glPushMatrix();
+          //glViewport(cax, cay, cbx - cax, cby - cay);
+          //glScissor((*it)->cax, (*it)->cay, (*it)->cbx - (*it)->cax, (*it)->cby - (*it)->cay);
+          (*it)->render(down);
+          //glPopMatrix();
+          ++it;
+        }
       }
     }
 
@@ -124,7 +129,12 @@ namespace NGin {
     }
 
     void Panel::deleteElement(shared_ptr<GUIElement> elem, bool hard) {
-      elements.remove(elem);
+      if (hard) {
+        elements.remove(elem);
+      }
+      else {
+        elem->toDelete = true;
+      }
     }
 
     Panel::~Panel() {
